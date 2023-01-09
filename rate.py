@@ -66,11 +66,11 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
     # Do the rating updates for won games, then lost games
     #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
     # TODO: do losses come before wins? It influences the ratings slightly
-    for _ in range(_loser_score):
-        _update_rating(player2, player1)
-
     for _ in range(_winner_score):
         _update_rating(player1, player2)
+
+    for _ in range(_loser_score):
+        _update_rating(player2, player1)
 
 
 def build_ratings():
