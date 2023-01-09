@@ -34,21 +34,43 @@ def build_players():
     """Creates the player objects with a default rating"""
 
 
-def do_games(
-    _winner_player: Player, _loser_player: Player, _winner_score: int, _loser_score: int
-):
+def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score: int):
     """Updates ratings for given games & players"""
 
-    print(_winner_player)
-    print(_loser_player)
+    def _update_rating(_player1: Player, _player2: Player):
+        """Updates ratings, player1 is winner and player2 is loser"""
 
-    for _ in range(_winner_score):
-        _new_winner_rating, _new_loser_rating = _winner_player.rating_singles.rate_1vs1(
-            _winner_player.rating_singles, _loser_player.rating_singles
+        # print("New game")
+        # print(player1)
+        # print(player2)
+
+        # Calculate new ratings
+        _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
+            _player1.rating_singles, _player2.rating_singles
         )
 
-    print(_winner_player)
-    print(_loser_player)
+        # Assign new ratings
+        _player1.rating_singles.mu = _new_player1_rating.mu
+        _player1.rating_singles.phi = _new_player1_rating.phi
+        _player1.rating_singles.sigma = _new_player1_rating.sigma
+
+        _player2.rating_singles.mu = _new_player2_rating.mu
+        _player2.rating_singles.phi = _new_player2_rating.phi
+        _player2.rating_singles.sigma = _new_player2_rating.sigma
+
+        # print('...after')
+        # print(player1)
+        # print(player2)
+        # print("")
+
+    # Do the rating updates for won games, then lost games
+    #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
+    # TODO: do losses come before wins? It influences the ratings slightly
+    for _ in range(_loser_score):
+        _update_rating(player2, player1)
+
+    for _ in range(_winner_score):
+        _update_rating(player1, player2)
 
 
 def build_ratings():
@@ -95,6 +117,12 @@ def build_ratings():
         # Run the algorithm and update ratings
         # NOTE: we're assuming these are singles games only (for now)
         do_games(_winner_player, _loser_player, _winner_score, _loser_score)
+
+    sorted_players = sorted(
+        players.values(), key=lambda x: x.rating_singles.mu, reverse=True
+    )
+    for player in sorted_players:
+        print(player)
 
 
 if __name__ == "__main__":
