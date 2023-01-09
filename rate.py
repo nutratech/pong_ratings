@@ -10,6 +10,7 @@ from datetime import date
 from io import StringIO
 
 import requests
+from glicko2 import glicko2
 
 from models import Player
 
@@ -37,7 +38,17 @@ def do_games(
     _winner_player: Player, _loser_player: Player, _winner_score: int, _loser_score: int
 ):
     """Updates ratings for given games & players"""
-    print("hi")
+
+    print(_winner_player)
+    print(_loser_player)
+
+    for _ in range(_winner_score):
+        _new_winner_rating, _new_loser_rating = _winner_player.rating_singles.rate_1vs1(
+            _winner_player.rating_singles, _loser_player.rating_singles
+        )
+
+    print(_winner_player)
+    print(_loser_player)
 
 
 def build_ratings():
