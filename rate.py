@@ -174,7 +174,7 @@ def print_matchups(players: List[Player]):
             already_matched.add((player1, player2))
 
     # Print off best 10 matchups
-    print_title("Fairest matches")
+    print_title("Singles matchups")
     matchups.sort(key=lambda x: x[2], reverse=True)
 
     _table = tabulate(matchups[:10], headers=["Player 1", "Player 2", "Fairness"])
@@ -182,5 +182,6 @@ def print_matchups(players: List[Player]):
 
 
 if __name__ == "__main__":
+    # NOTE: Also need to support DOUBLES rankings & matchups (not just singles)
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)
