@@ -8,6 +8,7 @@ Created on Sun Jan  8 23:34:31 2023
 import csv
 from datetime import date
 from io import StringIO
+from typing import List
 
 import requests
 from glicko2 import glicko2
@@ -22,7 +23,12 @@ GAMES_URL = (
 
 
 def get_google_sheet():
-    """Returns a byte array (string)"""
+    """
+    Returns a byte array (string)
+    TODO: Cache these on the filesystem, commit, and have the network latency be an
+     optional step to "refresh" the data in real time.
+     But also allow running instantly on old (cached) CSV files.
+    """
 
     response = requests.get(GAMES_URL)
     assert response.status_code == 200, "Wrong status code"
@@ -40,10 +46,6 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
     def _update_rating(_player1: Player, _player2: Player):
         """Updates ratings, player1 is winner and player2 is loser"""
 
-        # print("New game")
-        # print(player1)
-        # print(player2)
-
         # Calculate new ratings
         _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
             _player1.rating_singles, _player2.rating_singles
@@ -58,14 +60,9 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
         _player2.rating_singles.phi = _new_player2_rating.phi
         _player2.rating_singles.sigma = _new_player2_rating.sigma
 
-        # print('...after')
-        # print(player1)
-        # print(player2)
-        # print("")
-
     # Do the rating updates for won games, then lost games
     #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
-    # TODO: do losses come before wins? It influences the ratings slightly
+    # NOTE: do losses come before wins? It influences the ratings slightly
     for _ in range(_winner_score):
         _update_rating(player1, player2)
 
@@ -74,7 +71,13 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
 
 
 def build_ratings():
-    """Main method which calculates ratings"""
+    """
+    Main method which calculates ratings
+
+    TODO:
+     - Support TrueSkill and multiplayer (doubles games) ratings
+     - Support an API level interface?
+    """
 
     # Prepare the CSV inputs
     _csv_bytes_output = get_google_sheet()
@@ -124,6 +127,45 @@ def build_ratings():
     for player in sorted_players:
         print(player)
 
+    # Used to build pairings / ideal matchups
+    return sorted_players
+
+
+def print_matchups(players: List[Player]):
+    """
+    Prints out the fairest possible games, matching up nearly equal opponents for
+    interesting play.
+    """
+    already_matched = set()
+    matchups = []
+
+    # Evaluate all possible match ups
+    for p1 in players:
+        for p2 in players:
+
+            # Can't play yourself
+            if p1 == p2:
+                continue
+
+            # Don't double count (p1, p2) AND (p2, p1)... they are the same
+            if (p2, p1) in already_matched:
+                continue
+
+            quality_of_match = round(
+                glicko2.Glicko2().quality_1vs1(p1.rating_singles, p2.rating_singles),
+                3,
+            )
+
+            matchups.append((p1.username, p2.username, quality_of_match))
+            already_matched.add((p1, p2))
+
+    # Sort (and print off the top 10)
+    matchups.sort(key=lambda x: x[2], reverse=True)
+
+    for match in matchups[:10]:
+        print(match)
+
 
 if __name__ == "__main__":
-    build_ratings()
+    _sorted_players = build_ratings()
+    print_matchups(_sorted_players)
