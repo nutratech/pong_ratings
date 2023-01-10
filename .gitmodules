@@ -1,0 +1,3 @@
+[submodule "pong/glicko2"]
+	path = pong/glicko2
+	url = git@github.com:nutratech/glicko2.git
