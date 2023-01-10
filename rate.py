@@ -6,12 +6,14 @@ Created on Sun Jan  8 23:34:31 2023
 @author: shane
 """
 import csv
+import os
 from datetime import date
 from io import StringIO
 from typing import List
 
 import requests
 from glicko2 import glicko2
+from tabulate import tabulate
 
 from models import Player
 
@@ -36,8 +38,13 @@ def get_google_sheet():
     return response.content
 
 
-def build_players():
-    """Creates the player objects with a default rating"""
+def print_title(title: str):
+    """Prints a neat and visible header to separate tables"""
+    print(os.linesep)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print(title)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("")
 
 
 def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score: int):
@@ -121,11 +128,16 @@ def build_ratings():
         # NOTE: we're assuming these are singles games only (for now)
         do_games(_winner_player, _loser_player, _winner_score, _loser_score)
 
+    # Print off rankings
+    print_title("Singles rankings")
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_singles.mu, reverse=True
     )
-    for player in sorted_players:
-        print(player)
+    _table = tabulate(
+        [(x.username, x.str_rating_singles) for x in sorted_players],
+        headers=["Username", "Glicko 2"],
+    )
+    print(_table)
 
     # Used to build pairings / ideal matchups
     return sorted_players
@@ -159,11 +171,14 @@ def print_matchups(players: List[Player]):
             matchups.append((p1.username, p2.username, quality_of_match))
             already_matched.add((p1, p2))
 
-    # Sort (and print off the top 10)
+    # Print off best 10 matchups
+    print_title("Fairest matches")
     matchups.sort(key=lambda x: x[2], reverse=True)
 
-    for match in matchups[:10]:
-        print(match)
+    _table = tabulate(matchups[:10], headers=["Player 1", "Player 2", "Fairness"])
+    print(_table)
+    # for match in matchups[:10]:
+    #     print(match)
 
 
 if __name__ == "__main__":

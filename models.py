@@ -11,8 +11,12 @@ class Player:
 
         self.rating_singles = glicko2.Glicko2()
 
-    def __str__(self):
+    @property
+    def str_rating_singles(self):
         _rating = round(self.rating_singles.mu)
         _two_deviations = round(self.rating_singles.phi * 2)
+        return f"{_rating} ± {_two_deviations}"
+
+    def __str__(self):
         # TODO: return this as a tuple, and tabulate it (rather than format as string)?
-        return f"{self.username} ({_rating} ± {_two_deviations})"
+        return f"{self.username} ({self.rating})"
