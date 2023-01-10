@@ -12,11 +12,12 @@ from io import StringIO
 from typing import List
 
 import requests
-from glicko2 import glicko2
 from tabulate import tabulate
 
-from models import Player
+from pong.glicko2 import glicko2
+from pong.models import Player
 
+# Hardcoded URL value pointing to our sheet
 GAMES_URL = (
     "https://docs.google.com/spreadsheet/ccc"
     "?key=1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
@@ -27,12 +28,14 @@ GAMES_URL = (
 def get_google_sheet():
     """
     Returns a byte array (string)
-    TODO: Cache these on the filesystem, commit, and have the network latency be an
-     optional step to "refresh" the data in real time.
-     But also allow running instantly on old (cached) CSV files.
+    TODO:
+      - Cache these on the filesystem, commit, and have the network latency be an
+        optional step to "refresh" the data in real time.
+        But also allow running instantly on old (cached) CSV files.
+      - Support multiple sheets per document (e.g. separate doubles sheet)?
     """
 
-    response = requests.get(GAMES_URL)
+    response = requests.get(GAMES_URL, timeout=12)
     assert response.status_code == 200, "Wrong status code"
 
     return response.content
@@ -92,7 +95,6 @@ def build_ratings():
     reader = csv.reader(_csv_file)
 
     players = {}  # Player mapping username -> "class" objects use to store ratings
-    headers = []
 
     def _get_or_create_player_by_name(username: str):
         """Adds a player"""
@@ -104,23 +106,21 @@ def build_ratings():
         return _player
 
     # Process the CSV
-    for row in reader:
+    for i, row in enumerate(reader):
 
         # Skip header row
-        if not headers:
-            headers = row
+        if i == 0:
             continue
 
         # Parse fields
-        _date = date.fromisoformat(row[0])
+        _ = date.fromisoformat(row[0])  # Not used for now
         _winner = row[1]
         _loser = row[2]
 
-        _outcome = row[3].split("-")
-        _winner_score = int(_outcome[0])
-        _loser_score = int(_outcome[1])
+        _winner_score = int(row[3].split("-")[0])
+        _loser_score = int(row[3].split("-")[1])
 
-        # Check if players are already tracked
+        # Check if players are already tracked, create if not
         _winner_player = _get_or_create_player_by_name(_winner)
         _loser_player = _get_or_create_player_by_name(_loser)
 
@@ -152,24 +152,26 @@ def print_matchups(players: List[Player]):
     matchups = []
 
     # Evaluate all possible match ups
-    for p1 in players:
-        for p2 in players:
+    for player1 in players:
+        for player2 in players:
 
             # Can't play yourself
-            if p1 == p2:
+            if player1 == player2:
                 continue
 
             # Don't double count (p1, p2) AND (p2, p1)... they are the same
-            if (p2, p1) in already_matched:
+            if (player2, player1) in already_matched:
                 continue
 
+            # Compute quality, and add to list
             quality_of_match = round(
-                glicko2.Glicko2().quality_1vs1(p1.rating_singles, p2.rating_singles),
+                glicko2.Glicko2().quality_1vs1(
+                    player1.rating_singles, player2.rating_singles
+                ),
                 3,
             )
-
-            matchups.append((p1.username, p2.username, quality_of_match))
-            already_matched.add((p1, p2))
+            matchups.append((player1.username, player2.username, quality_of_match))
+            already_matched.add((player1, player2))
 
     # Print off best 10 matchups
     print_title("Fairest matches")
@@ -177,8 +179,6 @@ def print_matchups(players: List[Player]):
 
     _table = tabulate(matchups[:10], headers=["Player 1", "Player 2", "Fairness"])
     print(_table)
-    # for match in matchups[:10]:
-    #     print(match)
 
 
 if __name__ == "__main__":
