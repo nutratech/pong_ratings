@@ -178,8 +178,8 @@ def print_matchups(players: List[Player]):
     _n_top = 15
     _choose_2_players = math.comb(len(players), 2)
     print_title(
-        f"Singles matchups (top {max(_n_top, _choose_2_players)} "
-        f"out of {len(players)}C2={_choose_2_players} possible)"
+        f"Singles matchups (top {max(_n_top, _choose_2_players)}, "
+        f"{len(players)}C2={_choose_2_players} possible)"
     )
     matchups.sort(key=lambda x: x[2], reverse=True)
 
@@ -189,5 +189,6 @@ def print_matchups(players: List[Player]):
 
 if __name__ == "__main__":
     # NOTE: Also need to support DOUBLES rankings & matchups (not just singles)
+    print(f"Last updated: {date.today()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)
