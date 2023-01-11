@@ -6,6 +6,7 @@ Created on Sun Jan  8 23:34:31 2023
 @author: shane
 """
 import csv
+import math
 import os
 from datetime import date
 from io import StringIO
@@ -32,7 +33,7 @@ def get_google_sheet():
       - Cache these on the filesystem, commit, and have the network latency be an
         optional step to "refresh" the data in real time.
         But also allow running instantly on old (cached) CSV files.
-      - Support multiple sheets per document (e.g. separate doubles sheet)?
+      - Support multiple sheets per document (e.g. separate "doubles games" sheet)?
     """
 
     response = requests.get(GAMES_URL, timeout=12)
@@ -173,11 +174,13 @@ def print_matchups(players: List[Player]):
             matchups.append((player1.username, player2.username, quality_of_match))
             already_matched.add((player1, player2))
 
-    # Print off best 10 matchups
-    print_title("Singles matchups")
+    # Print off best matchups
+    _n_top = 15
+    _choose_2_players = math.comb(len(players), 2)
+    print_title(f"Singles matchups (top {_n_top} out of {_choose_2_players} possible)")
     matchups.sort(key=lambda x: x[2], reverse=True)
 
-    _table = tabulate(matchups[:10], headers=["Player 1", "Player 2", "Fairness"])
+    _table = tabulate(matchups[:_n_top], headers=["Player 1", "Player 2", "Fairness"])
     print(_table)
 
 
