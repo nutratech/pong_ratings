@@ -177,7 +177,10 @@ def print_matchups(players: List[Player]):
     # Print off best matchups
     _n_top = 15
     _choose_2_players = math.comb(len(players), 2)
-    print_title(f"Singles matchups (top {_n_top} out of {_choose_2_players} possible)")
+    print_title(
+        f"Singles matchups (top {max(_n_top, _choose_2_players)} "
+        f"out of {len(players)}C2={_choose_2_players} possible)"
+    )
     matchups.sort(key=lambda x: x[2], reverse=True)
 
     _table = tabulate(matchups[:_n_top], headers=["Player 1", "Player 2", "Fairness"])
