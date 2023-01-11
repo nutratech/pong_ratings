@@ -18,7 +18,7 @@ from tabulate import tabulate
 from pong.glicko2 import glicko2
 from pong.models import Player
 
-# Hardcoded URL value pointing to our sheet
+# Hard-coded URL value pointing to our sheet
 GAMES_URL = (
     "https://docs.google.com/spreadsheet/ccc"
     "?key=1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
@@ -140,7 +140,7 @@ def build_ratings():
     )
     print(_table)
 
-    # Used to build pairings / ideal matchups
+    # Used to build pairings / ideal matches
     return sorted_players
 
 
@@ -174,11 +174,11 @@ def print_matchups(players: List[Player]):
             matchups.append((player1.username, player2.username, quality_of_match))
             already_matched.add((player1, player2))
 
-    # Print off best matchups
+    # Print off best matches
     _n_top = 15
     _choose_2_players = math.comb(len(players), 2)
     print_title(
-        f"Singles matchups (top {max(_n_top, _choose_2_players)}, "
+        f"Singles matches (top {max(_n_top, _choose_2_players)}, "
         f"{len(players)}C2={_choose_2_players} possible)"
     )
     matchups.sort(key=lambda x: x[2], reverse=True)
@@ -188,7 +188,7 @@ def print_matchups(players: List[Player]):
 
 
 if __name__ == "__main__":
-    # NOTE: Also need to support DOUBLES rankings & matchups (not just singles)
+    # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print(f"Last updated: {date.today()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)
