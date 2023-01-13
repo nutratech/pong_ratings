@@ -1,6 +1,10 @@
+import csv
 import os
+from io import StringIO
 
 import requests
+
+from pong.models import Player
 
 
 # Hard-coded URL values pointing to our sheet
@@ -32,6 +36,23 @@ def get_google_sheet(url: str):
     assert response.status_code == 200, "Wrong status code"
 
     return response.content
+
+
+def build_csv_reader(url: str):
+    """Returns a csv.reader() object"""
+    _csv_bytes_output = get_google_sheet(url)
+    _csv_file = StringIO(_csv_bytes_output.decode())
+    return csv.reader(_csv_file)
+
+
+def get_or_create_player_by_name(players: dict, username: str):
+    """Adds a player"""
+    if username in players:
+        return players[username]
+
+    _player = Player(username)
+    players[username] = _player
+    return _player
 
 
 def print_title(title: str):
