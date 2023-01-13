@@ -191,7 +191,7 @@ def print_matchups(players: List[Player]):
     )
     matchups.sort(key=lambda x: x[2], reverse=True)
 
-    _table = tabulate(matchups[:_n_top], headers=["Player 1", "Player 2", "Fairness"])
+    _table = tabulate(matchups[:_n_top], headers=["Player 1", "Player 2", "Quality"])
     print(_table)
 
 
