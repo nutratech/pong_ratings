@@ -147,6 +147,14 @@ def print_matchups(players: List[Player]):
                 glicko2.Glicko2().expect_score(
                     player1.rating_singles,
                     player2.rating_singles,
+                    glicko2.Glicko2().reduce_impact(player2.rating_singles),
+                ),
+                3,
+            )
+            _loss_probability = round(
+                glicko2.Glicko2().expect_score(
+                    player2.rating_singles,
+                    player1.rating_singles,
                     glicko2.Glicko2().reduce_impact(player1.rating_singles),
                 ),
                 3,
@@ -158,27 +166,24 @@ def print_matchups(players: List[Player]):
                     delta_rating,
                     quality_of_match,
                     _win_probability,
+                    _loss_probability,
                 )
             )
             already_matched.add((player1, player2))
 
     # Print off best matches
-    _n_top = 15
+    # _n_top = 21
     _n_choose_2_players = math.comb(len(players), 2)
-    print_title(
-        f"Singles matches [top {min(_n_top, _n_choose_2_players)}, "
-        f"{len(players)}C2={_n_choose_2_players} possible]"
-    )
-    matchups.sort(key=lambda x: x[-1], reverse=False)
+    print_title(f"Singles matches [{len(players)}C2={_n_choose_2_players} possible]")
+    matchups.sort(key=lambda x: x[-1], reverse=True)
 
     _table = tabulate(
-        matchups[:_n_top], headers=["Player 1", "Player 2", "Δμ", "Quality", "P(w)"]
+        matchups, headers=["Player 1", "Player 2", "Δμ", "Quality", "P(w)", "P(l)"]
     )
     print(_table)
 
 
 if __name__ == "__main__":
-    # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print("SINGLES")
     print(f"Last updated: {datetime.utcnow()}")
     _sorted_players = build_ratings()
