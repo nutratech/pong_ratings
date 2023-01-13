@@ -5,50 +5,20 @@ Created on Sun Jan  8 23:34:31 2023
 
 @author: shane
 """
-import csv
 import math
-import os
 from datetime import date
-from io import StringIO
 from typing import List
 
-import requests
 from tabulate import tabulate
 
+from pong.core import (
+    SINGLES_URL,
+    build_csv_reader,
+    get_or_create_player_by_name,
+    print_title,
+)
 from pong.glicko2 import glicko2
 from pong.models import Player
-
-# Hard-coded URL value pointing to our sheet
-GAMES_URL = (
-    "https://docs.google.com/spreadsheet/ccc"
-    "?key=1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
-    "&output=csv"
-)
-
-
-def get_google_sheet():
-    """
-    Returns a byte array (string)
-    TODO:
-      - Cache these on the filesystem, commit, and have the network latency be an
-        optional step to "refresh" the data in real time.
-        But also allow running instantly on old (cached) CSV files.
-      - Support multiple sheets per document (e.g. separate "doubles games" sheet)?
-    """
-
-    response = requests.get(GAMES_URL, timeout=12)
-    assert response.status_code == 200, "Wrong status code"
-
-    return response.content
-
-
-def print_title(title: str):
-    """Prints a neat and visible header to separate tables"""
-    print(os.linesep)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(title)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("")
 
 
 def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score: int):
@@ -75,13 +45,13 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
     #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
     # NOTE: do losses come before wins? It influences the ratings slightly
     for _ in range(_loser_score):
-        player2.wins += 1
-        player1.losses += 1
+        player2.wins_singles += 1
+        player1.losses_singles += 1
         _update_rating(player2, player1)
 
     for _ in range(_winner_score):
-        player1.wins += 1
-        player2.losses += 1
+        player1.wins_singles += 1
+        player2.losses_singles += 1
         _update_rating(player1, player2)
 
 
@@ -95,20 +65,9 @@ def build_ratings():
     """
 
     # Prepare the CSV inputs
-    _csv_bytes_output = get_google_sheet()
-    _csv_file = StringIO(_csv_bytes_output.decode())
-    reader = csv.reader(_csv_file)
+    reader = build_csv_reader(SINGLES_URL)
 
     players = {}  # Player mapping username -> "class" objects use to store ratings
-
-    def _get_or_create_player_by_name(username: str):
-        """Adds a player"""
-        if username in players:
-            return players[username]
-
-        _player = Player(username)
-        players[username] = _player
-        return _player
 
     # Process the CSV
     for i, row in enumerate(reader):
@@ -126,8 +85,8 @@ def build_ratings():
         _loser_score = int(row[3].split("-")[1])
 
         # Check if players are already tracked, create if not
-        _winner_player = _get_or_create_player_by_name(_winner)
-        _loser_player = _get_or_create_player_by_name(_loser)
+        _winner_player = get_or_create_player_by_name(players, _winner)
+        _loser_player = get_or_create_player_by_name(players, _loser)
 
         # Run the algorithm and update ratings
         # NOTE: we're assuming these are singles games only (for now)
@@ -141,7 +100,7 @@ def build_ratings():
     )
     _table = tabulate(
         [
-            (x.username, x.str_rating_singles, f"{x.wins}-{x.losses}")
+            (x.username, x.str_rating_singles, f"{x.wins_singles}-{x.losses_singles}")
             for x in sorted_players
         ],
         headers=["Username", "Glicko 2", "Record"],
