@@ -6,7 +6,7 @@ Created on Sun Jan  8 23:34:31 2023
 @author: shane
 """
 import math
-from datetime import date
+from datetime import date, datetime
 from typing import List
 
 from tabulate import tabulate
@@ -136,17 +136,29 @@ def print_matchups(players: List[Player]):
                 continue
 
             # Compute quality, and add to list
-            delta_rating = round(
-                player1.rating_singles.mu - player2.rating_singles.mu
-            )
+            delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
             quality_of_match = round(
                 glicko2.Glicko2().quality_1vs1(
                     player1.rating_singles, player2.rating_singles
                 ),
                 3,
             )
+            _win_probability = round(
+                glicko2.Glicko2().expect_score(
+                    player1.rating_singles,
+                    player2.rating_singles,
+                    glicko2.Glicko2().reduce_impact(player1.rating_singles),
+                ),
+                3,
+            )
             matchups.append(
-                (player1.username, player2.username, delta_rating, quality_of_match)
+                (
+                    player1.username,
+                    player2.username,
+                    delta_rating,
+                    quality_of_match,
+                    _win_probability,
+                )
             )
             already_matched.add((player1, player2))
 
@@ -157,10 +169,10 @@ def print_matchups(players: List[Player]):
         f"Singles matches [top {min(_n_top, _n_choose_2_players)}, "
         f"{len(players)}C2={_n_choose_2_players} possible]"
     )
-    matchups.sort(key=lambda x: x[3], reverse=True)
+    matchups.sort(key=lambda x: x[-1], reverse=False)
 
     _table = tabulate(
-        matchups[:_n_top], headers=["Player 1", "Player 2", "Δμ", "Quality"]
+        matchups[:_n_top], headers=["Player 1", "Player 2", "Δμ", "Quality", "P(w)"]
     )
     print(_table)
 
@@ -168,6 +180,6 @@ def print_matchups(players: List[Player]):
 if __name__ == "__main__":
     # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print("SINGLES")
-    print(f"Last updated: {date.today()}")
+    print(f"Last updated: {datetime.now()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)

@@ -6,8 +6,7 @@ Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 @author: shane
 https://trueskill.org/
 """
-import math
-from datetime import date
+from datetime import date, datetime
 from typing import List
 
 import trueskill  # pylint: disable=import-error
@@ -19,7 +18,8 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import Player, GLICKO_TO_TRUESKILL_FACTOR
+from pong.models import Player
+from pong.tsutils import win_probability
 
 
 def do_games(
@@ -193,6 +193,13 @@ def print_matchups(players: List[Player]):
                         ),
                         3,
                     )
+                    _win_probability = round(
+                        win_probability(
+                            (player1.rating_doubles, player2.rating_doubles),
+                            (player3.rating_doubles, player4.rating_doubles),
+                        ),
+                        2,
+                    )
                     matchups.append(
                         (
                             player1.username,
@@ -201,6 +208,7 @@ def print_matchups(players: List[Player]):
                             player4.username,
                             delta_rating,
                             quality_of_match,
+                            _win_probability,
                         )
                     )
                     already_matched.add((team1, team2))
@@ -212,11 +220,11 @@ def print_matchups(players: List[Player]):
         f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
         f"P({len(players)},2,2)={_n_choose_2_teams} possible]"
     )
-    matchups.sort(key=lambda x: x[5], reverse=True)
+    matchups.sort(key=lambda x: x[-1], reverse=False)
 
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Quality"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Quality", "P(w)"],
     )
     print(_table)
 
@@ -224,6 +232,6 @@ def print_matchups(players: List[Player]):
 if __name__ == "__main__":
     # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print("DOUBLES")
-    print(f"Last updated: {date.today()}")
+    print(f"Last updated: {datetime.now()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)
