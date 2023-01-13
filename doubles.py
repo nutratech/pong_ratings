@@ -5,7 +5,6 @@ Created on Sun Jan  8 23:34:31 2023
 
 @author: shane
 """
-import math
 from datetime import date
 from typing import List
 
