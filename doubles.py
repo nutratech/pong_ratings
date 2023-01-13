@@ -18,7 +18,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import Player
+from pong.models import Player, GLICKO_TO_TRUESKILL_FACTOR
 from pong.tsutils import win_probability
 
 
@@ -179,10 +179,10 @@ def print_matchups(players: List[Player]):
                         continue
 
                     # Compute quality, and add to list
-                    delta_rating = round(
-                        (player1.rating_doubles.mu + player2.rating_doubles.mu) / 2
-                        - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
-                    )
+                    delta_rating = (
+                        player1.rating_doubles.mu + player2.rating_doubles.mu
+                    ) / 2 - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
+                    delta_rating = round(delta_rating * GLICKO_TO_TRUESKILL_FACTOR)
 
                     quality_of_match = round(
                         trueskill.quality(
@@ -232,6 +232,6 @@ def print_matchups(players: List[Player]):
 if __name__ == "__main__":
     # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print("DOUBLES")
-    print(f"Last updated: {datetime.now()}")
+    print(f"Last updated: {datetime.utcnow()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)

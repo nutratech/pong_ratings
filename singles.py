@@ -180,6 +180,6 @@ def print_matchups(players: List[Player]):
 if __name__ == "__main__":
     # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print("SINGLES")
-    print(f"Last updated: {datetime.now()}")
+    print(f"Last updated: {datetime.utcnow()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)
