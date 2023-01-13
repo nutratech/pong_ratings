@@ -137,7 +137,7 @@ def print_matchups(players: List[Player]):
 
             # Compute quality, and add to list
             delta_rating = round(
-                math.fabs(player1.rating_singles.mu - player2.rating_singles.mu)
+                player1.rating_singles.mu - player2.rating_singles.mu
             )
             quality_of_match = round(
                 glicko2.Glicko2().quality_1vs1(

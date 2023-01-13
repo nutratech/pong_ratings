@@ -4,6 +4,7 @@
 Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 
 @author: shane
+https://trueskill.org/
 """
 import math
 from datetime import date
@@ -18,7 +19,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import Player
+from pong.models import Player, GLICKO_TO_TRUESKILL_FACTOR
 
 
 def do_games(
@@ -178,11 +179,10 @@ def print_matchups(players: List[Player]):
                         continue
 
                     # Compute quality, and add to list
-                    delta_rating = math.fabs(
+                    delta_rating = round(
                         (player1.rating_doubles.mu + player2.rating_doubles.mu) / 2
                         - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
                     )
-                    delta_rating = round(delta_rating, 1)
 
                     quality_of_match = round(
                         trueskill.quality(

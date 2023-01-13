@@ -9,6 +9,7 @@ import trueskill  # pylint: disable=import-error
 
 from pong.glicko2 import glicko2
 
+GLICKO_TO_TRUESKILL_FACTOR = 60
 DEFAULT_RATING = 1500
 
 
@@ -36,8 +37,10 @@ class Player:
     @property
     def str_rating_doubles(self):
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
-        _rating = round(self.rating_doubles.mu)
-        _two_deviations = round(self.rating_doubles.sigma * 2)
+        _rating = round(self.rating_doubles.mu * GLICKO_TO_TRUESKILL_FACTOR)
+        _two_deviations = round(
+            self.rating_doubles.sigma * 2 * GLICKO_TO_TRUESKILL_FACTOR
+        )
         return f"{_rating} ± {_two_deviations}"
 
     def __str__(self):
