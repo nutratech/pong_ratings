@@ -173,8 +173,8 @@ def print_matchups(players: List[Player]):
                         x.username
                         for x in sorted([player3, player4], key=lambda x: x.username)
                     )
-                    p1, p2 = (team1, team2), (team2, team1)
-                    if p1 in already_matched or p2 in already_matched:
+                    pair1, pair2 = (team1, team2), (team2, team1)
+                    if pair1 in already_matched or pair2 in already_matched:
                         continue
 
                     # Compute quality, and add to list
@@ -197,15 +197,11 @@ def print_matchups(players: List[Player]):
                         )
                     )
                     already_matched.add((team1, team2))
-                    print(already_matched)
 
     # Print off best matches
     _n_top = 15
-    _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2)
-    print_title(
-        f"Singles matches (top {min(_n_top, _n_choose_2_teams)}, "
-        f"{len(players)}C2 * {len(players) - 2}C2={_n_choose_2_teams} possible)"
-    )
+    # _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2)
+    print_title(f"Doubles matches (top {_n_top})")
     matchups.sort(key=lambda x: x[4], reverse=True)
 
     _table = tabulate(
