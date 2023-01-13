@@ -111,7 +111,6 @@ def build_ratings():
         _loser_player2 = get_or_create_player_by_name(players, _loser2)
 
         # Run the algorithm and update ratings
-        # NOTE: we're assuming these are singles games only (for now)
         do_games(
             _winner_player1,
             _winner_player2,
