@@ -3,8 +3,9 @@
 Created on Sun 08 Jan 2023 11∶26∶34 PM EST
 
 @author: shane
+Player model used for singles & doubles ratings, username, wins/losses, etc
 """
-import trueskill
+import trueskill  # pylint: disable=import-error
 
 from pong.glicko2 import glicko2
 

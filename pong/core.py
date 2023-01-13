@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri 13 Jan 2023 01∶14∶59 PM EST
+
+@author: shane
+Shared utilities by both singles and doubles interface
+"""
 import csv
 import os
 from io import StringIO
