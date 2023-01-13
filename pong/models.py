@@ -15,6 +15,8 @@ class Player:
     def __init__(self, username: str):
         self.username = username
 
+        self.wins = 0
+        self.losses = 0
         self.rating_singles = glicko2.Glicko2()
 
     @property

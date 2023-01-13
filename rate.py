@@ -75,9 +75,13 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
     #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
     # NOTE: do losses come before wins? It influences the ratings slightly
     for _ in range(_loser_score):
+        player2.wins += 1
+        player1.losses += 1
         _update_rating(player2, player1)
 
     for _ in range(_winner_score):
+        player1.wins += 1
+        player2.losses += 1
         _update_rating(player1, player2)
 
 
@@ -130,13 +134,17 @@ def build_ratings():
         do_games(_winner_player, _loser_player, _winner_score, _loser_score)
 
     # Print off rankings
+    # TODO: filter inactive or highly uncertain ratings?
     print_title("Singles rankings")
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_singles.mu, reverse=True
     )
     _table = tabulate(
-        [(x.username, x.str_rating_singles) for x in sorted_players],
-        headers=["Username", "Glicko 2"],
+        [
+            (x.username, x.str_rating_singles, f"{x.wins}-{x.losses}")
+            for x in sorted_players
+        ],
+        headers=["Username", "Glicko 2", "Record"],
     )
     print(_table)
 
