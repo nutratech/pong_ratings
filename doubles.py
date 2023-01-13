@@ -29,14 +29,15 @@ def do_games(
     _losers_score: int,
 ):
     """
-    Updates ratings for given games & players
-    NOTE: Team1 = (player1, player2), Team2 = (player3, player4)
+    Updates ratings.
+    NOTE: team1 = wins, team2 = loses
+          team1 = (player1, player2), team2 = (player3, player4)
     """
 
     def _update_rating(
         _player1: Player, _player2: Player, _player3: Player, _player4: Player
     ):
-        """Updates ratings, player1 is winner and player2 is loser"""
+        """Updates ratings."""
 
         # Calculate new ratings
         _new_team1_ratings, _new_team2_ratings = trueskill.rate(

@@ -22,10 +22,15 @@ from pong.models import Player
 
 
 def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score: int):
-    """Updates ratings for given games & players"""
+    """
+    Updates ratings for given games & players
+    NOTE: player1 wins, player2 loses
+    """
 
     def _update_rating(_player1: Player, _player2: Player):
-        """Updates ratings, player1 is winner and player2 is loser"""
+        """
+        Updates ratings.
+        """
 
         # Calculate new ratings
         _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
