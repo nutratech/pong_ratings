@@ -5,7 +5,9 @@ Created on Sun Jan  8 23:34:31 2023
 
 @author: shane
 """
+import math
 from datetime import date
+from typing import List
 
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
@@ -138,7 +140,82 @@ def build_ratings():
     return sorted_players
 
 
+def print_matchups(players: List[Player]):
+    """
+    Prints out the fairest possible games, matching up nearly equal opponents for
+    interesting play.
+    """
+    already_matched = set()
+    matchups = []
+
+    # Evaluate all possible match ups
+    for player1 in players:
+        for player2 in players:
+            for player3 in players:
+                for player4 in players:
+
+                    # Can't play yourself
+                    if player1 in {player2, player3, player4}:
+                        continue
+                    if player2 in {player1, player3, player4}:
+                        continue
+                    if player3 in {player1, player2, player4}:
+                        continue
+                    if player4 in {player1, player2, player3}:
+                        continue
+
+                    # Don't double count (t1, t2) AND (t2, t1)... the same teams
+                    team1 = "-".join(
+                        x.username
+                        for x in sorted([player1, player2], key=lambda x: x.username)
+                    )
+                    team2 = "-".join(
+                        x.username
+                        for x in sorted([player3, player4], key=lambda x: x.username)
+                    )
+                    p1, p2 = (team1, team2), (team2, team1)
+                    if p1 in already_matched or p2 in already_matched:
+                        continue
+
+                    # Compute quality, and add to list
+                    quality_of_match = round(
+                        trueskill.quality(
+                            [
+                                (player1.rating_doubles, player2.rating_doubles),
+                                (player3.rating_doubles, player4.rating_doubles),
+                            ]
+                        ),
+                        3,
+                    )
+                    matchups.append(
+                        (
+                            player1.username,
+                            player2.username,
+                            player3.username,
+                            player4.username,
+                            quality_of_match,
+                        )
+                    )
+                    already_matched.add((team1, team2))
+                    print(already_matched)
+
+    # Print off best matches
+    _n_top = 15
+    _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2)
+    print_title(
+        f"Singles matches (top {min(_n_top, _n_choose_2_teams)}, "
+        f"{len(players)}C2 * {len(players) - 2}C2={_n_choose_2_teams} possible)"
+    )
+    matchups.sort(key=lambda x: x[4], reverse=True)
+
+    _table = tabulate(
+        matchups[:_n_top], headers=["Team 1", "Team 1", "Team 2", "Team 2", "Quality"]
+    )
+    print(_table)
+
+
 if __name__ == "__main__":
     # NOTE: Also need to support DOUBLES rankings & matches (not just singles)
     print(f"Last updated: {date.today()}")
     _sorted_players = build_ratings()
+    print_matchups(_sorted_players)
