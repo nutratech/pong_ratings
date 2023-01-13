@@ -7,48 +7,15 @@ Created on Sun Jan  8 23:34:31 2023
 """
 import csv
 import math
-import os
 from datetime import date
 from io import StringIO
 from typing import List
 
-import requests
 from tabulate import tabulate
 
+from pong.core import get_google_sheet, print_title, SINGLES_URL
 from pong.glicko2 import glicko2
 from pong.models import Player
-
-# Hard-coded URL value pointing to our sheet
-GAMES_URL = (
-    "https://docs.google.com/spreadsheet/ccc"
-    "?key=1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
-    "&output=csv"
-)
-
-
-def get_google_sheet():
-    """
-    Returns a byte array (string)
-    TODO:
-      - Cache these on the filesystem, commit, and have the network latency be an
-        optional step to "refresh" the data in real time.
-        But also allow running instantly on old (cached) CSV files.
-      - Support multiple sheets per document (e.g. separate "doubles games" sheet)?
-    """
-
-    response = requests.get(GAMES_URL, timeout=12)
-    assert response.status_code == 200, "Wrong status code"
-
-    return response.content
-
-
-def print_title(title: str):
-    """Prints a neat and visible header to separate tables"""
-    print(os.linesep)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(title)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("")
 
 
 def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score: int):
@@ -95,7 +62,7 @@ def build_ratings():
     """
 
     # Prepare the CSV inputs
-    _csv_bytes_output = get_google_sheet()
+    _csv_bytes_output = get_google_sheet(SINGLES_URL)
     _csv_file = StringIO(_csv_bytes_output.decode())
     reader = csv.reader(_csv_file)
 
