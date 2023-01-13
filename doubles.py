@@ -7,7 +7,7 @@ Created on Sun Jan  8 23:34:31 2023
 """
 from datetime import date
 
-import trueskill
+import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
 from pong.core import (
@@ -85,7 +85,7 @@ def build_ratings():
     players = {}  # Player mapping username -> "class" objects use to store ratings
 
     # Process the CSV
-    for i, row in enumerate(reader):
+    for i, row in enumerate(reader):  # pylint: disable=duplicate-code
 
         # Skip header row
         if i == 0:
@@ -130,7 +130,7 @@ def build_ratings():
             (x.username, x.str_rating_doubles, f"{x.wins_doubles}-{x.losses_doubles}")
             for x in sorted_players
         ],
-        headers=["Username", "Trueskill", "Record"],
+        headers=["Username", "TrueSkill", "Record"],
     )
     print(_table)
 
