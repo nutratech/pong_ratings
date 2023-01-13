@@ -200,8 +200,11 @@ def print_matchups(players: List[Player]):
 
     # Print off best matches
     _n_top = 15
-    # _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2)
-    print_title(f"Doubles matches (top {_n_top})")
+    _n_choose_2_teams = len(matchups)
+    print_title(
+        f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
+        f"P({len(players)},2,2)={_n_choose_2_teams} possible]"
+    )
     matchups.sort(key=lambda x: x[4], reverse=True)
 
     _table = tabulate(

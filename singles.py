@@ -145,8 +145,8 @@ def print_matchups(players: List[Player]):
     _n_top = 15
     _n_choose_2_players = math.comb(len(players), 2)
     print_title(
-        f"Singles matches (top {min(_n_top, _n_choose_2_players)}, "
-        f"{len(players)}C2={_n_choose_2_players} possible)"
+        f"Singles matches [top {min(_n_top, _n_choose_2_players)}, "
+        f"{len(players)}C2={_n_choose_2_players} possible]"
     )
     matchups.sort(key=lambda x: x[2], reverse=True)
 
