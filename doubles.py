@@ -5,6 +5,7 @@ Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 
 @author: shane
 """
+import math
 from datetime import date
 from typing import List
 
@@ -177,6 +178,12 @@ def print_matchups(players: List[Player]):
                         continue
 
                     # Compute quality, and add to list
+                    delta_rating = math.fabs(
+                        (player1.rating_doubles.mu + player2.rating_doubles.mu) / 2
+                        - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
+                    )
+                    delta_rating = round(delta_rating, 1)
+
                     quality_of_match = round(
                         trueskill.quality(
                             [
@@ -192,6 +199,7 @@ def print_matchups(players: List[Player]):
                             player2.username,
                             player3.username,
                             player4.username,
+                            delta_rating,
                             quality_of_match,
                         )
                     )
@@ -204,10 +212,11 @@ def print_matchups(players: List[Player]):
         f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
         f"P({len(players)},2,2)={_n_choose_2_teams} possible]"
     )
-    matchups.sort(key=lambda x: x[4], reverse=True)
+    matchups.sort(key=lambda x: x[5], reverse=True)
 
     _table = tabulate(
-        matchups[:_n_top], headers=["Team 1", "Team 1", "Team 2", "Team 2", "Quality"]
+        matchups[:_n_top],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Quality"],
     )
     print(_table)
 

@@ -136,13 +136,18 @@ def print_matchups(players: List[Player]):
                 continue
 
             # Compute quality, and add to list
+            delta_rating = round(
+                math.fabs(player1.rating_singles.mu - player2.rating_singles.mu)
+            )
             quality_of_match = round(
                 glicko2.Glicko2().quality_1vs1(
                     player1.rating_singles, player2.rating_singles
                 ),
                 3,
             )
-            matchups.append((player1.username, player2.username, quality_of_match))
+            matchups.append(
+                (player1.username, player2.username, delta_rating, quality_of_match)
+            )
             already_matched.add((player1, player2))
 
     # Print off best matches
@@ -152,9 +157,11 @@ def print_matchups(players: List[Player]):
         f"Singles matches [top {min(_n_top, _n_choose_2_players)}, "
         f"{len(players)}C2={_n_choose_2_players} possible]"
     )
-    matchups.sort(key=lambda x: x[2], reverse=True)
+    matchups.sort(key=lambda x: x[3], reverse=True)
 
-    _table = tabulate(matchups[:_n_top], headers=["Player 1", "Player 2", "Quality"])
+    _table = tabulate(
+        matchups[:_n_top], headers=["Player 1", "Player 2", "Δμ", "Quality"]
+    )
     print(_table)
 
 
