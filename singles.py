@@ -18,6 +18,7 @@ from pong.core import (
     print_title,
 )
 from pong.glicko2 import glicko2
+from pong.glicko2.glicko2 import WIN, LOSS
 from pong.models import Player
 
 
@@ -27,37 +28,44 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
     NOTE: player1 wins, player2 loses
     """
 
-    def _update_rating(_player1: Player, _player2: Player):
-        """
-        Updates ratings.
-        """
+    # def _update_rating(_player1: Player, _player2: Player):
+    #     """
+    #     Updates ratings.
+    #     """
+    #
+    #     # Calculate new ratings
+    #     _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
+    #         _player1.rating_singles, _player2.rating_singles
+    #     )
+    #
+    #     # Assign new ratings
+    #     _player1.rating_singles.mu = _new_player1_rating.mu
+    #     _player1.rating_singles.phi = _new_player1_rating.phi
+    #     _player1.rating_singles.sigma = _new_player1_rating.sigma
+    #
+    #     _player2.rating_singles.mu = _new_player2_rating.mu
+    #     _player2.rating_singles.phi = _new_player2_rating.phi
+    #     _player2.rating_singles.sigma = _new_player2_rating.sigma
+    #
+    # # Do the rating updates for won games, then lost games
+    # #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
+    # # NOTE: do losses come before wins? It influences the ratings slightly
+    # for _ in range(_loser_score):
+    #     player2.wins_singles += 1
+    #     player1.losses_singles += 1
+    #     _update_rating(player2, player1)
+    #
+    # for _ in range(_winner_score):
+    #     player1.wins_singles += 1
+    #     player2.losses_singles += 1
+    #     _update_rating(player1, player2)
 
-        # Calculate new ratings
-        _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
-            _player1.rating_singles, _player2.rating_singles
-        )
-
-        # Assign new ratings
-        _player1.rating_singles.mu = _new_player1_rating.mu
-        _player1.rating_singles.phi = _new_player1_rating.phi
-        _player1.rating_singles.sigma = _new_player1_rating.sigma
-
-        _player2.rating_singles.mu = _new_player2_rating.mu
-        _player2.rating_singles.phi = _new_player2_rating.phi
-        _player2.rating_singles.sigma = _new_player2_rating.sigma
-
-    # Do the rating updates for won games, then lost games
-    #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
-    # NOTE: do losses come before wins? It influences the ratings slightly
-    for _ in range(_loser_score):
-        player2.wins_singles += 1
-        player1.losses_singles += 1
-        _update_rating(player2, player1)
-
-    for _ in range(_winner_score):
-        player1.wins_singles += 1
-        player2.losses_singles += 1
-        _update_rating(player1, player2)
+    # NOTE: wip new rate series instead of rate_1vs1() series
+    _series = [(LOSS, player2.rating_singles) for _ in range(_loser_score)]
+    _series.extend([(WIN, player2.rating_singles) for _ in range(_winner_score)])
+    player1.rating_singles = player1.rating_singles.rate(
+        player1.rating_singles, _series
+    )
 
 
 def build_ratings():
