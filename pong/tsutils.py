@@ -8,12 +8,13 @@ Helper functions for TrueSkill algo
 
 import itertools
 import math
+from typing import Tuple
 
 import trueskill
 from trueskill import BETA
 
 
-def win_probability(team1, team2):
+def win_probability(team1: Tuple, team2: Tuple):
     """
     Calculate the win probability for team1 vs. team2
     https://trueskill.org/#win-probability

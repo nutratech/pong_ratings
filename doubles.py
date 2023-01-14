@@ -20,7 +20,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import Player, GLICKO_TO_TRUESKILL_FACTOR
+from pong.models import GLICKO_TO_TRUESKILL_FACTOR, Player
 from pong.tsutils import win_probability
 
 
