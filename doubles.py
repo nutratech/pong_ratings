@@ -149,11 +149,6 @@ def print_matchups(players: List[Player]):
     interesting play.
     """
 
-    def P(N: int, k=2) -> int:
-        """Partition a group of N into 2 groups of k, e.g. 2 groups of 2 for doubles"""
-        assert N >= 2 * k, "Not enough players for doubles, need >=4"
-        return math.comb(N, k) * math.comb(N - k, k) // 2
-
     t_start = time.time()
     already_matched = set()
     matchups = []
@@ -224,12 +219,12 @@ def print_matchups(players: List[Player]):
 
     # Print off best matches
     _n_top = 100
-    _n_choose_2_teams = P(len(players))
+    _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
     print_title(
         f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
-        f"P({len(players)},2,2)={_n_choose_2_teams} possible]"
+        f"{len(players)}C2*{len(players) - 2}C2/2={_n_choose_2_teams} possible]"
     )
-    matchups.sort(key=lambda x: x[-1], reverse=False)
+    matchups.sort(key=lambda x: x[-2], reverse=True)
 
     _table = tabulate(
         matchups[:_n_top],
