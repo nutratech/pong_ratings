@@ -7,7 +7,6 @@ Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 https://trueskill.org/
 """
 import math
-import random
 import time
 from datetime import date, datetime
 from typing import List
@@ -153,13 +152,6 @@ def print_matchups(players: List[Player]):
     t_start = time.time()
     already_matched = set()
     matchups = []
-    players = [Player(f"id_{x}") for x in range(20)]
-    for p in players:
-        p.rating_doubles = trueskill.Rating(
-            random.randrange(20, 30),
-            random.randrange(2, 10),
-        )
-        print(p.rating_doubles)
 
     # Evaluate all possible match ups
     for player1 in players:
