@@ -122,6 +122,7 @@ def print_matchups(players: List[Player]):
     """
     already_matched = set()
     matchups = []
+    rating_engine = glicko2.Glicko2()
 
     # Evaluate all possible match ups
     for player1 in players:
@@ -138,24 +139,28 @@ def print_matchups(players: List[Player]):
             # Compute quality, and add to list
             delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
             quality_of_match = round(
-                glicko2.Glicko2().quality_1vs1(
+                rating_engine.quality_1vs1(
                     player1.rating_singles, player2.rating_singles
                 ),
                 3,
             )
             _win_probability = round(
-                glicko2.Glicko2().expect_score(
-                    player1.rating_singles,
-                    player2.rating_singles,
-                    glicko2.Glicko2().reduce_impact(player2.rating_singles),
+                rating_engine.expect_score(
+                    rating_engine.scale_down(player1.rating_singles),
+                    rating_engine.scale_down(player2.rating_singles),
+                    rating_engine.reduce_impact(
+                        rating_engine.scale_down(player2.rating_singles),
+                    ),
                 ),
                 3,
             )
             _loss_probability = round(
-                glicko2.Glicko2().expect_score(
-                    player2.rating_singles,
-                    player1.rating_singles,
-                    glicko2.Glicko2().reduce_impact(player1.rating_singles),
+                rating_engine.expect_score(
+                    rating_engine.scale_down(player2.rating_singles),
+                    rating_engine.scale_down(player1.rating_singles),
+                    rating_engine.reduce_impact(
+                        rating_engine.scale_down(player1.rating_singles),
+                    ),
                 ),
                 3,
             )
