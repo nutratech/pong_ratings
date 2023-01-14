@@ -7,6 +7,7 @@ Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 https://trueskill.org/
 """
 import math
+import time
 from datetime import date, datetime
 from typing import List
 
@@ -153,6 +154,7 @@ def print_matchups(players: List[Player]):
         assert N >= 2 * k
         return math.comb(N, k) * math.comb(N - k, k) // 2
 
+    t_start = time.time()
     already_matched = set()
     matchups = []
 
@@ -234,6 +236,12 @@ def print_matchups(players: List[Player]):
         headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Quality", "P(w)"],
     )
     print(_table)
+    t_delta = time.time() - t_start
+    print()
+    print(
+        f"Calculated {_n_choose_2_teams} matches in {round(t_delta, 5) * 1000}ms "
+        f"({round(_n_choose_2_teams / t_delta)}/s)"
+    )
 
 
 if __name__ == "__main__":
