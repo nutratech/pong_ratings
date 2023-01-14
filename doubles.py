@@ -20,7 +20,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import GLICKO_TO_TRUESKILL_FACTOR, Player
+from pong.models import Player
 from pong.tsutils import win_probability
 
 
@@ -186,7 +186,7 @@ def print_matchups(players: List[Player]):
                     delta_rating = (
                         player1.rating_doubles.mu + player2.rating_doubles.mu
                     ) / 2 - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
-                    delta_rating = round(delta_rating * GLICKO_TO_TRUESKILL_FACTOR)
+                    delta_rating = round(delta_rating)
 
                     quality_of_match = round(
                         trueskill.quality(
