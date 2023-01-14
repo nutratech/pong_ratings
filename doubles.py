@@ -6,6 +6,7 @@ Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 @author: shane
 https://trueskill.org/
 """
+import math
 from datetime import date, datetime
 from typing import List
 
@@ -146,6 +147,12 @@ def print_matchups(players: List[Player]):
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
     """
+
+    def P(N: int, k=2) -> int:
+        """Partition a group of N into 2 groups of k, e.g. 2 groups of 2 for doubles"""
+        assert N >= 2 * k
+        return math.comb(N, k) * math.comb(N - k, k) // 2
+
     already_matched = set()
     matchups = []
 
@@ -215,7 +222,7 @@ def print_matchups(players: List[Player]):
 
     # Print off best matches
     _n_top = 100
-    _n_choose_2_teams = len(matchups)
+    _n_choose_2_teams = P(len(players))
     print_title(
         f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
         f"P({len(players)},2,2)={_n_choose_2_teams} possible]"
