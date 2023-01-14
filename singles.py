@@ -139,7 +139,10 @@ def print_matchups(players: List[Player]):
             # Compute quality, and add to list
             delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
             _rd_avg = round(
-                (player1.rating_singles.phi + player2.rating_singles.phi) / 2
+                math.sqrt(
+                    (player1.rating_singles.phi**2 + player2.rating_singles.phi**2)
+                    / 2
+                )
             )
             _win_probability = round(
                 rating_engine.expect_score(
