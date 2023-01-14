@@ -151,7 +151,7 @@ def print_matchups(players: List[Player]):
 
     def P(N: int, k=2) -> int:
         """Partition a group of N into 2 groups of k, e.g. 2 groups of 2 for doubles"""
-        assert N >= 2 * k
+        assert N >= 2 * k, "Not enough players for doubles, need >=4"
         return math.comb(N, k) * math.comb(N - k, k) // 2
 
     t_start = time.time()
