@@ -150,12 +150,11 @@ def print_matchups(players: List[Player]):
 
     def P(N: int, k=2) -> int:
         """Partition a group of N into 2 groups of k, e.g. 2 groups of 2 for doubles"""
+        assert N >= 2 * k
         return math.comb(N, k) * math.comb(N - k, k) // 2
 
     already_matched = set()
     matchups = []
-    _N_TMP = 45
-    players = [Player(f"hi_{x}") for x in range(_N_TMP)]
 
     # Evaluate all possible match ups
     for player1 in players:
@@ -222,13 +221,12 @@ def print_matchups(players: List[Player]):
                     already_matched.add((team1, team2))
 
     # Print off best matches
-    _n_top = 10
+    _n_top = 100
     _n_choose_2_teams = P(len(players))
     print_title(
         f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
         f"P({len(players)},2,2)={_n_choose_2_teams} possible]"
     )
-    print(len(matchups))
     matchups.sort(key=lambda x: x[-1], reverse=False)
 
     _table = tabulate(
@@ -236,8 +234,6 @@ def print_matchups(players: List[Player]):
         headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Quality", "P(w)"],
     )
     print(_table)
-    for i in range(4, _N_TMP + 1):
-        print(f"{i} -> {P(i)}")
 
 
 if __name__ == "__main__":
