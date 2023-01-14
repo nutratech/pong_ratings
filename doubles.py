@@ -99,11 +99,11 @@ def build_ratings():
 
         # Parse fields
         _ = date.fromisoformat(row[0])  # Not used for now
-        _winner1 = row[1]
-        _winner2 = row[2]
+        _winner1 = row[1].lower()
+        _winner2 = row[2].lower()
 
-        _loser1 = row[3]
-        _loser2 = row[4]
+        _loser1 = row[3].lower()
+        _loser2 = row[4].lower()
 
         _winners_score = int(row[5].split("-")[0])
         _losers_score = int(row[5].split("-")[1])
