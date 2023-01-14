@@ -214,7 +214,7 @@ def print_matchups(players: List[Player]):
                     already_matched.add((team1, team2))
 
     # Print off best matches
-    _n_top = 15
+    _n_top = 100
     _n_choose_2_teams = len(matchups)
     print_title(
         f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "

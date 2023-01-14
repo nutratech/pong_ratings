@@ -174,9 +174,12 @@ def print_matchups(players: List[Player]):
             already_matched.add((player1, player2))
 
     # Print off best matches
-    # _n_top = 21
+    _n_top = 100
     _n_choose_2_players = math.comb(len(players), 2)
-    print_title(f"Singles matches [{len(players)}C2={_n_choose_2_players} possible]")
+    print_title(
+        f"Singles matches [top {min(_n_top, _n_choose_2_players)}, "
+        f"{len(players)}C2={_n_choose_2_players} possible]"
+    )
     matchups.sort(key=lambda x: x[-1], reverse=True)
 
     _table = tabulate(
