@@ -138,11 +138,8 @@ def print_matchups(players: List[Player]):
 
             # Compute quality, and add to list
             delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
-            quality_of_match = round(
-                rating_engine.quality_1vs1(
-                    player1.rating_singles, player2.rating_singles
-                ),
-                3,
+            _rd_avg = round(
+                (player1.rating_singles.phi + player2.rating_singles.phi) / 2
             )
             _win_probability = round(
                 rating_engine.expect_score(
@@ -169,7 +166,7 @@ def print_matchups(players: List[Player]):
                     player1.username,
                     player2.username,
                     delta_rating,
-                    quality_of_match,
+                    _rd_avg,
                     _win_probability,
                     _loss_probability,
                 )
@@ -183,7 +180,8 @@ def print_matchups(players: List[Player]):
     matchups.sort(key=lambda x: x[-1], reverse=True)
 
     _table = tabulate(
-        matchups, headers=["Player 1", "Player 2", "Δμ", "Quality", "P(w)", "P(l)"]
+        matchups,
+        headers=["Player 1", "Player 2", "Δμ", "rd", "P(w)", "P(l)"],
     )
     print(_table)
 
