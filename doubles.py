@@ -12,6 +12,7 @@ import time
 from datetime import date, datetime
 from typing import List
 
+import numpy as numpy
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
@@ -153,12 +154,15 @@ def print_matchups(players: List[Player]):
     t_start = time.time()
     already_matched = set()
     matchups = []
+
+    _n_players = 20
+    _mu_values = numpy.random.normal(trueskill.MU, trueskill.SIGMA, _n_players)
+    _sigma_values = numpy.random.normal(
+        trueskill.SIGMA, trueskill.SIGMA / 3, _n_players
+    )
     players = [Player(f"id_{x}") for x in range(20)]
-    for p in players:
-        p.rating_doubles = trueskill.Rating(
-            random.randrange(20, 30),
-            random.randrange(2, 10),
-        )
+    for i, p in enumerate(players):
+        p.rating_doubles = trueskill.Rating(_mu_values[i], _sigma_values[i])
         print(p.rating_doubles)
 
     # Evaluate all possible match ups
