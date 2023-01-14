@@ -218,10 +218,10 @@ def print_matchups(players: List[Player]):
                     )
                     matchups.append(
                         (
-                            player1.username,
-                            player2.username,
-                            player3.username,
-                            player4.username,
+                            player1.rating_doubles.mu,
+                            player2.rating_doubles.mu,
+                            player3.rating_doubles.mu,
+                            player4.rating_doubles.mu,
                             delta_rating,
                             quality_of_match,
                             _win_probability,
