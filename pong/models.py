@@ -40,4 +40,4 @@ class Player:
 
     def __str__(self):
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
-        return f"{self.username} ({self.str_rating_singles})"
+        return f"{self.username} ({self.str_rating_singles}, {self.str_rating_doubles}]"

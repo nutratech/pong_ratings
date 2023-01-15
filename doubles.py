@@ -42,6 +42,10 @@ def do_games(
         _player1: Player, _player2: Player, _player3: Player, _player4: Player
     ):
         """Updates ratings."""
+        _player1.wins_doubles += 1
+        _player2.wins_doubles += 1
+        _player3.losses_doubles += 1
+        _player4.losses_doubles += 1
 
         # Calculate new ratings
         _new_team1_ratings, _new_team2_ratings = trueskill.rate(
@@ -58,21 +62,15 @@ def do_games(
         _player3.rating_doubles = _new_team2_ratings[0]
         _player4.rating_doubles = _new_team2_ratings[1]
 
-    # Do the rating updates for won games, then lost games
-    #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
-    # NOTE: do losses come before wins? It influences the ratings slightly
-    for _ in range(_losers_score):
-        player4.wins_doubles += 1
-        player3.wins_doubles += 1
-        player2.losses_doubles += 1
-        player1.losses_doubles += 1
-        _update_rating(player4, player3, player2, player1)
+    # Disallow scores like 2-5
+    assert _winners_score >= _losers_score, "Winner score first in CSV, e.g. 5-2"
 
-    for _ in range(_winners_score):
-        player1.wins_doubles += 1
-        player2.wins_doubles += 1
-        player3.losses_doubles += 1
-        player4.losses_doubles += 1
+    # Do the rating updates for won games, then alternate
+    for _ in range(_winners_score - _losers_score):
+        _update_rating(player1, player2, player3, player4)
+
+    for _ in range(_losers_score):
+        _update_rating(player4, player3, player2, player1)
         _update_rating(player1, player2, player3, player4)
 
 
@@ -184,8 +182,9 @@ def print_matchups(players: List[Player]):
 
                     # Compute quality, and add to list
                     delta_rating = (
-                        player1.rating_doubles.mu + player2.rating_doubles.mu
-                    ) / 2 - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
+                                       player1.rating_doubles.mu + player2.rating_doubles.mu
+                                   ) / 2 - (
+                                       player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
                     delta_rating = round(delta_rating)
 
                     quality_of_match = round(
