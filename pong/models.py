@@ -20,7 +20,7 @@ class Player:
         self.wins_singles = 0
         self.losses_singles = 0
 
-        self.rating_doubles = trueskill.Rating()
+        self.rating_doubles = trueskill.TrueSkill(draw_probability=0.0)
         self.wins_doubles = 0
         self.losses_doubles = 0
 
