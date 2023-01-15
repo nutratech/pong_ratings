@@ -70,8 +70,8 @@ def do_games(
         _update_rating(player1, player2, player3, player4)
 
     for _ in range(_losers_score):
-        _update_rating(player4, player3, player2, player1)
         _update_rating(player1, player2, player3, player4)
+        _update_rating(player4, player3, player2, player1)
 
 
 def build_ratings():
