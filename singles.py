@@ -31,6 +31,8 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
         """
         Updates ratings.
         """
+        _player1.wins_singles += 1
+        _player2.losses_singles += 1
 
         # Calculate new ratings
         _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
@@ -46,17 +48,15 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
         _player2.rating_singles.phi = _new_player2_rating.phi
         _player2.rating_singles.sigma = _new_player2_rating.sigma
 
-    # Do the rating updates for won games, then lost games
-    #  e.g. 2-1... so 2 wins for the winner, AND then 1 loss for him/her
-    # NOTE: do losses come before wins? It influences the ratings slightly
-    for _ in range(_loser_score):
-        player2.wins_singles += 1
-        player1.losses_singles += 1
-        _update_rating(player2, player1)
+    # Disallow scores like 2-5
+    assert _winner_score >= _loser_score, "Winner score first in CSV, e.g. 5-2"
 
-    for _ in range(_winner_score):
-        player1.wins_singles += 1
-        player2.losses_singles += 1
+    # Do the rating updates for won games, then alternate
+    for _ in range(_winner_score - _loser_score):
+        _update_rating(player1, player2)
+
+    for _ in range(_loser_score):
+        _update_rating(player2, player1)
         _update_rating(player1, player2)
 
 

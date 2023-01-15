@@ -70,8 +70,8 @@ def do_games(
         _update_rating(player1, player2, player3, player4)
 
     for _ in range(_losers_score):
-        _update_rating(player1, player2, player3, player4)
         _update_rating(player4, player3, player2, player1)
+        _update_rating(player1, player2, player3, player4)
 
 
 def build_ratings():
@@ -182,9 +182,8 @@ def print_matchups(players: List[Player]):
 
                     # Compute quality, and add to list
                     delta_rating = (
-                                       player1.rating_doubles.mu + player2.rating_doubles.mu
-                                   ) / 2 - (
-                                       player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
+                        player1.rating_doubles.mu + player2.rating_doubles.mu
+                    ) / 2 - (player3.rating_doubles.mu + player4.rating_doubles.mu) / 2
                     delta_rating = round(delta_rating)
 
                     quality_of_match = round(
