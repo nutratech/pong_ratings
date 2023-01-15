@@ -181,15 +181,15 @@ def print_matchups(players: List[Player]):
                         continue
 
                     # Compute quality, and add to list
-                    delta_rating = (
+                    _delta_rating = (
                         player1.rating_doubles.mu
                         + player2.rating_doubles.mu
                         - player3.rating_doubles.mu
                         - player4.rating_doubles.mu
                     ) / 2
-                    delta_rating = round(delta_rating, 1)
+                    _delta_rating = round(_delta_rating, 1)
 
-                    quality_of_match = round(
+                    _quality_of_match = round(
                         trueskill.quality(
                             [
                                 (player1.rating_doubles, player2.rating_doubles),
@@ -211,8 +211,8 @@ def print_matchups(players: List[Player]):
                             player2.username,
                             player3.username,
                             player4.username,
-                            delta_rating,
-                            quality_of_match,
+                            _delta_rating,
+                            _quality_of_match,
                             _win_probability,
                         )
                     )
