@@ -141,11 +141,6 @@ def print_matchups(players: List[Player]) -> None:
     matchups = []
     rating_engine = glicko2.Glicko2()
 
-    # Filter if requested
-    if PLAYERS_PRESENT:
-        print(PLAYERS_PRESENT)
-        players = list(filter(lambda x: x.username in PLAYERS_PRESENT, players))
-
     # Evaluate all possible match ups
     for player1 in players:
         for player2 in players:
@@ -233,6 +228,14 @@ def print_progresses(_players: List[Player]):
 if __name__ == "__main__":
     print("SINGLES")
     print(f"Last updated: {datetime.utcnow()}")
+
     _sorted_players = build_ratings()
+
+    # Filter if requested
+    if PLAYERS_PRESENT:
+        _sorted_players = list(
+            filter(lambda x: x.username in PLAYERS_PRESENT, _sorted_players)
+        )
+
     print_matchups(_sorted_players)
     print_progresses(_sorted_players)
