@@ -16,6 +16,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
+from pong.env import PLAYERS_PRESENT
 from pong.glicko2 import glicko2
 from pong.models import Player
 
@@ -139,6 +140,11 @@ def print_matchups(players: List[Player]) -> None:
     already_matched = set()
     matchups = []
     rating_engine = glicko2.Glicko2()
+
+    # Filter if requested
+    if PLAYERS_PRESENT:
+        print(PLAYERS_PRESENT)
+        players = list(filter(lambda x: x.username in PLAYERS_PRESENT, players))
 
     # Evaluate all possible match ups
     for player1 in players:
