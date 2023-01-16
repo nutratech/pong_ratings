@@ -12,7 +12,6 @@ from typing import List
 from tabulate import tabulate
 
 from pong.core import (
-    SINGLES_URL,
     build_csv_reader,
     get_or_create_player_by_name,
     print_title,
@@ -50,9 +49,13 @@ def do_games(
         _player2.rating_singles.phi = _new_player2_rating.phi
         _player2.rating_singles.sigma = _new_player2_rating.sigma
 
-        # Store new top / max rating (if it is the highest yet)
-        for _player in [_player1, _player2]:
-            _player.stack_ratings_singles.append(round(_player.rating_singles.mu))
+        # Update list of ratings
+        _player1.stack_ratings_singles.append(_player1.rating_singles.mu)
+        _player2.stack_ratings_singles.append(_player2.rating_singles.mu)
+
+        # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
+        _player1.opponent_rating_wins_singles.append(_player2.rating_singles.mu)
+        _player2.opponent_rating_losses_singles.append(_player1.rating_singles.mu)
 
     # Disallow scores like 2-5
     assert _winner_score >= _loser_score, "Winner score first in CSV, e.g. 5-2"
@@ -115,11 +118,12 @@ def build_ratings() -> List[Player]:
                 x.username,
                 x.str_rating_singles,
                 f"{x.wins_singles}-{x.losses_singles}",
-                max(x.stack_ratings_singles),
+                round(max(x.stack_ratings_singles)),
+                x.avg_opponent_singles,
             )
             for x in sorted_players
         ],
-        headers=["Username", "Glicko 2", "W/L", "Top"],
+        headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp"],
     )
     print(_table)
 
@@ -208,7 +212,10 @@ def print_progresses(_players: List[Player]):
     """Prints rating progress graphs"""
     print_title("Rating progress graphs")
     for _player in _players:
-        print(f"{_player.username} [{_player.str_rating_singles}]")
+        print(
+            f"{_player.username} [{_player.str_rating_singles}], "
+            f"peak {round(max(_player.stack_ratings_singles))}"
+        )
         _player.graph_ratings()
         print()
 

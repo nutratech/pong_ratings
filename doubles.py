@@ -15,7 +15,6 @@ import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
 from pong.core import (
-    DOUBLES_URL,
     build_csv_reader,
     get_or_create_player_by_name,
     print_title,
@@ -62,9 +61,19 @@ def do_games(
         _player3.rating_doubles = _new_team2_ratings[0]
         _player4.rating_doubles = _new_team2_ratings[1]
 
-        # Store new top / max rating (if it is the highest yet)
+        # Update list of ratings
         for _player in [_player1, _player2, _player3, _player4]:
-            _player.stack_ratings_doubles.append(round(_player.rating_doubles.mu, 1))
+            _player.stack_ratings_doubles.append(_player.rating_doubles.mu)
+
+        # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
+        for _player in [_player1, _player2]:
+            _player.opponent_rating_wins_doubles.append(
+                (_player3.rating_doubles.mu + _player4.rating_doubles.mu) / 2
+            )
+        for _player in [_player3, _player4]:
+            _player.opponent_rating_losses_doubles.append(
+                (_player1.rating_doubles.mu + _player2.rating_doubles.mu) / 2
+            )
 
     # Disallow scores like 2-5
     assert _winners_score >= _losers_score, "Winner score first in CSV, e.g. 5-2"
@@ -138,11 +147,12 @@ def build_ratings():
                 x.username,
                 x.str_rating_doubles,
                 f"{x.wins_doubles}-{x.losses_doubles}",
-                max(x.stack_ratings_doubles),
+                round(max(x.stack_ratings_doubles), 1),
+                x.avg_opponent_doubles,
             )
             for x in sorted_players
         ],
-        headers=["Username", "TrueSkill", "W/L", "Top"],
+        headers=["Username", "TrueSkill", "W/L", "Top", "Avg opp"],
     )
     print(_table)
 
@@ -253,7 +263,10 @@ def print_progresses(_players: List[Player]):
     """Prints rating progress graphs"""
     print_title("Rating progress graphs")
     for _player in _players:
-        print(f"{_player.username} [{_player.str_rating_doubles}]")
+        print(
+            f"{_player.username} [{_player.str_rating_doubles}], "
+            f"peak {round(max(_player.stack_ratings_doubles), 1)}"
+        )
         _player.graph_ratings()
         print()
 
