@@ -17,10 +17,12 @@ class Player:
         self.username = username
 
         self.rating_singles = glicko2.Glicko2()
+        self.stack_ratings_singles = [glicko2.Glicko2().mu]
         self.wins_singles = 0
         self.losses_singles = 0
 
         self.rating_doubles = trueskill.TrueSkill(draw_probability=0.0)
+        self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=0.0).mu]
         self.wins_doubles = 0
         self.losses_doubles = 0
 

@@ -48,6 +48,10 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
         _player2.rating_singles.phi = _new_player2_rating.phi
         _player2.rating_singles.sigma = _new_player2_rating.sigma
 
+        # Store new top / max rating (if it is the highest yet)
+        for _player in [_player1, _player2]:
+            _player.stack_ratings_singles.append(round(_player.rating_singles.mu))
+
     # Disallow scores like 2-5
     assert _winner_score >= _loser_score, "Winner score first in CSV, e.g. 5-2"
 
@@ -104,10 +108,15 @@ def build_ratings():
     )
     _table = tabulate(
         [
-            (x.username, x.str_rating_singles, f"{x.wins_singles}-{x.losses_singles}")
+            (
+                x.username,
+                x.str_rating_singles,
+                f"{x.wins_singles}-{x.losses_singles}",
+                max(x.stack_ratings_singles),
+            )
             for x in sorted_players
         ],
-        headers=["Username", "Glicko 2", "Record"],
+        headers=["Username", "Glicko 2", "W/L", "Top"],
     )
     print(_table)
 

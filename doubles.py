@@ -62,6 +62,10 @@ def do_games(
         _player3.rating_doubles = _new_team2_ratings[0]
         _player4.rating_doubles = _new_team2_ratings[1]
 
+        # Store new top / max rating (if it is the highest yet)
+        for _player in [_player1, _player2, _player3, _player4]:
+            _player.stack_ratings_doubles.append(round(_player.rating_doubles.mu, 1))
+
     # Disallow scores like 2-5
     assert _winners_score >= _losers_score, "Winner score first in CSV, e.g. 5-2"
 
@@ -130,10 +134,15 @@ def build_ratings():
     )
     _table = tabulate(
         [
-            (x.username, x.str_rating_doubles, f"{x.wins_doubles}-{x.losses_doubles}")
+            (
+                x.username,
+                x.str_rating_doubles,
+                f"{x.wins_doubles}-{x.losses_doubles}",
+                max(x.stack_ratings_doubles),
+            )
             for x in sorted_players
         ],
-        headers=["Username", "TrueSkill", "Record"],
+        headers=["Username", "TrueSkill", "W/L", "Top"],
     )
     print(_table)
 
