@@ -71,8 +71,9 @@ def build_ratings() -> List[Player]:
     Main method which calculates ratings
 
     TODO:
-     - Support TrueSkill and multiplayer (doubles games) ratings
      - Support an API level interface?
+     - Preview points won / lost
+     - Points, server, other details statistics?
     """
 
     # Prepare the CSV inputs
@@ -205,9 +206,11 @@ def print_matchups(players: List[Player]) -> None:
 
 def print_progresses(_players: List[Player]):
     """Prints rating progress graphs"""
+    print_title("Rating progress graphs")
     for _player in _players:
         print(f"{_player.username} [{_player.str_rating_singles}]")
         _player.graph_ratings()
+        print()
 
 
 if __name__ == "__main__":

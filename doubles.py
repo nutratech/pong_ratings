@@ -251,9 +251,11 @@ def print_matchups(players: List[Player]):
 
 def print_progresses(_players: List[Player]):
     """Prints rating progress graphs"""
+    print_title("Rating progress graphs")
     for _player in _players:
         print(f"{_player.username} [{_player.str_rating_doubles}]")
         _player.graph_ratings()
+        print()
 
 
 if __name__ == "__main__":

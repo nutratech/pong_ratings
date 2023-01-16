@@ -45,14 +45,19 @@ class Player:
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
         return f"{self.username} [{self.str_rating_singles}, {self.str_rating_doubles}]"
 
-    def graph_ratings(self) -> None:
+    def graph_ratings(self, graph_width_limit=50, graph_height=10) -> None:
         """
-        Prints an ASCII graph of rating over time (technically over game number for now)
+        Prints an ASCII graph of rating over past 50 games
         """
-        if len(self.stack_ratings_singles) > 1:
-            _singles = asciichartpy.plot(self.stack_ratings_singles, {"height": 6})
-            print(_singles)
 
-        if len(self.stack_ratings_doubles) > 1:
-            _doubles = asciichartpy.plot(self.stack_ratings_doubles, {"height": 6})
-            print(_doubles)
+        if len(self.stack_ratings_singles) > 1:
+            _series = self.stack_ratings_singles[-graph_width_limit:]
+        # NOTE: mutually exclusive for now, we process singles/doubles separately
+        elif len(self.stack_ratings_doubles) > 1:
+            _series = self.stack_ratings_doubles[-graph_width_limit:]
+        else:
+            _series = []
+
+        if _series:
+            _plot = asciichartpy.plot(_series, {"height": graph_height})
+            print(_plot)
