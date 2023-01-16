@@ -51,16 +51,15 @@ def get_google_sheet(url: str):
     return response.content
 
 
-def cache_csv_file(_csv_file, singles=True):
+def cache_csv_file(_csv_bytes_output, singles=True):
     """
     Persists the CSV file into the git commit history.
     Fall back calculation in case sheets.google.com is unreachable.
     (Manually) verify no nefarious edits are made.
     """
     csv_path = SINGLES_CSV if singles else DOUBLES_CSV
-    with open(csv_path, "w", encoding="utf-8") as _file:
-        csv_writer = csv.writer(_file)
-        csv_writer.writerows(_csv_file)
+    with open(csv_path, "wb") as _file:
+        _file.write(_csv_bytes_output)
 
 
 def build_csv_reader(singles=True):
@@ -70,7 +69,7 @@ def build_csv_reader(singles=True):
         url = SINGLES_URL if singles else DOUBLES_URL
         _csv_bytes_output = get_google_sheet(url)
         _csv_file = StringIO(_csv_bytes_output.decode())
-        cache_csv_file(_csv_file, singles=singles)
+        cache_csv_file(_csv_bytes_output, singles=singles)
 
         return csv.reader(_csv_file)
 
