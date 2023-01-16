@@ -5,6 +5,8 @@ Created on Sun 08 Jan 2023 11∶26∶34 PM EST
 @author: shane
 Player model used for singles & doubles ratings, username, wins/losses, etc
 """
+from typing import Union
+
 import asciichartpy
 import trueskill  # pylint: disable=import-error
 
@@ -62,7 +64,7 @@ class Player:
         )
 
     @property
-    def avg_opponent_doubles(self) -> int:
+    def avg_opponent_doubles(self) -> float:
         """Returns average opponent in doubles"""
         return round(
             (
@@ -75,6 +77,20 @@ class Player:
             ),
             1,
         )
+
+    @property
+    def best_win_singles(self) -> Union[None, int]:
+        """Returns best win for singles games"""
+        if not self.opponent_rating_wins_singles:
+            return None
+        return round(max(self.opponent_rating_wins_singles))
+
+    @property
+    def best_win_doubles(self) -> Union[None, int]:
+        """Returns best win for singles games"""
+        if not self.opponent_rating_wins_doubles:
+            return None
+        return round(max(self.opponent_rating_wins_doubles), 1)
 
     def __str__(self):
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?

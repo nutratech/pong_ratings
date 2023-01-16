@@ -207,6 +207,15 @@ def print_matchups(players: List[Player]):
                         - player4.rating_doubles.mu
                     ) / 2
                     _delta_rating = round(_delta_rating, 1)
+                    _rd_avg = round(
+                        math.sqrt(
+                            sum(
+                                x.rating_doubles.sigma**2
+                                for x in [player1, player2, player3, player4]
+                            )
+                            / 4
+                        )
+                    )
 
                     _quality_of_match = round(
                         trueskill.quality(
@@ -224,6 +233,8 @@ def print_matchups(players: List[Player]):
                         ),
                         2,
                     )
+
+                    # Add to list
                     matchups.append(
                         (
                             player1.username,
@@ -231,6 +242,7 @@ def print_matchups(players: List[Player]):
                             player3.username,
                             player4.username,
                             _delta_rating,
+                            _rd_avg,
                             _quality_of_match,
                             _win_probability,
                         )
@@ -248,7 +260,7 @@ def print_matchups(players: List[Player]):
 
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Q", "P(w)"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "rd", "Q", "P(w)"],
     )
     print(_table)
     t_delta = time.time() - t_start
@@ -265,7 +277,8 @@ def print_progresses(_players: List[Player]):
     for _player in _players:
         print(
             f"{_player.username} [{_player.str_rating_doubles}], "
-            f"peak {round(max(_player.stack_ratings_doubles), 1)}"
+            f"peak {round(max(_player.stack_ratings_doubles), 1)}, "
+            f"best win {_player.best_win_doubles}"
         )
         _player.graph_ratings()
         print()
