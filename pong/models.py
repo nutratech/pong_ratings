@@ -45,7 +45,7 @@ class Player:
     def str_rating_doubles(self) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
         _rating = round(self.rating_doubles.mu, 1)
-        _two_deviations = round(self.rating_doubles.sigma * 2, 1)
+        _two_deviations = round(self.rating_doubles.sigma * 2)
         _max_rating = round(max(self.stack_ratings_doubles), 1)
         return f"{_rating} ± {_two_deviations}"
 
