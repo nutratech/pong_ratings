@@ -21,7 +21,9 @@ from pong.glicko2 import glicko2
 from pong.models import Player
 
 
-def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score: int):
+def do_games(
+    player1: Player, player2: Player, _winner_score: int, _loser_score: int
+) -> None:
     """
     Updates ratings for given games & players
     NOTE: player1 wins, player2 loses
@@ -64,7 +66,7 @@ def do_games(player1: Player, player2: Player, _winner_score: int, _loser_score:
         _update_rating(player1, player2)
 
 
-def build_ratings():
+def build_ratings() -> List[Player]:
     """
     Main method which calculates ratings
 
@@ -124,7 +126,7 @@ def build_ratings():
     return sorted_players
 
 
-def print_matchups(players: List[Player]):
+def print_matchups(players: List[Player]) -> None:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -201,8 +203,16 @@ def print_matchups(players: List[Player]):
     print(_table)
 
 
+def print_progresses(_players: List[Player]):
+    """Prints rating progress graphs"""
+    for _player in _players:
+        print(f"{_player.username} [{_player.str_rating_singles}]")
+        _player.graph_ratings()
+
+
 if __name__ == "__main__":
     print("SINGLES")
     print(f"Last updated: {datetime.utcnow()}")
     _sorted_players = build_ratings()
     print_matchups(_sorted_players)
+    print_progresses(_sorted_players)
