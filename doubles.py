@@ -205,14 +205,14 @@ def print_matchups(players: List[Player]):
                                 (player3.rating_doubles, player4.rating_doubles),
                             ]
                         ),
-                        3,
+                        2,
                     )
                     _win_probability = round(
                         win_probability(
                             (player1.rating_doubles, player2.rating_doubles),
                             (player3.rating_doubles, player4.rating_doubles),
                         ),
-                        3,
+                        2,
                     )
                     matchups.append(
                         (

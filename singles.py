@@ -153,12 +153,6 @@ def print_matchups(players: List[Player]):
                     / 2
                 )
             )
-            _quality_of_match = round(
-                rating_engine.quality_1vs1(
-                    player1.rating_singles, player2.rating_singles
-                ),
-                3,
-            )
             _win_probability = round(
                 rating_engine.expect_score(
                     rating_engine.scale_down(player1.rating_singles),
@@ -167,7 +161,7 @@ def print_matchups(players: List[Player]):
                         rating_engine.scale_down(player2.rating_singles),
                     ),
                 ),
-                3,
+                2,
             )
             _loss_probability = round(
                 rating_engine.expect_score(
@@ -177,7 +171,7 @@ def print_matchups(players: List[Player]):
                         rating_engine.scale_down(player1.rating_singles),
                     ),
                 ),
-                3,
+                2,
             )
             matchups.append(
                 (
@@ -185,7 +179,6 @@ def print_matchups(players: List[Player]):
                     player2.username,
                     _delta_rating,
                     _rd_avg,
-                    _quality_of_match,
                     _win_probability,
                     _loss_probability,
                 )
@@ -203,7 +196,7 @@ def print_matchups(players: List[Player]):
 
     _table = tabulate(
         matchups,
-        headers=["Player 1", "Player 2", "Δμ", "rd", "Q", "P(w)", "P(l)"],
+        headers=["Player 1", "Player 2", "Δμ", "rd", "P(w)", "P(l)"],
     )
     print(_table)
 
