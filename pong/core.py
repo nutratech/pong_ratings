@@ -25,8 +25,14 @@ def _url(gid: int):
     )
 
 
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
 SINGLES_URL = _url(834797930)
 DOUBLES_URL = _url(682349527)
+
+# Fall back (cached CSV files, if sheets.google.com is unreachable)
+SINGLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_singles.csv")
+DOUBLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_doubles.csv")
 
 
 def get_google_sheet(url: str):
@@ -39,17 +45,42 @@ def get_google_sheet(url: str):
       - Support multiple sheets per document (e.g. separate "doubles games" sheet)?
     """
 
-    response = requests.get(url, timeout=12)
+    response = requests.get(url, timeout=2)
     assert response.status_code == 200, "Wrong status code"
 
     return response.content
 
 
-def build_csv_reader(url: str):
+def cache_csv_file(_csv_file, singles=True):
+    """
+    Persists the CSV file into the git commit history.
+    Fall back calculation in case sheets.google.com is unreachable.
+    (Manually) verify no nefarious edits are made.
+    """
+    csv_path = SINGLES_CSV if singles else DOUBLES_CSV
+    with open(csv_path, "w", encoding="utf-8") as _file:
+        csv_writer = csv.writer(_file)
+        csv_writer.writerows(_csv_file)
+
+
+def build_csv_reader(singles=True):
     """Returns a csv.reader() object"""
-    _csv_bytes_output = get_google_sheet(url)
-    _csv_file = StringIO(_csv_bytes_output.decode())
-    return csv.reader(_csv_file)
+
+    try:
+        url = SINGLES_URL if singles else DOUBLES_URL
+        _csv_bytes_output = get_google_sheet(url)
+        _csv_file = StringIO(_csv_bytes_output.decode())
+        cache_csv_file(_csv_file, singles=singles)
+
+        return csv.reader(_csv_file)
+
+    except requests.exceptions.ConnectionError as err:
+        print(repr(err))
+        print()
+        print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
+        csv_path = SINGLES_CSV if singles else DOUBLES_CSV
+
+        return csv.reader(open(csv_path, encoding="utf-8"))
 
 
 def get_or_create_player_by_name(players: dict, username: str):

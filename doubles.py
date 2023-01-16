@@ -88,7 +88,7 @@ def build_ratings():
     """
 
     # Prepare the CSV inputs
-    reader = build_csv_reader(DOUBLES_URL)
+    reader = build_csv_reader(singles=False)
 
     players = {}  # Player mapping username -> "class" objects use to store ratings
 
