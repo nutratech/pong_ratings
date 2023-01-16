@@ -12,4 +12,6 @@ import dotenv
 dotenv.load_dotenv(verbose=True)
 
 # TODO: support inverse too? Inactive players
-PLAYERS_PRESENT = set(os.environ.get("PLAYERS").split())
+PLAYERS_PRESENT = os.environ.get("PLAYERS")
+if PLAYERS_PRESENT:
+    PLAYERS_PRESENT = set(PLAYERS_PRESENT.split())
