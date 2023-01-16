@@ -7,15 +7,18 @@ Shared utilities by both singles and doubles interface
 """
 import csv
 import os
+from datetime import datetime
 from io import StringIO
+from typing import List
 
 import requests
 
+from pong.env import PLAYERS_PRESENT
 from pong.models import Player
 
 
 # Hard-coded URL values pointing to our sheet
-def _url(gid: int):
+def _url(gid: int) -> str:
     _spreadsheet_key = "1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
     return (
         "https://docs.google.com/spreadsheet/ccc"
@@ -35,7 +38,7 @@ SINGLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_singles.csv")
 DOUBLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_doubles.csv")
 
 
-def get_google_sheet(url: str):
+def get_google_sheet(url: str) -> bytes:
     """
     Returns a byte array (string)
     TODO:
@@ -51,7 +54,7 @@ def get_google_sheet(url: str):
     return response.content
 
 
-def cache_csv_file(_csv_bytes_output, singles=True):
+def cache_csv_file(_csv_bytes_output, singles=True) -> None:
     """
     Persists the CSV file into the git commit history.
     Fall back calculation in case sheets.google.com is unreachable.
@@ -62,7 +65,7 @@ def cache_csv_file(_csv_bytes_output, singles=True):
         _file.write(_csv_bytes_output)
 
 
-def build_csv_reader(singles=True):
+def build_csv_reader(singles=True) -> csv.reader:
     """Returns a csv.reader() object"""
 
     try:
@@ -82,7 +85,7 @@ def build_csv_reader(singles=True):
         return csv.reader(open(csv_path, encoding="utf-8"))
 
 
-def get_or_create_player_by_name(players: dict, username: str):
+def get_or_create_player_by_name(players: dict, username: str) -> Player:
     """Adds a player"""
     if username in players:
         return players[username]
@@ -92,10 +95,24 @@ def get_or_create_player_by_name(players: dict, username: str):
     return _player
 
 
-def print_title(title: str):
+def print_title(title: str) -> None:
     """Prints a neat and visible header to separate tables"""
     print(os.linesep)
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print(title)
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("")
+
+
+def filter_players(_sorted_players: List[Player]) -> List[Player]:
+    """Shared method for singles and doubles (main method)"""
+    print("SINGLES")
+    print(f"Last updated: {datetime.utcnow()}")
+
+    # Filter if requested
+    if PLAYERS_PRESENT:
+        _sorted_players = list(
+            filter(lambda x: x.username in PLAYERS_PRESENT, _sorted_players)
+        )
+
+    return _sorted_players

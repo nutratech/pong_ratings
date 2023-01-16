@@ -16,10 +16,10 @@ from tabulate import tabulate
 
 from pong.core import (
     build_csv_reader,
+    filter_players,
     get_or_create_player_by_name,
     print_title,
 )
-from pong.env import PLAYERS_PRESENT
 from pong.models import Player
 from pong.tsutils import win_probability
 
@@ -289,13 +289,7 @@ if __name__ == "__main__":
     print("DOUBLES")
     print(f"Last updated: {datetime.utcnow()}")
 
-    _sorted_players = build_ratings()
-
-    # Filter if requested
-    if PLAYERS_PRESENT:
-        _sorted_players = list(
-            filter(lambda x: x.username in PLAYERS_PRESENT, _sorted_players)
-        )
+    _sorted_players = filter_players(build_ratings())
 
     print_matchups(_sorted_players)
     print_progresses(_sorted_players)
