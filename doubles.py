@@ -229,13 +229,13 @@ def print_matchups(players: List[Player]):
 
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Q(x)", "P(w)"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "Q", "P(w)"],
     )
     print(_table)
     t_delta = time.time() - t_start
     print()
     print(
-        f"Calculated {_n_choose_2_teams} matches in {round(t_delta, 5) * 1000}ms "
+        f"Calculated {len(matchups)} matches in {round(t_delta, 5) * 1000}ms "
         f"({round(_n_choose_2_teams / t_delta)}/s)"
     )
 
