@@ -106,8 +106,6 @@ def print_title(title: str) -> None:
 
 def filter_players(_sorted_players: List[Player]) -> List[Player]:
     """Shared method for singles and doubles (main method)"""
-    print("SINGLES")
-    print(f"Last updated: {datetime.utcnow()}")
 
     # Filter if requested
     if PLAYERS_PRESENT:
