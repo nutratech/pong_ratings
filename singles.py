@@ -155,9 +155,10 @@ def print_matchups(players: List[Player]) -> None:
                 math.sqrt(
                     (player1.rating_singles.phi**2 + player2.rating_singles.phi**2)
                     / 2
-                )
+                ),
+                -1,
             )
-
+            _rd_avg = int(_rd_avg)
             _win_probability = round(
                 rating_engine.expect_score(
                     rating_engine.scale_down(player1.rating_singles),
