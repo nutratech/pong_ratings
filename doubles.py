@@ -31,7 +31,7 @@ def do_games(
     player4: Player,
     _winners_score: int,
     _losers_score: int,
-):
+) -> None:
     """
     Updates ratings.
     NOTE: team1 = wins, team2 = loses
@@ -40,12 +40,8 @@ def do_games(
 
     def _update_rating(
         _player1: Player, _player2: Player, _player3: Player, _player4: Player
-    ):
+    ) -> None:
         """Updates ratings."""
-        _player1.wins_doubles += 1
-        _player2.wins_doubles += 1
-        _player3.losses_doubles += 1
-        _player4.losses_doubles += 1
 
         # Calculate new ratings
         _new_team1_ratings, _new_team2_ratings = trueskill.rate(
@@ -88,7 +84,7 @@ def do_games(
         _update_rating(player1, player2, player3, player4)
 
 
-def build_ratings():
+def build_ratings() -> List[Player]:
     """
     Main method which calculates ratings
 
@@ -147,7 +143,7 @@ def build_ratings():
             (
                 x.username,
                 x.str_rating_doubles,
-                f"{x.wins_doubles}-{x.losses_doubles}",
+                x.str_win_losses(singles=False),
                 round(max(x.stack_ratings_doubles), 1),
                 x.avg_opponent_doubles,
             )
@@ -161,7 +157,7 @@ def build_ratings():
     return sorted_players
 
 
-def print_matchups(players: List[Player]):
+def print_matchups(players: List[Player]) -> None:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -272,7 +268,7 @@ def print_matchups(players: List[Player]):
     )
 
 
-def print_progresses(_players: List[Player]):
+def print_progresses(_players: List[Player]) -> None:
     """Prints rating progress graphs"""
     print_title("Rating progress graphs")
     for _player in _players:

@@ -29,12 +29,8 @@ def do_games(
     NOTE: player1 wins, player2 loses
     """
 
-    def _update_rating(_player1: Player, _player2: Player):
-        """
-        Updates ratings.
-        """
-        _player1.wins_singles += 1
-        _player2.losses_singles += 1
+    def _update_rating(_player1: Player, _player2: Player) -> None:
+        """Updates ratings."""
 
         # Calculate new ratings
         _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
@@ -118,7 +114,7 @@ def build_ratings() -> List[Player]:
             (
                 x.username,
                 x.str_rating_singles,
-                f"{x.wins_singles}-{x.losses_singles}",
+                x.str_win_losses(singles=True),
                 round(max(x.stack_ratings_singles)),
                 x.avg_opponent_singles,
             )
@@ -212,7 +208,7 @@ def print_matchups(players: List[Player]) -> None:
     print(_table)
 
 
-def print_progresses(_players: List[Player]):
+def print_progresses(_players: List[Player]) -> None:
     """Prints rating progress graphs"""
     print_title("Rating progress graphs")
     for _player in _players:

@@ -7,7 +7,6 @@ Shared utilities by both singles and doubles interface
 """
 import csv
 import os
-from datetime import datetime
 from io import StringIO
 from typing import List
 

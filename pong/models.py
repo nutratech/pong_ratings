@@ -21,17 +21,25 @@ class Player:
 
         self.rating_singles = glicko2.Glicko2()
         self.stack_ratings_singles = [glicko2.Glicko2().mu]
-        self.wins_singles = 0
-        self.losses_singles = 0
         self.opponent_rating_wins_singles = []
         self.opponent_rating_losses_singles = []
 
         self.rating_doubles = trueskill.TrueSkill(draw_probability=0.0)
         self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=0.0).mu]
-        self.wins_doubles = 0
-        self.losses_doubles = 0
         self.opponent_rating_wins_doubles = []
         self.opponent_rating_losses_doubles = []
+
+    def str_win_losses(self, singles=True) -> str:
+        """Returns e.g. 5-2"""
+
+        if singles:
+            _wins = len(self.opponent_rating_wins_singles)
+            _losses = len(self.opponent_rating_losses_singles)
+        else:
+            _wins = len(self.opponent_rating_wins_doubles)
+            _losses = len(self.opponent_rating_losses_doubles)
+
+        return f"{_wins}-{_losses}"
 
     @property
     def str_rating_singles(self) -> str:
