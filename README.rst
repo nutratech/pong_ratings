@@ -38,3 +38,21 @@ time.
 .. code-block:: bash
 
   ./rate.py
+
+Filtering Players
+~~~~~~~~~~~~~~~~~
+
+When there are too many doubles pairings, you can filter by present players
+only.
+
+Add this to a ``.env`` file.
+
+.. code-block:: bash
+
+  PLAYERS=player1 player2 player3 player4
+
+
+TODO
+####
+
+- Cache the output of the script too, to compare old ratings / graphs?
