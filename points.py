@@ -81,7 +81,7 @@ def build_ratings() -> List[Player]:
     """
 
     # Prepare the CSV inputs
-    reader = build_csv_reader(singles=True)
+    reader = build_csv_reader(style="SINGLES_POINTS")
 
     players = {}  # Player mapping username -> "class" objects use to store ratings
 
@@ -109,7 +109,7 @@ def build_ratings() -> List[Player]:
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings?
-    print_title("Singles rankings")
+    print_title("Points rankings")
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_singles.mu, reverse=True
     )
@@ -157,7 +157,7 @@ def print_matchups(players: List[Player]) -> None:
             _delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
             _rd_avg = round(
                 math.sqrt(
-                    (player1.rating_singles.phi ** 2 + player2.rating_singles.phi ** 2)
+                    (player1.rating_singles.phi**2 + player2.rating_singles.phi**2)
                     / 2
                 )
             )
@@ -226,7 +226,7 @@ def print_progresses(_players: List[Player]):
 
 
 if __name__ == "__main__":
-    print("BALLS")
+    print("POINTS")
     print(f"Last updated: {datetime.utcnow()}")
 
     _sorted_players = filter_players(build_ratings())

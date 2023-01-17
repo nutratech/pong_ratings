@@ -7,7 +7,6 @@ Shared utilities by both singles and doubles interface
 """
 import csv
 import os
-from datetime import datetime
 from io import StringIO
 from typing import List
 
@@ -15,6 +14,8 @@ import requests
 
 from pong.env import PLAYERS_PRESENT
 from pong.models import Player
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
 # Hard-coded URL values pointing to our sheet
@@ -28,14 +29,26 @@ def _url(gid: int) -> str:
     )
 
 
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+UNIMPLEMENTED_MSG1 = "Unimplemented DOUBLES_POINTS_URL"
 
-SINGLES_URL = _url(834797930)
-DOUBLES_URL = _url(682349527)
+
+def _csv_url_generator(style: str) -> str:
+    """Generates the URL to the Google Sheets asset"""
+    if style == "SINGLES":
+        return _url(834797930)
+    if style == "DOUBLES":
+        return _url(682349527)
+    if style == "SINGLES_POINTS":
+        return _url(0)
+    raise ValueError(UNIMPLEMENTED_MSG1)
+
 
 # Fall back (cached CSV files, if sheets.google.com is unreachable)
-SINGLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_singles.csv")
-DOUBLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_doubles.csv")
+def _csv_path_generator(style: str) -> str:
+    """Generates the persisted CSV paths"""
+    if style not in {"SINGLES", "DOUBLES", "SINGLES_POINTS"}:
+        raise ValueError(UNIMPLEMENTED_MSG1)
+    return os.path.join(PROJECT_ROOT, "data", f"{style}.csv")
 
 
 def get_google_sheet(url: str) -> bytes:
@@ -54,25 +67,33 @@ def get_google_sheet(url: str) -> bytes:
     return response.content
 
 
-def cache_csv_file(_csv_bytes_output, singles=True) -> None:
+def cache_csv_file(_csv_bytes_output, style: str) -> None:
     """
     Persists the CSV file into the git commit history.
     Fall back calculation in case sheets.google.com is unreachable.
     (Manually) verify no nefarious edits are made.
     """
-    csv_path = SINGLES_CSV if singles else DOUBLES_CSV
+
+    csv_path = _csv_path_generator(style)
+
     with open(csv_path, "wb") as _file:
         _file.write(_csv_bytes_output)
 
 
-def build_csv_reader(singles=True) -> csv.reader:
-    """Returns a csv.reader() object"""
+def build_csv_reader(style: str) -> csv.reader:
+    """
+    Returns a csv.reader() object
+
+    style: SINGLES, DOUBLES, SINGLES_POINTS, DOUBLES_POINTS
+    """
 
     try:
-        url = SINGLES_URL if singles else DOUBLES_URL
+        url = _csv_url_generator(style)
+
         _csv_bytes_output = get_google_sheet(url)
         _csv_file = StringIO(_csv_bytes_output.decode())
-        cache_csv_file(_csv_bytes_output, singles=singles)
+
+        cache_csv_file(_csv_bytes_output, style=style)
 
         return csv.reader(_csv_file)
 
@@ -80,8 +101,8 @@ def build_csv_reader(singles=True) -> csv.reader:
         print(repr(err))
         print()
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
-        csv_path = SINGLES_CSV if singles else DOUBLES_CSV
 
+        csv_path = _csv_path_generator(style)
         return csv.reader(open(csv_path, encoding="utf-8"))
 
 
