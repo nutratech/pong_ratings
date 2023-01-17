@@ -37,8 +37,8 @@ class Player:
     def str_rating_singles(self) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
         _rating = round(self.rating_singles.mu)
-        _two_deviations = round(self.rating_singles.phi * 2)
-        return f"{_rating} ± {_two_deviations}"
+        _two_deviations = round(self.rating_singles.phi * 2, -1)  # Round to 10s place
+        return f"{_rating} ± {int(_two_deviations)}"
 
     @property
     def str_rating_doubles(self) -> str:
