@@ -103,7 +103,7 @@ class Player:
             _series = [
                 round(x) for x in self.stack_ratings_singles[-graph_width_limit:]
             ]
-        # NOTE: mutually exclusive for now, we process singles/doubles separately
+        # TODO: mutually exclusive for now, we process singles/doubles separately
         elif len(self.stack_ratings_doubles) > 1:
             _series = [
                 round(x, 1) for x in self.stack_ratings_doubles[-graph_width_limit:]
