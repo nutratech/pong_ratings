@@ -204,7 +204,7 @@ def print_matchups(players: List[Player]) -> None:
 
     _table = tabulate(
         matchups,
-        headers=["Player 1", "Player 2", "Δμ", "rd", "P(w)", "P(l)"],
+        headers=["Player 1", "Player 2", "Δμ", "RD", "P(w)", "P(l)"],
     )
     print(_table)
 

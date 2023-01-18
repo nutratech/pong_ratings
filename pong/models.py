@@ -118,6 +118,7 @@ class Player:
         else:
             _series = []
 
+        # Don't print the plot for an empty list
         if _series:
             _plot = asciichartpy.plot(_series, {"height": graph_height})
             print(_plot)

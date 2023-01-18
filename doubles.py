@@ -257,7 +257,7 @@ def print_matchups(players: List[Player]) -> None:
 
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "rd", "Q", "P(w)"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "RD", "Q", "P(w)"],
     )
     print(_table)
     t_delta = time.time() - t_start
