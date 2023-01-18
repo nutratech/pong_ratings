@@ -41,19 +41,16 @@ class Player:
 
         return f"{_wins}-{_losses}"
 
-    @property
-    def str_rating_singles(self) -> str:
+    def str_rating(self, singles=True) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
-        _rating = round(self.rating_singles.mu)
-        _two_deviations = round(self.rating_singles.phi * 2, -1)  # Round to 10s place
-        return f"{_rating} ± {int(_two_deviations)}"
+        if singles:
+            _rating = round(self.rating_singles.mu)
+            _two_deviations = round(self.rating_singles.phi * 2, -1)  # Round to 10s
+        else:
+            _rating = round(self.rating_doubles.mu, 1)
+            _two_deviations = round(self.rating_doubles.sigma * 2)
 
-    @property
-    def str_rating_doubles(self) -> str:
-        """Returns a friendly string for a rating, e.g. 1500 ± 300"""
-        _rating = round(self.rating_doubles.mu, 1)
-        _two_deviations = round(self.rating_doubles.sigma * 2)
-        return f"{_rating} ± {_two_deviations}"
+        return f"{_rating} ± {int(_two_deviations)}"
 
     @property
     def avg_opponent_singles(self) -> int:
@@ -100,7 +97,9 @@ class Player:
 
     def __str__(self):
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
-        return f"{self.username} [{self.str_rating_singles}, {self.str_rating_doubles}]"
+        return (
+            f"{self.username} [{self.str_rating()}, {self.str_rating(singles=False)}]"
+        )
 
     def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
         """
