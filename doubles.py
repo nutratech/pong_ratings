@@ -145,7 +145,7 @@ def build_ratings() -> List[Player]:
                 x.str_rating(singles=False),
                 x.str_win_losses(singles=False),
                 round(max(x.stack_ratings_doubles), 1),
-                x.avg_opponent_doubles,
+                x.avg_opponent(singles=False),
             )
             for x in sorted_players
         ],
@@ -275,7 +275,7 @@ def print_progresses(_players: List[Player]) -> None:
         print(
             f"{_player.username} [{_player.str_rating(singles=False)}], "
             f"peak {round(max(_player.stack_ratings_doubles), 1)}, "
-            f"best win {_player.best_win_doubles}"
+            f"best win {_player.best_win(singles=False)}"
         )
         _player.graph_ratings()
         print()

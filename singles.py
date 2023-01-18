@@ -104,7 +104,7 @@ def build_ratings() -> List[Player]:
         do_games(_winner_player, _loser_player, _winner_score, _loser_score)
 
     # Print off rankings
-    # TODO: filter inactive or highly uncertain ratings?
+    # TODO: filter inactive or highly uncertain ratings? Group by home club?
     print_title("Rankings")
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_singles.mu, reverse=True
@@ -113,10 +113,10 @@ def build_ratings() -> List[Player]:
         [
             (
                 x.username,
-                x.str_rating(),
+                x.str_rating(singles=True),
                 x.str_win_losses(singles=True),
                 round(max(x.stack_ratings_singles)),
-                x.avg_opponent_singles,
+                x.avg_opponent(singles=True),
             )
             for x in sorted_players
         ],
@@ -216,7 +216,7 @@ def print_progresses(_players: List[Player]) -> None:
         print(
             f"{_player.username} [{_player.str_rating()}], "
             f"peak {round(max(_player.stack_ratings_singles))}, "
-            f"best win {_player.best_win_singles}"
+            f"best win {_player.best_win()}"
         )
         _player.graph_ratings()
         print()

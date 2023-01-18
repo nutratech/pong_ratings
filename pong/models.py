@@ -52,23 +52,19 @@ class Player:
 
         return f"{_rating} ± {int(_two_deviations)}"
 
-    @property
-    def avg_opponent_singles(self) -> int:
-        """Returns average opponent in singles"""
-        return round(
-            (
-                sum(self.opponent_rating_wins_singles)
-                + sum(self.opponent_rating_losses_singles)
+    def avg_opponent(self, singles=True) -> int:
+        """Returns average opponent"""
+        if singles:
+            return round(
+                (
+                    sum(self.opponent_rating_wins_singles)
+                    + sum(self.opponent_rating_losses_singles)
+                )
+                / (
+                    len(self.opponent_rating_wins_singles)
+                    + len(self.opponent_rating_losses_singles)
+                )
             )
-            / (
-                len(self.opponent_rating_wins_singles)
-                + len(self.opponent_rating_losses_singles)
-            )
-        )
-
-    @property
-    def avg_opponent_doubles(self) -> float:
-        """Returns average opponent in doubles"""
         return round(
             (
                 sum(self.opponent_rating_wins_doubles)
@@ -81,19 +77,15 @@ class Player:
             1,
         )
 
-    @property
-    def best_win_singles(self) -> Union[None, int]:
-        """Returns best win for singles games"""
-        if not self.opponent_rating_wins_singles:
-            return None
-        return round(max(self.opponent_rating_wins_singles))
-
-    @property
-    def best_win_doubles(self) -> Union[None, int]:
-        """Returns best win for singles games"""
-        if not self.opponent_rating_wins_doubles:
-            return None
-        return round(max(self.opponent_rating_wins_doubles), 1)
+    def best_win(self, singles=True) -> Union[None, int]:
+        """Returns best win"""
+        if singles:
+            if self.opponent_rating_wins_singles:
+                return round(max(self.opponent_rating_wins_singles))
+        else:
+            if self.opponent_rating_wins_doubles:
+                return round(max(self.opponent_rating_wins_doubles), 1)
+        return None
 
     def __str__(self):
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
