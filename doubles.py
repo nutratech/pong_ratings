@@ -134,7 +134,7 @@ def build_ratings() -> List[Player]:
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings?
-    print_title("Doubles rankings")
+    print_title("Rankings")
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_doubles.mu, reverse=True
     )
@@ -250,8 +250,8 @@ def print_matchups(players: List[Player]) -> None:
     _n_top = 100
     _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
     print_title(
-        f"Doubles matches [top {min(_n_top, _n_choose_2_teams)}, "
-        f"{len(players)}C2*{len(players) - 2}C2/2={_n_choose_2_teams} possible]"
+        f"Matches [top {min(_n_top, _n_choose_2_teams)}, "
+        f"({len(players)}C2*{len(players) - 2}C2)/2={_n_choose_2_teams} possible]"
     )
     matchups.sort(key=lambda x: x[-2], reverse=True)
 
