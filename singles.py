@@ -47,10 +47,11 @@ def do_games(
         _player2.rating_singles.sigma = _new_player2_rating.sigma
 
         # Update list of ratings
-        _player1.stack_ratings_singles.append(_player1.rating_singles.mu)
-        _player2.stack_ratings_singles.append(_player2.rating_singles.mu)
+        _player1.stack_ratings_singles.append(_player1.rating_singles)
+        _player2.stack_ratings_singles.append(_player2.rating_singles)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
+        # NOTE: these are just the mu values, but the main player stores the rating obj
         _player1.opponent_rating_wins_singles.append(_player2.rating_singles.mu)
         _player2.opponent_rating_losses_singles.append(_player1.rating_singles.mu)
 
@@ -115,7 +116,7 @@ def build_ratings() -> List[Player]:
                 x.username,
                 x.str_rating(singles=True),
                 x.str_win_losses(singles=True),
-                round(max(x.stack_ratings_singles)),
+                round(max(x.mu for x in x.stack_ratings_singles)),
                 x.avg_opponent(singles=True),
             )
             for x in sorted_players
@@ -215,7 +216,7 @@ def print_progresses(_players: List[Player]) -> None:
     for _player in _players:
         print(
             f"{_player.username} [{_player.str_rating()}], "
-            f"peak {round(max(_player.stack_ratings_singles))}, "
+            f"peak {round(max(x.mu for x in _player.stack_ratings_singles))}, "
             f"best win {_player.best_win()}"
         )
         _player.graph_ratings()

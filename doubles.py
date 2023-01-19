@@ -52,15 +52,15 @@ def do_games(
         )
 
         # Assign new ratings
-        _player1.rating_doubles = _new_team1_ratings[0]
-        _player2.rating_doubles = _new_team1_ratings[1]
+        _player1.stack_ratings_doubles.append(_new_team1_ratings[0])
+        _player2.stack_ratings_doubles.append(_new_team1_ratings[1])
 
-        _player3.rating_doubles = _new_team2_ratings[0]
-        _player4.rating_doubles = _new_team2_ratings[1]
+        _player3.stack_ratings_doubles.append(_new_team2_ratings[0])
+        _player4.stack_ratings_doubles.append(_new_team2_ratings[1])
 
         # Update list of ratings
         for _player in [_player1, _player2, _player3, _player4]:
-            _player.stack_ratings_doubles.append(_player.rating_doubles.mu)
+            _player.stack_ratings_doubles.append(_player.rating_doubles)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
         for _player in [_player1, _player2]:
@@ -144,7 +144,7 @@ def build_ratings() -> List[Player]:
                 x.username,
                 x.str_rating(singles=False),
                 x.str_win_losses(singles=False),
-                round(max(x.stack_ratings_doubles), 1),
+                round(max(x.mu for x in x.stack_ratings_doubles), 1),
                 x.avg_opponent(singles=False),
             )
             for x in sorted_players
@@ -274,7 +274,7 @@ def print_progresses(_players: List[Player]) -> None:
     for _player in _players:
         print(
             f"{_player.username} [{_player.str_rating(singles=False)}], "
-            f"peak {round(max(_player.stack_ratings_doubles), 1)}, "
+            f"peak {round(max(x.mu for x in _player.stack_ratings_doubles), 1)}, "
             f"best win {_player.best_win(singles=False)}"
         )
         _player.graph_ratings()

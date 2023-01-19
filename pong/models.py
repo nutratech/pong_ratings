@@ -16,18 +16,43 @@ from pong.glicko2 import glicko2
 class Player:
     """Model for storing username, rating"""
 
-    def __init__(self, username: str):
+    def __init__(self, username: str) -> None:
         self.username = username
 
-        self.rating_singles = glicko2.Glicko2()
-        self.stack_ratings_singles = [glicko2.Glicko2().mu]
+        self.stack_ratings_singles = [glicko2.Glicko2()]
         self.opponent_rating_wins_singles = []
         self.opponent_rating_losses_singles = []
 
-        self.rating_doubles = trueskill.TrueSkill(draw_probability=0.0)
-        self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=0.0).mu]
+        self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=0.0)]
         self.opponent_rating_wins_doubles = []
         self.opponent_rating_losses_doubles = []
+
+    def __str__(self) -> str:
+        # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
+        return (
+            f"{self.username} [{self.str_rating()}, {self.str_rating(singles=False)}]"
+        )
+
+    @property
+    def rating_singles(self):
+        """Gets the rating"""
+        return self.stack_ratings_singles[-1]
+
+    @property
+    def rating_doubles(self):
+        """Gets the rating"""
+        return self.stack_ratings_doubles[-1]
+
+    def str_rating(self, singles=True) -> str:
+        """Returns a friendly string for a rating, e.g. 1500 ± 300"""
+        if singles:
+            _rating = round(self.rating_singles.mu)
+            _uncertainty = round(self.rating_singles.phi * 1.96, -1)  # Round to 10s
+        else:
+            _rating = round(self.rating_doubles.mu, 1)
+            _uncertainty = round(self.rating_doubles.sigma * 1.96)
+
+        return f"{_rating} ± {int(_uncertainty)}"
 
     def str_win_losses(self, singles=True) -> str:
         """Returns e.g. 5-2"""
@@ -40,17 +65,6 @@ class Player:
             _losses = len(self.opponent_rating_losses_doubles)
 
         return f"{_wins}-{_losses}"
-
-    def str_rating(self, singles=True) -> str:
-        """Returns a friendly string for a rating, e.g. 1500 ± 300"""
-        if singles:
-            _rating = round(self.rating_singles.mu)
-            _uncertainty = round(self.rating_singles.phi * 1.96, -1)  # Round to 10s
-        else:
-            _rating = round(self.rating_doubles.mu, 1)
-            _uncertainty = round(self.rating_doubles.sigma * 1.96)
-
-        return f"{_rating} ± {int(_uncertainty)}"
 
     def avg_opponent(self, singles=True) -> int:
         """Returns average opponent"""
@@ -87,12 +101,6 @@ class Player:
                 return round(max(self.opponent_rating_wins_doubles), 1)
         return None
 
-    def __str__(self):
-        # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
-        return (
-            f"{self.username} [{self.str_rating()}, {self.str_rating(singles=False)}]"
-        )
-
     def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
         """
         Prints an ASCII graph of rating over past 50 games
@@ -100,12 +108,12 @@ class Player:
 
         if len(self.stack_ratings_singles) > 1:
             _series = [
-                round(x) for x in self.stack_ratings_singles[-graph_width_limit:]
+                round(x.mu) for x in self.stack_ratings_singles[-graph_width_limit:]
             ]
         # TODO: mutually exclusive for now, we process singles/doubles separately
         elif len(self.stack_ratings_doubles) > 1:
             _series = [
-                round(x, 1) for x in self.stack_ratings_doubles[-graph_width_limit:]
+                round(x.mu, 1) for x in self.stack_ratings_doubles[-graph_width_limit:]
             ]
         else:
             _series = []
