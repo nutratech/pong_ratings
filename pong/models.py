@@ -14,15 +14,22 @@ from pong.glicko2 import glicko2
 
 
 class Player:
-    """Model for storing username, rating"""
+    """
+    Model for storing username, rating
+
+    TODO:
+        - Include points in scoreboard? Track avg(points) of player1 vs. player2?
+    """
 
     def __init__(self, username: str) -> None:
         self.username = username
 
+        # Track singles related stats
         self.stack_ratings_singles = [glicko2.Glicko2()]
         self.opponent_rating_wins_singles = []
         self.opponent_rating_losses_singles = []
 
+        # Track doubles related stats
         self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=0.0)]
         self.opponent_rating_wins_doubles = []
         self.opponent_rating_losses_doubles = []
@@ -39,7 +46,7 @@ class Player:
         return self.stack_ratings_singles[-1]
 
     @property
-    def rating_doubles(self) -> glicko2.Glicko2:
+    def rating_doubles(self) -> trueskill.TrueSkill:
         """Gets the rating"""
         return self.stack_ratings_doubles[-1]
 
