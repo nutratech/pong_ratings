@@ -45,12 +45,12 @@ class Player:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
         if singles:
             _rating = round(self.rating_singles.mu)
-            _two_deviations = round(self.rating_singles.phi * 2, -1)  # Round to 10s
+            _uncertainty = round(self.rating_singles.phi * 1.96, -1)  # Round to 10s
         else:
             _rating = round(self.rating_doubles.mu, 1)
-            _two_deviations = round(self.rating_doubles.sigma * 2)
+            _uncertainty = round(self.rating_doubles.sigma * 1.96)
 
-        return f"{_rating} ± {int(_two_deviations)}"
+        return f"{_rating} ± {int(_uncertainty)}"
 
     def avg_opponent(self, singles=True) -> int:
         """Returns average opponent"""
