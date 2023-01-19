@@ -66,6 +66,8 @@ def build_ratings() -> List[Player]:
      - Support an API level interface?
      - Preview points won / lost
      - Points, server, other details statistics?
+     - Track a list of games, show a user's "home" club (most frequent location)
+     - Filter RD > 300/350? Command-line flag / ENV VAR to force anyways?
     """
 
     # Prepare the CSV inputs
