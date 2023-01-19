@@ -34,12 +34,12 @@ class Player:
         )
 
     @property
-    def rating_singles(self):
+    def rating_singles(self) -> glicko2.Glicko2:
         """Gets the rating"""
         return self.stack_ratings_singles[-1]
 
     @property
-    def rating_doubles(self):
+    def rating_doubles(self) -> glicko2.Glicko2:
         """Gets the rating"""
         return self.stack_ratings_doubles[-1]
 

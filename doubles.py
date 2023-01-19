@@ -51,16 +51,12 @@ def do_games(
             ]
         )
 
-        # Assign new ratings
+        # Push to list of ratings
         _player1.stack_ratings_doubles.append(_new_team1_ratings[0])
         _player2.stack_ratings_doubles.append(_new_team1_ratings[1])
 
         _player3.stack_ratings_doubles.append(_new_team2_ratings[0])
         _player4.stack_ratings_doubles.append(_new_team2_ratings[1])
-
-        # Update list of ratings
-        for _player in [_player1, _player2, _player3, _player4]:
-            _player.stack_ratings_doubles.append(_player.rating_doubles)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
         for _player in [_player1, _player2]:

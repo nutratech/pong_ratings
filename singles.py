@@ -33,22 +33,13 @@ def do_games(
         """Updates ratings."""
 
         # Calculate new ratings
-        _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
+        _new_player1_rating, _new_player2_rating = glicko2.Glicko2().rate_1vs1(
             _player1.rating_singles, _player2.rating_singles
         )
 
-        # Assign new ratings
-        _player1.rating_singles.mu = _new_player1_rating.mu
-        _player1.rating_singles.phi = _new_player1_rating.phi
-        _player1.rating_singles.sigma = _new_player1_rating.sigma
-
-        _player2.rating_singles.mu = _new_player2_rating.mu
-        _player2.rating_singles.phi = _new_player2_rating.phi
-        _player2.rating_singles.sigma = _new_player2_rating.sigma
-
-        # Update list of ratings
-        _player1.stack_ratings_singles.append(_player1.rating_singles)
-        _player2.stack_ratings_singles.append(_player2.rating_singles)
+        # Push to list of ratings
+        _player1.stack_ratings_singles.append(_new_player1_rating)
+        _player2.stack_ratings_singles.append(_new_player2_rating)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
         # NOTE: these are just the mu values, but the main player stores the rating obj
