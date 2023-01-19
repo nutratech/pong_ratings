@@ -33,24 +33,16 @@ def do_games(
         """Updates ratings."""
 
         # Calculate new ratings
-        _new_player1_rating, _new_player2_rating = _player1.rating_singles.rate_1vs1(
+        _new_player1_rating, _new_player2_rating = glicko2.Glicko2().rate_1vs1(
             _player1.rating_singles, _player2.rating_singles
         )
 
-        # Assign new ratings
-        _player1.rating_singles.mu = _new_player1_rating.mu
-        _player1.rating_singles.phi = _new_player1_rating.phi
-        _player1.rating_singles.sigma = _new_player1_rating.sigma
-
-        _player2.rating_singles.mu = _new_player2_rating.mu
-        _player2.rating_singles.phi = _new_player2_rating.phi
-        _player2.rating_singles.sigma = _new_player2_rating.sigma
-
-        # Update list of ratings
-        _player1.stack_ratings_singles.append(_player1.rating_singles.mu)
-        _player2.stack_ratings_singles.append(_player2.rating_singles.mu)
+        # Push to list of ratings
+        _player1.stack_ratings_singles.append(_new_player1_rating)
+        _player2.stack_ratings_singles.append(_new_player2_rating)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
+        # NOTE: these are just the mu values, but the main player stores the rating obj
         _player1.opponent_rating_wins_singles.append(_player2.rating_singles.mu)
         _player2.opponent_rating_losses_singles.append(_player1.rating_singles.mu)
 
@@ -115,7 +107,7 @@ def build_ratings() -> List[Player]:
                 x.username,
                 x.str_rating(singles=True),
                 x.str_win_losses(singles=True),
-                round(max(x.stack_ratings_singles)),
+                round(max(x.mu for x in x.stack_ratings_singles)),
                 x.avg_opponent(singles=True),
             )
             for x in sorted_players
@@ -215,7 +207,7 @@ def print_progresses(_players: List[Player]) -> None:
     for _player in _players:
         print(
             f"{_player.username} [{_player.str_rating()}], "
-            f"peak {round(max(_player.stack_ratings_singles))}, "
+            f"peak {round(max(x.mu for x in _player.stack_ratings_singles))}, "
             f"best win {_player.best_win()}"
         )
         _player.graph_ratings()
