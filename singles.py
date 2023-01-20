@@ -70,6 +70,15 @@ def build_ratings() -> List[Player]:
      - Filter RD > 300/350? Command-line flag / ENV VAR to force anyways?
     """
 
+    def _add_club(_player: Player, club: str) -> None:
+        """Adds a club tally to the club appearances dictionary"""
+        _appearances = _player.club_appearances["singles"]
+
+        if club in _appearances:
+            _appearances[club] += 1
+        else:
+            _appearances[club] = 1
+
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=True)
 
@@ -90,12 +99,18 @@ def build_ratings() -> List[Player]:
         _winner_score = int(row[3].split("-")[0])
         _loser_score = int(row[3].split("-")[1])
 
+        _location = row[4]  # Club name or location of game
+
         # Check if players are already tracked, create if not
         _winner_player = get_or_create_player_by_name(players, _winner)
         _loser_player = get_or_create_player_by_name(players, _loser)
 
         # Run the algorithm and update ratings
         do_games(_winner_player, _loser_player, _winner_score, _loser_score)
+
+        # Push to list of club locations
+        _add_club(_winner_player, _location)
+        _add_club(_loser_player, _location)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings? Group by home club?
@@ -106,15 +121,16 @@ def build_ratings() -> List[Player]:
     _table = tabulate(
         [
             (
-                x.username,
-                x.str_rating(singles=True),
-                x.str_win_losses(singles=True),
-                round(max(x.mu for x in x.stack_ratings_singles)),
-                x.avg_opponent(singles=True),
+                p.username,
+                p.str_rating(singles=True),
+                p.str_win_losses(singles=True),
+                round(max(x.mu for x in p.stack_ratings_singles)),
+                p.avg_opponent(singles=True),
+                p.home_club(singles=True),
             )
-            for x in sorted_players
+            for p in sorted_players
         ],
-        headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp"],
+        headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp", "Home club"],
     )
     print(_table)
 

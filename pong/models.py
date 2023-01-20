@@ -35,6 +35,9 @@ class Player:
         self.opponent_rating_wins_doubles = []
         self.opponent_rating_losses_doubles = []
 
+        # Used to decide home club
+        self.club_appearances = {"singles": {}, "doubles": {}}
+
     def __str__(self) -> str:
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
         return (
@@ -50,6 +53,31 @@ class Player:
     def rating_doubles(self) -> trueskill.TrueSkill:
         """Gets the rating"""
         return self.stack_ratings_doubles[-1]
+
+    def home_club(self, singles=True) -> str:
+        """Gets the most frequent place of playing"""
+
+        def _abbrev_club(_club: str) -> str:
+            _pong_det = "Pong Det"
+            return {
+                "Pong Detroit": _pong_det,
+                "Bert's": _pong_det,
+                "McGee's": _pong_det,
+                "Viet Detroit": "Viet",
+                "Norm's": "Norm's",
+            }[_club]
+
+        if singles:
+            _club = max(
+                self.club_appearances["singles"],
+                key=self.club_appearances["singles"].get,
+            )
+        else:
+            _club = max(
+                self.club_appearances["singles"],
+                key=self.club_appearances["doubles"].get,
+            )
+        return _abbrev_club(_club)
 
     def str_rating(self, singles=True) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
