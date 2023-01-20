@@ -40,9 +40,9 @@ def p_game(p: float) -> Dict[int, float]:
     """
 
     def _p_n(n: int) -> float:
-        _sum = 0.0
-        for k in range(0, n - 1):
-            _sum += p**n * (1 - p) ** k * (math.comb(n - 1 + k, k))
+        _sum = sum(
+            p**n * (1 - p) ** k * (math.comb(n - 1 + k, k)) for k in range(0, n - 1)
+        )
         _sum += p_deuce(p)[n] * p_deuce_win(p)
         return round(_sum, 3)
 
@@ -70,7 +70,7 @@ def print_table_common_deuce_odds() -> None:
     """Print a table for common deuce odds"""
     print("Deuce odds")
     _series = []
-    for _po in [0.5, 0.51, 0.55, 0.6, 0.7, 0.8]:
+    for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
         _do = p_deuce(_po)
         _11go = round(_do[11], 3)
         _21go = round(_do[21], 3)
@@ -87,7 +87,7 @@ def print_table_common_game_odds() -> None:
     """Print a table for common game odds"""
     print("Game odds")
     _series = []
-    for _po in [0.5, 0.51, 0.55, 0.6, 0.7, 0.8]:
+    for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
         _go = p_game(_po)
         _11go = _go[11]
         _21go = _go[21]
@@ -104,7 +104,7 @@ def print_table_common_match_odds() -> None:
     """Print a table for common match odds"""
     print("Match odds")
     _series = []
-    for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45]:
+    for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
         _mo = match_odds(_go)
         _2mo = round(_mo[2], 4)
         _3mo = round(_mo[3], 4)
