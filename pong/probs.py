@@ -20,8 +20,8 @@ def p_deuce(p: float) -> Dict[int, float]:
     :param p: Probability of winning an individual point
     """
     return {
-        11: p**10 * (1 - p) ** 10 * math.comb(20, 10),
-        21: p**20 * (1 - p) ** 20 * math.comb(40, 20),
+        n: p ** (n - 1) * (1 - p) ** (n - 1) * math.comb(2 * (n - 1), n - 1)
+        for n in [11, 21]
     }
 
 
@@ -46,10 +46,7 @@ def p_game(p: float) -> Dict[int, float]:
         _sum += p_deuce(p)[n] * p_deuce_win(p)
         return round(_sum, 3)
 
-    return {
-        11: _p_n(11),
-        21: _p_n(21),
-    }
+    return {n: _p_n(n) for n in [11, 21]}
 
 
 def match_odds(p: float) -> Dict[int, float]:
