@@ -5,12 +5,24 @@ Created on Fri Jan 20 14:24:28 2023
 @author: shane
 Probability tools used for side statistics.
 """
+import math
 from typing import Dict
 
 from tabulate import tabulate
 
 
 # pylint: disable=invalid-name
+
+
+def p_deuce(p: float) -> Dict[int, float]:
+    """
+    Get probability of reaching 10-10 score, based on probability to win a point.
+    :param p: Probability of winning an individual point
+    """
+    return {
+        11: p**10 * (1 - p) ** 10 * math.comb(20, 10),
+        21: p**20 * (1 - p) ** 20 * math.comb(40, 20),
+    }
 
 
 def match_odds(p: float) -> Dict[int, float]:
@@ -27,8 +39,26 @@ def match_odds(p: float) -> Dict[int, float]:
     }
 
 
-def match_odds_common_print_table() -> None:
+def print_table_common_deuce_odds() -> None:
+    """Print a table for common deuce odds"""
+    print("Deuce odds")
+    _series = []
+    for _po in [0.5, 0.51, 0.55, 0.6, 0.7, 0.8]:
+        _do = p_deuce(_po)
+        _11go = _do[11]
+        _21go = _do[21]
+        _series.append((_po, _11go, _21go))
+
+    _table = tabulate(
+        _series,
+        headers=["P(p)", "P(11g)", "P(21g)"],
+    )
+    print(_table)
+
+
+def print_table_common_match_odds() -> None:
     """Print a table for common match odds"""
+    print("Match odds")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45]:
         _mo = match_odds(_go)
@@ -44,4 +74,6 @@ def match_odds_common_print_table() -> None:
 
 
 if __name__ == "__main__":
-    match_odds_common_print_table()
+    print_table_common_match_odds()
+    print_table_common_deuce_odds()
+
