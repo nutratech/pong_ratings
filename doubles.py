@@ -54,9 +54,13 @@ def do_games(
         # Push to list of ratings
         _player1.stack_ratings_doubles.append(_new_team1_ratings[0])
         _player2.stack_ratings_doubles.append(_new_team1_ratings[1])
+        _player1.partner_rating_doubles.append(_player2.rating_doubles)
+        _player2.partner_rating_doubles.append(_player1.rating_doubles)
 
         _player3.stack_ratings_doubles.append(_new_team2_ratings[0])
         _player4.stack_ratings_doubles.append(_new_team2_ratings[1])
+        _player3.partner_rating_doubles.append(_player4.rating_doubles)
+        _player4.partner_rating_doubles.append(_player3.rating_doubles)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
         for _player in [_player1, _player2]:
@@ -137,15 +141,20 @@ def build_ratings() -> List[Player]:
     _table = tabulate(
         [
             (
-                x.username,
-                x.str_rating(singles=False),
-                x.str_win_losses(singles=False),
-                round(max(x.mu for x in x.stack_ratings_doubles), 1),
-                x.avg_opponent(singles=False),
+                p.username,
+                p.str_rating(singles=False),
+                p.str_win_losses(singles=False),
+                round(max(x.mu for x in p.stack_ratings_doubles), 1),
+                p.avg_opponent(singles=False),
+                round(
+                    sum(x.mu for x in p.partner_rating_doubles)
+                    / len(p.partner_rating_doubles),
+                    1,
+                ),
             )
-            for x in sorted_players
+            for p in sorted_players
         ],
-        headers=["Username", "TrueSkill", "W/L", "Top", "Avg opp"],
+        headers=["Username", "TrueSkill", "W/L", "Top", "Avg opp", "T mate"],
     )
     print(_table)
 

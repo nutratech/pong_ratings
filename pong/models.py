@@ -31,6 +31,7 @@ class Player:
 
         # Track doubles related stats
         self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=0.0)]
+        self.partner_rating_doubles = []
         self.opponent_rating_wins_doubles = []
         self.opponent_rating_losses_doubles = []
 
