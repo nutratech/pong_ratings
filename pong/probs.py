@@ -31,7 +31,7 @@ def p_deuce_win(p: float) -> float:
     Get probability of winning at deuce (two points in a row).
     :param p: Probability of winning an individual point
     """
-    return p**2 / (p**2 + (1 - p) ** 2)
+    return p**2 / (1 - 2 * p * (1 - p))
 
 
 def p_game(p: float) -> Dict[int, float]:
@@ -59,7 +59,7 @@ def match_odds(p: float) -> Dict[int, float]:
     """
 
     return {
-        2: p**2 * (3 - 2 * p),
+        2: p**2 * (1 + 2 * (1 - p)),
         3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
     }
 
