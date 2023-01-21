@@ -14,7 +14,7 @@ import trueskill
 from trueskill import BETA
 
 
-def win_probability(team1: Tuple, team2: Tuple):
+def win_probability(team1: Tuple, team2: Tuple) -> float:
     """
     Calculate the win probability for team1 vs. team2
     https://trueskill.org/#win-probability

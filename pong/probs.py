@@ -6,6 +6,7 @@ Created on Fri Jan 20 14:24:28 2023
 Probability tools used for side statistics.
 """
 import math
+import os
 from typing import Dict
 
 from tabulate import tabulate
@@ -65,7 +66,7 @@ def match_odds(p: float) -> Dict[int, float]:
 
 def print_table_common_deuce_odds() -> None:
     """Print a table for common deuce odds"""
-    print("Deuce odds")
+    print(os.linesep + "Odds of reaching deuce")
     _series = []
     for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
         _do = p_deuce(_po)
@@ -75,14 +76,14 @@ def print_table_common_deuce_odds() -> None:
 
     _table = tabulate(
         _series,
-        headers=["P(p)", "P(11g)", "P(21g)"],
+        headers=["P(p)", "P(20d)", "P(40d)"],
     )
     print(_table)
 
 
 def print_table_common_game_odds() -> None:
     """Print a table for common game odds"""
-    print("Game odds")
+    print(os.linesep + "Game odds")
     _series = []
     for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
         _go = p_game(_po)
@@ -99,12 +100,12 @@ def print_table_common_game_odds() -> None:
 
 def print_table_common_match_odds() -> None:
     """Print a table for common match odds"""
-    print("Match odds")
+    print(os.linesep + "Match odds")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
         _mo = match_odds(_go)
-        _2mo = round(_mo[2], 4)
-        _3mo = round(_mo[3], 4)
+        _2mo = round(_mo[2], 3)
+        _3mo = round(_mo[3], 3)
         _series.append((_go, _2mo, _3mo))
 
     _table = tabulate(
