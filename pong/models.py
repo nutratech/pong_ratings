@@ -63,9 +63,10 @@ class Player:
             _pong_det = "Pong Det"
             return {
                 "Pong Detroit": _pong_det,
-                "Bert's": _pong_det,
-                "McGee's": _pong_det,
+                "Pong Detroit (Bert's)": _pong_det,
+                "Pong Detroit (Magee's)": _pong_det,
                 "Viet Detroit": "Viet",
+                "MTTA (Novi)": "MTTA",
                 "Norm's": "Norm's",
             }[_club]
 
