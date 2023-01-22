@@ -83,13 +83,14 @@ def print_table_common_deuce_odds() -> None:
     _series = []
     for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
         _do = p_deuce(_po)
-        _11go = round(_do[11], 3)
-        _21go = round(_do[21], 3)
-        _series.append((_po, _11go, _21go))
+        _20do = round(_do[11], 3)
+        _40do = round(_do[21], 3)
+        _pwd = round(_po**2 / (1 - 2 * _po * (1 - _po)), 3)
+        _series.append((_po, _20do, _40do, _pwd))
 
     _table = tabulate(
         _series,
-        headers=["P(p)", "P(20d)", "P(40d)"],
+        headers=["P(p)", "P(20d)", "P(40d)", "P(wd)"],
     )
     print(_table)
 
