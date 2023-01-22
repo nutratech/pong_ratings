@@ -255,7 +255,7 @@ def print_matchups(players: List[Player]) -> None:
     _n_top = 100
     _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
     print_title(
-        f"Matches [top {min(_n_top, _n_choose_2_teams)}, "
+        f"Pair ups [top {min(_n_top, _n_choose_2_teams)}, "
         f"({len(players)}C2*{len(players) - 2}C2)/2={_n_choose_2_teams} possible]"
     )
     matchups.sort(key=lambda x: x[-2], reverse=True)
@@ -268,7 +268,7 @@ def print_matchups(players: List[Player]) -> None:
     t_delta = time.time() - t_start
     print()
     print(
-        f"Calculated {len(matchups)} matches in {round(t_delta, 5) * 1000}ms "
+        f"Calculated {len(matchups)} pairings in {round(t_delta, 5) * 1000}ms "
         f"({round(_n_choose_2_teams / t_delta)}/s)"
     )
 
