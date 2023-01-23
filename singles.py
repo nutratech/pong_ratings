@@ -242,6 +242,7 @@ if __name__ == "__main__":
 
     print_matchups(_sorted_players)
 
+    # Filter players with a highly uncertain rating
     _sorted_players = list(
         filter(lambda x: x.rating_singles.phi * 1.96 < 300, _sorted_players)
     )

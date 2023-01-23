@@ -111,11 +111,11 @@ def build_ratings() -> List[Player]:
         _winner1 = row[1].lower()
         _winner2 = row[2].lower()
 
-        _loser1 = row[3].lower()
-        _loser2 = row[4].lower()
+        _winners_score = int(row[3].split("-")[0])
+        _losers_score = int(row[3].split("-")[1])
 
-        _winners_score = int(row[5].split("-")[0])
-        _losers_score = int(row[5].split("-")[1])
+        _loser1 = row[4].lower()
+        _loser2 = row[5].lower()
 
         # Check if players are already tracked, create if not
         _winner_player1 = get_or_create_player_by_name(players, _winner1)
