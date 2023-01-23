@@ -77,7 +77,7 @@ class Player:
             )
         else:
             _club = max(
-                self.club_appearances["singles"],
+                self.club_appearances["doubles"],
                 key=self.club_appearances["doubles"].get,
             )
         return _abbrev_club(_club)
