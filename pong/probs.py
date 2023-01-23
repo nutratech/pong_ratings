@@ -11,7 +11,6 @@ from typing import Dict
 
 from tabulate import tabulate
 
-
 # pylint: disable=invalid-name
 
 

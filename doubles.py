@@ -16,6 +16,7 @@ from tabulate import tabulate
 
 from pong.core import (
     build_csv_reader,
+    cache_ratings_csv_file,
     filter_players,
     get_or_create_player_by_name,
     print_title,
@@ -291,6 +292,7 @@ if __name__ == "__main__":
     print(f"Last updated: {datetime.utcnow()}")
 
     _sorted_players = filter_players(build_ratings())
+    cache_ratings_csv_file(_sorted_players, singles=False)
 
     print_matchups(_sorted_players)
     print_progresses(_sorted_players)

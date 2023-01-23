@@ -113,3 +113,49 @@ def filter_players(_sorted_players: List[Player]) -> List[Player]:
         )
 
     return _sorted_players
+
+
+def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
+    """Saves the ratings in a CSV file, so we can manually calculate match ups"""
+
+    # TODO: support p.rating(singles=singles)?
+    if singles:
+        _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_singles.csv")
+        headers = ["username", "mu", "phi", "sigma"]
+        _series = [
+            (
+                p.username,
+                p.rating_singles.mu,
+                p.rating_singles.phi,
+                p.rating_singles.sigma,
+            )
+            for p in sorted_players
+        ]
+    else:
+        _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_doubles.csv")
+        headers = ["username", "mu", "sigma"]
+        _series = [
+            (
+                p.username,
+                p.rating_doubles.mu,
+                p.rating_doubles.sigma,
+            )
+            for p in sorted_players
+        ]
+
+    # Write the rows
+    with open(_file_path, "w", encoding="utf-8") as _f:
+        csv_writer = csv.writer(_f)
+
+        csv_writer.writerow(headers)
+        csv_writer.writerows(
+            [
+                (
+                    p.username,
+                    p.rating_singles.mu,
+                    p.rating_singles.phi,
+                    p.rating_singles.sigma,
+                )
+                for p in sorted_players
+            ]
+        )
