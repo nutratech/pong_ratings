@@ -148,14 +148,4 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
         csv_writer = csv.writer(_f)
 
         csv_writer.writerow(headers)
-        csv_writer.writerows(
-            [
-                (
-                    p.username,
-                    p.rating_singles.mu,
-                    p.rating_singles.phi,
-                    p.rating_singles.sigma,
-                )
-                for p in sorted_players
-            ]
-        )
+        csv_writer.writerows(_series)

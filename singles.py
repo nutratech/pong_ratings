@@ -240,5 +240,8 @@ if __name__ == "__main__":
     _sorted_players = filter_players(build_ratings())
     cache_ratings_csv_file(_sorted_players, singles=True)
 
+    _sorted_players = list(
+        filter(lambda x: x.rating_singles.phi * 1.96 < 300, _sorted_players)
+    )
     print_matchups(_sorted_players)
     print_progresses(_sorted_players)

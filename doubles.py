@@ -294,5 +294,8 @@ if __name__ == "__main__":
     _sorted_players = filter_players(build_ratings())
     cache_ratings_csv_file(_sorted_players, singles=False)
 
+    # _sorted_players = list(
+    #     filter(lambda x: x.rating_doubles.sigma * 1.96 < 9, _sorted_players)
+    # )
     print_matchups(_sorted_players)
     print_progresses(_sorted_players)
