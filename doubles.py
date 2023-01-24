@@ -187,7 +187,7 @@ def print_matchups(players: List[Player]) -> None:
     interesting play.
     """
 
-    # players = [Player(f"id_{x}") for x in range(40)]
+    players = [Player(f"id_{x}") for x in range(40)]
     # _rand_ratings = numpy.random.normal(25, 5, len(players))
     # for i, player in enumerate(players):
     #     player.rating_doubles.mu = _rand_ratings[i]
@@ -197,8 +197,15 @@ def print_matchups(players: List[Player]) -> None:
     matchups = []
     n_skipped_matchups = 0
 
+    _n_top = 100
+    _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
+
     # Evaluate all possible match ups
     # pylint: disable=invalid-name
+    print(
+        os.linesep + f"Calculating {_n_choose_2_teams} match ups, "
+        f"should take ~{round(_n_choose_2_teams / 10000, 2)}s"
+    )
     for i1 in range(n_players):
         for i2 in range(i1 + 1, n_players):
 
@@ -275,9 +282,7 @@ def print_matchups(players: List[Player]) -> None:
                         )
                     )
 
-    # Constants, and sorting
-    _n_top = 100
-    _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
+    # Print title and sort
     print_title(
         f"Pair ups [top {min(_n_top, _n_choose_2_teams)}, "
         f"({len(players)}C2*{len(players) - 2}C2)/2={_n_choose_2_teams} possible]"
