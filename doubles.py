@@ -210,12 +210,14 @@ def print_matchups(players: List[Player]) -> None:
                         - player4.rating_doubles.mu
                     ) / 2
                     _delta_rating = round(_delta_rating, 1)
-                    _2rd_avg = round(
-                        math.sqrt(
+                    _2_rd_avg = round(
+                        1.96
+                        * math.sqrt(
                             sum(
                                 x.rating_doubles.sigma**2
                                 for x in [player1, player2, player3, player4]
                             )
+                            / 4
                         )
                     )
 
@@ -244,7 +246,7 @@ def print_matchups(players: List[Player]) -> None:
                             player3.username,
                             player4.username,
                             _delta_rating,
-                            _2rd_avg,
+                            _2_rd_avg,
                             _quality_of_match,
                             _win_probability,
                         )
