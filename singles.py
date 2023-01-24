@@ -139,21 +139,22 @@ def print_matchups(players: List[Player]) -> None:
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
     """
-    already_matched = set()
+
+    n_players = len(players)
     matchups = []
+
     rating_engine = glicko2.Glicko2()
 
+    _n_top = 100
+    _n_choose_2_players = math.comb(len(players), 2)
+
     # Evaluate all possible match ups
-    for player1 in players:
-        for player2 in players:
-
-            # Can't play yourself
-            if player1 == player2:
-                continue
-
-            # Don't double count (p1, p2) AND (p2, p1)... they are the same
-            if (player2, player1) in already_matched:
-                continue
+    # pylint: disable=invalid-name
+    for i1 in range(n_players):
+        player1 = players[i1]
+        # Second player
+        for i2 in range(i1 + 1, n_players):
+            player2 = players[i2]
 
             # Compute quality, and add to list
             _delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
@@ -197,16 +198,17 @@ def print_matchups(players: List[Player]) -> None:
                     _loss_probability,
                 )
             )
-            already_matched.add((player1, player2))
+            # already_matched.add((player1, player2))
 
-    # Print off best matches
-    _n_top = 100
-    _n_choose_2_players = math.comb(len(players), 2)
+    # Print title and sort
     print_title(
         f"Pair ups [top {min(_n_top, _n_choose_2_players)}, "
         f"{len(players)}C2={_n_choose_2_players} possible]"
     )
     matchups.sort(key=lambda x: x[-1], reverse=True)
+
+    # Verify things
+    assert len(matchups) == _n_choose_2_players, "Missed some match ups?"
 
     _table = tabulate(
         matchups[:_n_top],

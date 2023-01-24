@@ -201,24 +201,21 @@ def print_matchups(players: List[Player]) -> None:
         f"should take ~{round(_n_choose_2_teams / 10000, 2)}s"
     )
     for i1 in range(n_players):
+        player1 = players[i1]
         for i2 in range(i1 + 1, n_players):
+            player2 = players[i2]
 
             # Second team
             for i3 in range(i1 + 1, n_players):
-
                 # Can't play yourself
                 if i3 == i2:
                     continue
-                for i4 in range(i3 + 1, n_players):
+                player3 = players[i3]
 
+                for i4 in range(i3 + 1, n_players):
                     # Can't play yourself
                     if i4 in (i2, i1):
                         continue
-
-                    # Pull players from array index
-                    player1 = players[i1]
-                    player2 = players[i2]
-                    player3 = players[i3]
                     player4 = players[i4]
 
                     # Short list only match ups with small delta mu values
