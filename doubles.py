@@ -188,6 +188,7 @@ def print_matchups(players: List[Player]) -> None:
     t_start = time.time()
     already_matched = set()
     matchups = []
+    skipped_matchups = 0
 
     # Evaluate all possible match ups
     for player1 in players:
@@ -218,13 +219,18 @@ def print_matchups(players: List[Player]) -> None:
                     if pair1 in already_matched or pair2 in already_matched:
                         continue
 
-                    # Compute quality, and add to list
+                    # Short list only match ups with small delta mu values
                     _delta_rating = (
                         player1.rating_doubles.mu
                         + player2.rating_doubles.mu
                         - player3.rating_doubles.mu
                         - player4.rating_doubles.mu
                     ) / 2
+                    if _delta_rating > 3:
+                        skipped_matchups += 1
+                        continue
+
+                    # Compute quality metrics, and add to list
                     _delta_rating = round(_delta_rating, 1)
                     _2_rd_avg = round(
                         1.96
@@ -287,7 +293,8 @@ def print_matchups(players: List[Player]) -> None:
     print()
     print(
         f"Calculated {len(matchups)} pairings in {round(t_delta, 5) * 1000}ms "
-        f"({round(_n_choose_2_teams / t_delta)}/s)"
+        f"({round(_n_choose_2_teams / t_delta)}/s), "
+        f"skipped {skipped_matchups}"
     )
 
 
