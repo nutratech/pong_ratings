@@ -65,8 +65,8 @@ class Player:
                 "Pong Detroit": _pong_det,
                 "Pong Detroit (Bert's)": _pong_det,
                 "Pong Detroit (Magee's)": _pong_det,
-                "Viet Detroit": "Viet",
-                "MTTA (Novi)": "MTTA",
+                "Viet Detroit (Grace Parish Warren)": "Viet",
+                "MTTA (Sparc Arena Novi)": "MTTA",
                 "Norm's": "Norm's",
             }[_club]
 
