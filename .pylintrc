@@ -1,0 +1,9 @@
+[MASTER]
+
+fail-under=10
+
+
+[MESSAGES CONTROL]
+
+disable=
+    fixme,

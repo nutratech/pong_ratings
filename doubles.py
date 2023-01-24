@@ -12,7 +12,6 @@ import time
 from datetime import date, datetime
 from typing import List
 
-import numpy
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
@@ -186,11 +185,6 @@ def print_matchups(players: List[Player]) -> None:
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
     """
-
-    players = [Player(f"id_{x}") for x in range(40)]
-    # _rand_ratings = numpy.random.normal(25, 5, len(players))
-    # for i, player in enumerate(players):
-    #     player.rating_doubles.mu = _rand_ratings[i]
 
     t_start = time.time()
     n_players = len(players)
