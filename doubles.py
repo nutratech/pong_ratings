@@ -75,7 +75,10 @@ def do_games(
             )
 
     # Disallow scores like 2-5
-    assert _winners_score >= _losers_score, "Winner score first in CSV, e.g. 5-2"
+    if _winners_score < _losers_score:
+        raise ValueError(
+            f"Winner score first in CSV, invalid: {_winners_score}-{_losers_score}"
+        )
 
     # Do the rating updates for won games, then alternate
     for _ in range(_winners_score - _losers_score):

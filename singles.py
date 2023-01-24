@@ -49,7 +49,10 @@ def do_games(
         _player2.opponent_rating_losses_singles.append(_player1.rating_singles.mu)
 
     # Disallow scores like 2-5
-    assert _winner_score >= _loser_score, "Winner score first in CSV, e.g. 5-2"
+    if _winner_score < _loser_score:
+        raise ValueError(
+            f"Winner score first in CSV, invalid: {_winner_score}-{_loser_score}"
+        )
 
     # Do the rating updates for won games, then alternate
     for _ in range(_winner_score - _loser_score):
