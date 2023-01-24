@@ -75,7 +75,10 @@ def build_csv_reader(singles=True) -> csv.reader:
 
         return csv.reader(_csv_file)
 
-    except requests.exceptions.ConnectionError as err:
+    except (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.ReadTimeout,
+    ) as err:
         print(repr(err))
         print()
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")

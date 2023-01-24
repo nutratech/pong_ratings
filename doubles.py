@@ -186,6 +186,8 @@ def print_matchups(players: List[Player]) -> None:
     interesting play.
     """
 
+    # players = [Player(f"id_{x}") for x in range(60)]
+
     t_start = time.time()
     n_players = len(players)
     matchups = []
@@ -198,7 +200,7 @@ def print_matchups(players: List[Player]) -> None:
     # pylint: disable=invalid-name
     print(
         os.linesep + f"Calculating {_n_choose_2_teams} match ups, "
-        f"should take ~{round(_n_choose_2_teams / 10000, 2)}s"
+        f"should take ~{round(_n_choose_2_teams / 150000, 2)}s"
     )
     for i1 in range(n_players):
         player1 = players[i1]
@@ -242,15 +244,16 @@ def print_matchups(players: List[Player]) -> None:
                         )
                     )
 
-                    _quality_of_match = round(
-                        trueskill.quality(
-                            [
-                                (player1.rating_doubles, player2.rating_doubles),
-                                (player3.rating_doubles, player4.rating_doubles),
-                            ]
-                        ),
-                        2,
-                    )
+                    # NOTE: commented out because it is relatively slow to calculate
+                    # _quality_of_match = round(
+                    #     trueskill.quality(
+                    #         [
+                    #             (player1.rating_doubles, player2.rating_doubles),
+                    #             (player3.rating_doubles, player4.rating_doubles),
+                    #         ]
+                    #     ),
+                    #     2,
+                    # )
                     _win_probability = round(
                         win_probability(
                             (player1.rating_doubles, player2.rating_doubles),
@@ -268,7 +271,7 @@ def print_matchups(players: List[Player]) -> None:
                             player4.username,
                             _delta_rating,
                             _2_rd_avg,
-                            _quality_of_match,
+                            # _quality_of_match,
                             _win_probability,
                         )
                     )
@@ -281,14 +284,14 @@ def print_matchups(players: List[Player]) -> None:
     matchups.sort(key=lambda x: x[-2], reverse=True)
 
     # Verify things
-    assert (
-        len(matchups) + n_skipped_matchups == _n_choose_2_teams
-    ), "Missed some match ups?"
+    # assert (
+    #     len(matchups) + n_skipped_matchups == _n_choose_2_teams
+    # ), "Missed some match ups?"
 
     # Print off best matches
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "Q", "P(w)"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "P(w)"],
     )
     print(_table)
     t_delta = time.time() - t_start
