@@ -5,7 +5,7 @@
 Link to the Google Sheet
 ########################
 
-https://docs.google.com/spreadsheets/d/1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A/edit#gid=834797930
+https://docs.google.com/spreadsheets/d/1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A/edit#gid=757272539
 
 
 Setup
@@ -37,7 +37,9 @@ time.
 
 .. code-block:: bash
 
-  ./rate.py
+  ./singles.py
+
+  ./doubles.py
 
 Filtering Players
 ~~~~~~~~~~~~~~~~~
@@ -55,4 +57,4 @@ Add this to a ``.env`` file.
 TODO
 ####
 
-- Cache the output of the script too, to compare old ratings / graphs?
+- Preview change, calculate odds against particular opponent

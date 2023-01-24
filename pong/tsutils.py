@@ -10,8 +10,8 @@ import itertools
 import math
 from typing import Tuple
 
-import trueskill
-from trueskill import BETA
+import trueskill  # pylint: disable=import-error
+from trueskill import BETA  # pylint: disable=import-error
 
 
 def win_probability(team1: Tuple, team2: Tuple) -> float:
