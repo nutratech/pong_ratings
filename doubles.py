@@ -292,9 +292,9 @@ def print_matchups(players: List[Player]) -> None:
     matchups.sort(key=lambda x: math.fabs(0.5 - x[-2]), reverse=True)
 
     # Verify things
-    # assert (
-    #     len(matchups) + n_skipped_matchups == _n_choose_2_teams
-    # ), "Missed some match ups?"
+    assert (
+        len(matchups) + n_skipped_matchups == _n_choose_2_teams
+    ), "Missed some match ups?"
 
     # Print off best matches
     _table = tabulate(
