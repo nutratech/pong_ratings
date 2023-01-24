@@ -17,6 +17,7 @@ from pong.core import (
     filter_players,
     get_or_create_player_by_name,
     print_title,
+    add_club,
 )
 from pong.glicko2 import glicko2
 from pong.models import Player
@@ -71,15 +72,6 @@ def build_ratings() -> List[Player]:
      - Filter RD > 300/350? Command-line flag / ENV VAR to force anyways?
     """
 
-    def _add_club(_player: Player, club: str) -> None:
-        """Adds a club tally to the club appearances dictionary"""
-        _appearances = _player.club_appearances["singles"]
-
-        if club in _appearances:
-            _appearances[club] += 1
-        else:
-            _appearances[club] = 1
-
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=True)
 
@@ -110,8 +102,8 @@ def build_ratings() -> List[Player]:
         do_games(_winner_player, _loser_player, _winner_score, _loser_score)
 
         # Push to list of club locations
-        _add_club(_winner_player, _location)
-        _add_club(_loser_player, _location)
+        add_club(_winner_player, _location, singles=True)
+        add_club(_loser_player, _location, singles=True)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings? Group by home club?
@@ -131,7 +123,7 @@ def build_ratings() -> List[Player]:
             )
             for p in sorted_players
         ],
-        headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp", "Home club"],
+        headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp", "Club"],
     )
     print(_table)
 

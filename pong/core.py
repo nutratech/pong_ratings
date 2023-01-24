@@ -115,6 +115,19 @@ def filter_players(_sorted_players: List[Player]) -> List[Player]:
     return _sorted_players
 
 
+def add_club(_player: Player, club: str, singles=True) -> None:
+    """Adds a club tally to the club appearances dictionary"""
+    if singles:
+        _appearances = _player.club_appearances["singles"]
+    else:
+        _appearances = _player.club_appearances["doubles"]
+
+    if club in _appearances:
+        _appearances[club] += 1
+    else:
+        _appearances[club] = 1
+
+
 def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
     """Saves the ratings in a CSV file, so we can manually calculate match ups"""
 

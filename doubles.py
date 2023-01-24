@@ -20,6 +20,7 @@ from pong.core import (
     filter_players,
     get_or_create_player_by_name,
     print_title,
+    add_club,
 )
 from pong.models import Player
 from pong.tsutils import win_probability
@@ -117,6 +118,8 @@ def build_ratings() -> List[Player]:
         _loser1 = row[4].lower()
         _loser2 = row[5].lower()
 
+        _location = row[6]  # Club name or location of game
+
         # Check if players are already tracked, create if not
         _winner_player1 = get_or_create_player_by_name(players, _winner1)
         _winner_player2 = get_or_create_player_by_name(players, _winner2)
@@ -132,6 +135,15 @@ def build_ratings() -> List[Player]:
             _winners_score,
             _losers_score,
         )
+
+        # Push to list of club locations
+        for player in [
+            _winner_player1,
+            _winner_player2,
+            _loser_player1,
+            _loser_player2,
+        ]:
+            add_club(player, _location, singles=False)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings?
@@ -152,10 +164,11 @@ def build_ratings() -> List[Player]:
                     / len(p.partner_rating_doubles),
                     1,
                 ),
+                p.home_club(singles=False),
             )
             for p in sorted_players
         ],
-        headers=["Username", "TrueSkill", "W/L", "Top", "Avg opp", "T mate"],
+        headers=["Username", "TrueSkill", "W/L", "Top", "Avg opp", "T mate", "Club"],
     )
     print(_table)
 
