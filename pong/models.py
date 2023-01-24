@@ -8,7 +8,7 @@ Player model used for singles & doubles ratings, username, wins/losses, etc
 import math
 from typing import Union
 
-import asciichartpy
+import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
 
 from pong.glicko2 import glicko2

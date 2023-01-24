@@ -186,7 +186,13 @@ def print_matchups(players: List[Player]) -> None:
     interesting play.
     """
 
-    # players = [Player(f"id_{x}") for x in range(60)]
+    # players = [Player(f"id_{x}") for x in range(20)]
+    # import numpy
+    # for player in players:
+    #     player.rating_doubles.mu = numpy.random.normal(25, 5, 1)[0]
+    #     player.rating_doubles.sigma = numpy.random.normal(25/3, 3, 1)[0]
+
+    #     print(player.rating_doubles)
 
     t_start = time.time()
     n_players = len(players)
@@ -195,12 +201,13 @@ def print_matchups(players: List[Player]) -> None:
 
     _n_top = 100
     _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
+    _avg_cmps_per_second = 30000
 
     # Evaluate all possible match ups
     # pylint: disable=invalid-name
     print(
         os.linesep + f"Calculating {_n_choose_2_teams} match ups, "
-        f"should take ~{round(_n_choose_2_teams / 150000, 2)}s"
+        f"should take ~{round(_n_choose_2_teams / _avg_cmps_per_second, 2)}s"
     )
     for i1 in range(n_players):
         player1 = players[i1]
@@ -220,19 +227,15 @@ def print_matchups(players: List[Player]) -> None:
                         continue
                     player4 = players[i4]
 
-                    # Short list only match ups with small delta mu values
+                    # Compute rating difference and average RD
                     _delta_rating = (
                         player1.rating_doubles.mu
                         + player2.rating_doubles.mu
                         - player3.rating_doubles.mu
                         - player4.rating_doubles.mu
                     ) / 2
-                    if _delta_rating > 3:
-                        n_skipped_matchups += 1
-                        continue
-
-                    # Compute quality metrics, and add to list
                     _delta_rating = round(_delta_rating, 1)
+
                     _2_rd_avg = round(
                         1.96
                         * math.sqrt(
@@ -243,17 +246,22 @@ def print_matchups(players: List[Player]) -> None:
                             / 4
                         )
                     )
+                    # Short list only match ups with small delta mu and small sigma
+                    if _delta_rating > 3 or _2_rd_avg > 9.5:
+                        n_skipped_matchups += 1
+                        continue
 
+                    # Compute quality metrics, and add to list
                     # NOTE: commented out because it is relatively slow to calculate
-                    # _quality_of_match = round(
-                    #     trueskill.quality(
-                    #         [
-                    #             (player1.rating_doubles, player2.rating_doubles),
-                    #             (player3.rating_doubles, player4.rating_doubles),
-                    #         ]
-                    #     ),
-                    #     2,
-                    # )
+                    _quality_of_match = round(
+                        trueskill.quality(
+                            [
+                                (player1.rating_doubles, player2.rating_doubles),
+                                (player3.rating_doubles, player4.rating_doubles),
+                            ]
+                        ),
+                        2,
+                    )
                     _win_probability = round(
                         win_probability(
                             (player1.rating_doubles, player2.rating_doubles),
@@ -271,7 +279,7 @@ def print_matchups(players: List[Player]) -> None:
                             player4.username,
                             _delta_rating,
                             _2_rd_avg,
-                            # _quality_of_match,
+                            _quality_of_match,
                             _win_probability,
                         )
                     )
@@ -281,7 +289,7 @@ def print_matchups(players: List[Player]) -> None:
         f"Pair ups [top {min(_n_top, _n_choose_2_teams)}, "
         f"({len(players)}C2*{len(players) - 2}C2)/2={_n_choose_2_teams} possible]"
     )
-    matchups.sort(key=lambda x: x[-2], reverse=True)
+    matchups.sort(key=lambda x: math.fabs(0.5 - x[-2]), reverse=True)
 
     # Verify things
     # assert (
@@ -291,7 +299,7 @@ def print_matchups(players: List[Player]) -> None:
     # Print off best matches
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "P(w)"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "Q", "P(w)"],
     )
     print(_table)
     t_delta = time.time() - t_start
