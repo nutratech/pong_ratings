@@ -7,10 +7,12 @@ Created on Fri 13 Jan 2023 01∶14∶59 PM EST
 https://trueskill.org/
 """
 import math
+import os
 import time
 from datetime import date, datetime
 from typing import List
 
+import numpy
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
@@ -185,39 +187,38 @@ def print_matchups(players: List[Player]) -> None:
     interesting play.
     """
 
+    # players = [Player(f"id_{x}") for x in range(40)]
+    # _rand_ratings = numpy.random.normal(25, 5, len(players))
+    # for i, player in enumerate(players):
+    #     player.rating_doubles.mu = _rand_ratings[i]
+
     t_start = time.time()
-    already_matched = set()
+    n_players = len(players)
     matchups = []
-    skipped_matchups = 0
+    n_skipped_matchups = 0
 
     # Evaluate all possible match ups
-    for player1 in players:
-        for player2 in players:
-            for player3 in players:
-                for player4 in players:
+    # pylint: disable=invalid-name
+    for i1 in range(n_players):
+        for i2 in range(i1 + 1, n_players):
+
+            # Second team
+            for i3 in range(i1 + 1, n_players):
+
+                # Can't play yourself
+                if i3 == i2:
+                    continue
+                for i4 in range(i3 + 1, n_players):
 
                     # Can't play yourself
-                    if player1 in {player2, player3, player4}:
-                        continue
-                    if player2 in {player1, player3, player4}:
-                        continue
-                    if player3 in {player1, player2, player4}:
-                        continue
-                    if player4 in {player1, player2, player3}:
+                    if i4 in (i2, i1):
                         continue
 
-                    # Don't double count (t1, t2) AND (t2, t1)... the same teams
-                    team1 = "-".join(
-                        x.username
-                        for x in sorted([player1, player2], key=lambda x: x.username)
-                    )
-                    team2 = "-".join(
-                        x.username
-                        for x in sorted([player3, player4], key=lambda x: x.username)
-                    )
-                    pair1, pair2 = (team1, team2), (team2, team1)
-                    if pair1 in already_matched or pair2 in already_matched:
-                        continue
+                    # Pull players from array index
+                    player1 = players[i1]
+                    player2 = players[i2]
+                    player3 = players[i3]
+                    player4 = players[i4]
 
                     # Short list only match ups with small delta mu values
                     _delta_rating = (
@@ -227,7 +228,7 @@ def print_matchups(players: List[Player]) -> None:
                         - player4.rating_doubles.mu
                     ) / 2
                     if _delta_rating > 3:
-                        skipped_matchups += 1
+                        n_skipped_matchups += 1
                         continue
 
                     # Compute quality metrics, and add to list
@@ -273,9 +274,8 @@ def print_matchups(players: List[Player]) -> None:
                             _win_probability,
                         )
                     )
-                    already_matched.add((team1, team2))
 
-    # Print off best matches
+    # Constants, and sorting
     _n_top = 100
     _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
     print_title(
@@ -284,6 +284,12 @@ def print_matchups(players: List[Player]) -> None:
     )
     matchups.sort(key=lambda x: x[-2], reverse=True)
 
+    # Verify things
+    assert (
+        len(matchups) + n_skipped_matchups == _n_choose_2_teams
+    ), "Missed some match ups?"
+
+    # Print off best matches
     _table = tabulate(
         matchups[:_n_top],
         headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "Q", "P(w)"],
@@ -292,9 +298,9 @@ def print_matchups(players: List[Player]) -> None:
     t_delta = time.time() - t_start
     print()
     print(
-        f"Calculated {len(matchups)} pairings in {round(t_delta, 5) * 1000}ms "
+        f"Assessed {_n_choose_2_teams} pairings in {round(t_delta, 5) * 1000}ms "
         f"({round(_n_choose_2_teams / t_delta)}/s), "
-        f"skipped {skipped_matchups}"
+        f"skipped {n_skipped_matchups}"
     )
 
 
@@ -322,4 +328,4 @@ if __name__ == "__main__":
     #     filter(lambda x: x.rating_doubles.sigma * 1.96 < 9, _sorted_players)
     # )
     print_matchups(_sorted_players)
-    print_progresses(_sorted_players)
+    # print_progresses(_sorted_players)
