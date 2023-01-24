@@ -294,7 +294,7 @@ def print_matchups(players: List[Player]) -> None:
     t_delta = time.time() - t_start
     print()
     print(
-        f"Assessed {_n_choose_2_teams} pairings in {round(t_delta, 5) * 1000}ms "
+        f"Assessed {_n_choose_2_teams} pairings in {round(t_delta * 1000, 1)}ms "
         f"({round(_n_choose_2_teams / t_delta)}/s), "
         f"skipped {n_skipped_matchups}"
     )
