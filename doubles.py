@@ -210,13 +210,12 @@ def print_matchups(players: List[Player]) -> None:
                         - player4.rating_doubles.mu
                     ) / 2
                     _delta_rating = round(_delta_rating, 1)
-                    _rd_avg = round(
+                    _2rd_avg = round(
                         math.sqrt(
                             sum(
                                 x.rating_doubles.sigma**2
                                 for x in [player1, player2, player3, player4]
                             )
-                            / 4
                         )
                     )
 
@@ -245,7 +244,7 @@ def print_matchups(players: List[Player]) -> None:
                             player3.username,
                             player4.username,
                             _delta_rating,
-                            _rd_avg,
+                            _2rd_avg,
                             _quality_of_match,
                             _win_probability,
                         )
@@ -263,7 +262,7 @@ def print_matchups(players: List[Player]) -> None:
 
     _table = tabulate(
         matchups[:_n_top],
-        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "RD", "Q", "P(w)"],
+        headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "Q", "P(w)"],
     )
     print(_table)
     t_delta = time.time() - t_start
