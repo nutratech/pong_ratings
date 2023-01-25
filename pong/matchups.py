@@ -137,18 +137,15 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
             round(_w_p1.mu - rating1.mu),
             round(_l_p1.mu - rating1.mu),
             round(_w_p1.phi + _l_p1.phi - 2 * rating1.phi, 1),
-            round(_w_p1.sigma + _l_p1.sigma - 2 * rating1.sigma, 7),
         ),
         (
             player2.username,
             round(_w_p2.mu - rating2.mu),
             round(_l_p2.mu - rating2.mu),
             round(_w_p2.phi + _l_p2.phi - 2 * rating2.phi, 1),
-            round(_w_p2.sigma + _l_p2.sigma - 2 * rating2.sigma, 7),
         ),
     ]
     _table = tabulate(
-        _series,
-        headers=["", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)", "avg(Δσ)"],
+        _series, headers=["", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)"]
     )
     print(_table)
