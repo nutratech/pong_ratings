@@ -29,7 +29,8 @@ from pong.probs import (
 def _build_players() -> Dict[str, Player]:
     """Builds the players from the updated ratings_*.csv file"""
 
-    players: Dict[str, Player] = {}
+    singles_players: Dict[str, Player] = {}
+    doubles_players: Dict[str, Player] = {}
 
     # Singles
     with open(CSV_RATINGS_SINGLES, encoding="utf-8") as _f:
@@ -44,45 +45,38 @@ def _build_players() -> Dict[str, Player]:
                 sigma=float(row["sigma"]),
             )
 
-            players[player.username] = player
+            singles_players[player.username] = player
 
     # Doubles
     with open(CSV_RATINGS_DOUBLES, encoding="utf-8") as _f:
         csv_reader = csv.DictReader(_f)
 
         for row in csv_reader:
-            username = row["username"]
-            # print(row)
+            player = Player(username=row["username"])
 
-            # Check if player was read up in SINGLES CSV
-            if username in players:
-                players[username].stack_ratings_doubles[0] = trueskill.TrueSkill(
-                    mu=float(row["mu"]),
-                    sigma=float(row["sigma"]),
-                    draw_probability=DRAW_PROB_DOUBLES,
-                )
+            player.stack_ratings_doubles[0] = trueskill.TrueSkill(
+                mu=float(row["mu"]),
+                sigma=float(row["sigma"]),
+            )
 
-            # Otherwise, create a new player for doubles
-            else:
-                player = Player(username=row["username"])
-                player.stack_ratings_doubles[0] = trueskill.TrueSkill(
-                    mu=float(row["mu"]),
-                    sigma=float(row["sigma"]),
-                )
-                players[player.username] = player
+            doubles_players[player.username] = player
 
-    return players
+    return singles_players, doubles_players
 
 
 def eval_singles(username1: str, username2: str) -> None:
-    """Print out stats for player1 vs. player2"""
-    # TODO: sort by rating, or not here?
-    players_dict = _build_players()
+    """
+    Print out stats for player1 vs. player2
+    TODO:
+        - sort by rating, or not here?
+    """
 
+    # Only use singles ratings for this
+    players, _ = _build_players()
     glicko = glicko2.Glicko2()
 
-    # Grab players from usernames
-    player1, player2 = players_dict[username1], players_dict[username2]
+    # Alias players and ratings
+    player1, player2 = players[username1], players[username2]
     rating1, rating2 = player1.rating_singles, player2.rating_singles
 
     # Calculate misc stats

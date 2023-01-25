@@ -198,7 +198,6 @@ def print_matchups(players: List[Player]) -> None:
                     _loss_probability,
                 )
             )
-            # already_matched.add((player1, player2))
 
     # Print title and sort
     print_title(
