@@ -18,12 +18,7 @@ from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
 from pong.models import Player
-from pong.probs import (
-    p_at_least_k_wins,
-    p_deuce,
-    p_deuce_win,
-    p_match,
-)
+from pong.probs import p_at_least_k_wins, p_deuce, p_deuce_win, p_match
 
 
 def _build_players() -> tuple:
