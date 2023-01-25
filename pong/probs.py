@@ -55,10 +55,14 @@ def p_at_least_k_wins(p: float) -> Dict[int, float]:
     :param p: Probability to win one game, between 0.0 - 1.0
     """
 
-    def _p_k(k: int) -> float:
-        return 1 - (1 - p) ** k
+    def _p_n_k(n: int, _k=1) -> float:
+        """
+        :param n: Win n games to win the match, e.g. 2 or 3
+        :param _k: Win at least k games, e.g. win at least 1 game against a good player
+        """
+        return 1 - (1 - p) ** n
 
-    return {n: _p_k(n) for n in [2, 3, 4]}
+    return {n: _p_n_k(n) for n in [2, 3, 4]}
 
 
 def p_match(p: float) -> Dict[int, float]:
