@@ -86,6 +86,7 @@ def eval_singles(username1: str, username2: str) -> None:
     rating1, rating2 = player1.rating_singles, player2.rating_singles
 
     # Calculate misc stats
+    _delta_mu = round(rating1.mu - rating2.mu)
     _rd = int(round(math.sqrt((rating1.phi**2 + rating2.phi**2) / 2), -1))
 
     # Calculate probabilities
@@ -99,11 +100,11 @@ def eval_singles(username1: str, username2: str) -> None:
 
     prob_match = p_match(prob_game)
     prob_win_at_least_1 = p_at_least_k_wins(prob_game)
-    percent_reach_deuce = round(p_deuce(prob_point)[11] * 100, 1)
-    percent_deuce_win = round(p_deuce_win(prob_point) * 100, 1)
+    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
+    prob_deuce_win = round(p_deuce_win(prob_point), 2)
 
     # Print off
-    print_title(f"{player1.username} & {player2.username} (RD={_rd})")
+    print_title(f"{player1.username} & {player2.username} (Δμ={_delta_mu}, RD={_rd})")
     print(player1)
     print(player2)
     # _series = [
@@ -114,11 +115,27 @@ def eval_singles(username1: str, username2: str) -> None:
     print()
 
     # Game probability
+    print_subtitle(f"Game & Deuce odds (for {username1})")
+    _series = [
+        ("Game", round(prob_game, 2)),
+        ("Point", round(prob_point, 2)),
+        ("Deuce", prob_deuce_reach),
+        ("Win deuce", prob_deuce_win),
+    ]
+    print(tabulate(_series, headers=["", "P(...)"]))
+    print()
+
     print(f"P(game):     {round(prob_game, 2)}")
     print(f"P(point):    {round(prob_point, 2)}")
     print()
 
+    # Deuce probabilities
+    print(f"P(reach deuce)    {prob_deuce_reach}%")
+    print(f"P(win deuce)      {prob_deuce_win}%")
+    print()
+
     # Match probability, and related stats
+    print_subtitle("Match odds and rating changes")
     _series = [
         ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
         (
@@ -131,27 +148,12 @@ def eval_singles(username1: str, username2: str) -> None:
     print(tabulate(_series, headers=["P(...)", "2/3", "3/5"]))
     print()
 
-    # Deuce probabilities
-    print(f"Prob to reach deuce: {percent_reach_deuce}%")
-    print(f"Prob to win deuce:   {percent_deuce_win}%")
-    print()
-
     # New ratings (preview the changes)
     _w_p1, _w_p2 = glicko.rate_1vs1(rating1, rating2)
     _l_p1, _l_p2 = glicko.rate_1vs1(rating2, rating1)
     _series = [
-        (
-            player1.username,
-            round(_w_p1.mu - player1.rating_singles.mu),
-            round(_l_p1.mu - player1.rating_singles.mu),
-        ),
-        (
-            player2.username,
-            round(_w_p2.mu - player2.rating_singles.mu),
-            round(_l_p2.mu - player2.rating_singles.mu),
-        ),
+        (player1.username, round(_w_p1.mu - rating1.mu), round(_l_p1.mu - rating1.mu)),
+        (player2.username, round(_w_p2.mu - rating2.mu), round(_l_p2.mu - rating2.mu)),
     ]
-    _table = tabulate(
-        _series, headers=["rating changes", f"{username1} wins", f"{username1} loses"]
-    )
+    _table = tabulate(_series, headers=["", f"{username1} wins", f"{username1} loses"])
     print(_table)
