@@ -21,7 +21,7 @@ from pong.models import Player
 from pong.probs import p_at_least_k_wins, p_deuce, p_deuce_win, p_match
 
 
-def _build_players() -> tuple:
+def build_players() -> tuple:
     """Builds the players from the updated ratings_*.csv file"""
 
     singles_players: Dict[str, Player] = {}
@@ -78,18 +78,17 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     _rd = int(round(math.sqrt((rating1.phi**2 + rating2.phi**2) / 2), -1))
 
     # Calculate probabilities
-    prob_game = glicko.expect_score(
+    prob_p1_game = glicko.expect_score(
         glicko.scale_down(rating1),
         glicko.scale_down(rating2),
         glicko.reduce_impact(glicko.scale_down(rating2)),
     )
-    prob_game2 = glicko.expect_score(
+    prob_p2_game = glicko.expect_score(
         glicko.scale_down(rating2),
         glicko.scale_down(rating1),
         glicko.reduce_impact(glicko.scale_down(rating1)),
     )
-    print(1 - prob_game)
-    print(prob_game2)
+    prob_game = (prob_p1_game + (1 - prob_p2_game)) / 2
 
     prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
 

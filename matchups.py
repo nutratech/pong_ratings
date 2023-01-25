@@ -9,7 +9,8 @@ import math
 import os
 import sys
 
-from pong.matchups import _build_players, eval_singles
+from pong.matchups import build_players, eval_singles
+from singles import print_singles_matchups
 
 if __name__ == "__main__":
 
@@ -24,11 +25,20 @@ if __name__ == "__main__":
     print(f"Evaluating {N_PAIRS} match ups...")
 
     # Load players/ratings from CSV
-    singles_players, doubles_players = _build_players()
+    singles_players, doubles_players = build_players()
 
-    # Print match up predictions
+    # Print the table first
+    # NOTE: convoluted way to sort players in order of descending strength...
+    #   iterating over single_players first, which IS sorted already
+    print_singles_matchups(
+        players=[player for name, player in singles_players.items() if name in players]
+    )
+
+    # Print match-up predictions
     for i1 in range(N_PLAYERS):
         player1 = players[i1]
+
         for i2 in range(i1 + 1, N_PLAYERS):
             player2 = players[i2]
+
             eval_singles(player1, player2, singles_players)
