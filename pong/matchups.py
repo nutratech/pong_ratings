@@ -107,7 +107,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
         ("Game", round(prob_game, 2)),
-        ("Point", round(prob_point, 2)),
+        ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
     ]
