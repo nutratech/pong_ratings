@@ -335,4 +335,4 @@ if __name__ == "__main__":
     #     filter(lambda x: x.rating_doubles.sigma * 1.96 < 9, _sorted_players)
     # )
     print_matchups(_sorted_players)
-    # print_progresses(_sorted_players)
+    print_progresses(_sorted_players)
