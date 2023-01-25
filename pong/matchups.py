@@ -103,11 +103,10 @@ def eval_singles(username1: str, username2: str) -> None:
     prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
     prob_deuce_win = round(p_deuce_win(prob_point), 2)
 
-    # Print off
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Print off the details
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     print_title(f"{player1.username} & {player2.username} (Δμ={_delta_mu}, RD={_rd})")
-    print(player1)
-    print(player2)
-    print()
 
     # Game & Deuce probabilities
     # print_subtitle(f"Game & Deuce odds (for {username1})")
