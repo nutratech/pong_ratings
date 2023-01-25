@@ -14,11 +14,11 @@ import trueskill
 from tabulate import tabulate
 
 from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES
+from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
 from pong.models import Player
 from pong.probs import (
-    GAME_PERCENT_TO_POINT_PROB,
     p_at_least_k_wins,
     p_deuce,
     p_deuce_win,
@@ -89,7 +89,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         glicko.reduce_impact(glicko.scale_down(rating2)),
     )
 
-    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 100)]
+    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
 
     prob_match = p_match(prob_game)
     prob_win_at_least_1 = p_at_least_k_wins(prob_game)
