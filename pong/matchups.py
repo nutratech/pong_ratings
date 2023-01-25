@@ -114,8 +114,8 @@ def eval_singles(username1: str, username2: str) -> None:
     # print(tabulate(_series, headers=["", "singles", "doubles"]))
     print()
 
-    # Game probability
-    print_subtitle(f"Game & Deuce odds (for {username1})")
+    # Game & Deuce probabilities
+    # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 2)),
@@ -123,15 +123,6 @@ def eval_singles(username1: str, username2: str) -> None:
         ("Win deuce", prob_deuce_win),
     ]
     print(tabulate(_series, headers=["", "P(...)"]))
-    print()
-
-    print(f"P(game):     {round(prob_game, 2)}")
-    print(f"P(point):    {round(prob_point, 2)}")
-    print()
-
-    # Deuce probabilities
-    print(f"P(reach deuce)    {prob_deuce_reach}%")
-    print(f"P(win deuce)      {prob_deuce_win}%")
     print()
 
     # Match probability, and related stats
