@@ -9,7 +9,7 @@ import math
 import os
 import sys
 
-from pong.matchups import eval_singles
+from pong.matchups import _build_players, eval_singles
 
 if __name__ == "__main__":
 
@@ -23,9 +23,12 @@ if __name__ == "__main__":
     N_PAIRS = math.comb(N_PLAYERS, 2)
     print(f"Evaluating {N_PAIRS} match ups...")
 
+    # Load players/ratings from CSV
+    singles_players, doubles_players = _build_players()
+
     # Print match up predictions
     for i1 in range(N_PLAYERS):
         player1 = players[i1]
         for i2 in range(i1 + 1, N_PLAYERS):
             player2 = players[i2]
-            eval_singles(player1, player2)
+            eval_singles(player1, player2, singles_players)

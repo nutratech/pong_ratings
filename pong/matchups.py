@@ -26,7 +26,7 @@ from pong.probs import (
 )
 
 
-def _build_players() -> Dict[str, Player]:
+def _build_players() -> tuple:
     """Builds the players from the updated ratings_*.csv file"""
 
     singles_players: Dict[str, Player] = {}
@@ -64,7 +64,7 @@ def _build_players() -> Dict[str, Player]:
     return singles_players, doubles_players
 
 
-def eval_singles(username1: str, username2: str) -> None:
+def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> None:
     """
     Print out stats for player1 vs. player2
     TODO:
@@ -72,7 +72,6 @@ def eval_singles(username1: str, username2: str) -> None:
     """
 
     # Only use singles ratings for this
-    players, _ = _build_players()
     glicko = glicko2.Glicko2()
 
     # Alias players and ratings
@@ -129,7 +128,7 @@ def eval_singles(username1: str, username2: str) -> None:
 
     # New ratings (preview the changes)
     _w_p1, _w_p2 = glicko.rate_1vs1(rating1, rating2)
-    _l_p1, _l_p2 = glicko.rate_1vs1(rating2, rating1)
+    _l_p2, _l_p1 = glicko.rate_1vs1(rating2, rating1)
     _series = [
         (player1.username, round(_w_p1.mu - rating1.mu), round(_l_p1.mu - rating1.mu)),
         (player2.username, round(_w_p2.mu - rating2.mu), round(_l_p2.mu - rating2.mu)),
