@@ -131,7 +131,7 @@ def eval_singles(username1: str, username2: str) -> None:
         ),
         ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
     ]
-    print(tabulate(_series, headers=["P(...)", "2/3", "3/5"]))
+    print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
     print()
 
     # New ratings (preview the changes)
