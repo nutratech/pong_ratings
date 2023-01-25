@@ -61,7 +61,7 @@ def p_at_least_k_wins(p: float) -> Dict[int, float]:
     return {n: _p_k(n) for n in [2, 3, 4]}
 
 
-def match_odds(p: float) -> Dict[int, float]:
+def p_match(p: float) -> Dict[int, float]:
     """
     Calculate probability to win a match (best of 3 & best of 5), based on probability
     to win a game.
@@ -116,7 +116,7 @@ def print_table_common_match_odds() -> None:
     print(os.linesep + "Match odds")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
-        _mo = match_odds(_go)
+        _mo = p_match(_go)
         _2mo = round(_mo[2], 3)
         _3mo = round(_mo[3], 3)
         _4mo = round(_mo[4], 3)
