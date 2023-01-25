@@ -5,6 +5,8 @@ Created on Wed Jan 25 16:06:42 2023
 @author: shane
 """
 
+# pylint: disable=too-many-lines
+
 GAME_PERCENT_TO_POINT_PROB = [
     0.0,
     0.162957,
