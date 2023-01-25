@@ -8,6 +8,7 @@ Created on Wed Jan 25 13:38:55 2023
 import math
 import os
 import sys
+from typing import List
 
 from doubles import print_doubles_matchups
 from pong.matchups import build_players, eval_singles
@@ -26,7 +27,7 @@ def print_singles_details() -> None:
             eval_singles(player1, player2, singles_players)
 
 
-def print_doubles_details() -> None:
+def print_doubles_details(matchups: List[tuple]) -> None:
     """Prints the details for each possible team pairing"""
 
 
@@ -51,16 +52,18 @@ if __name__ == "__main__":
     # NOTE: convoluted way to sort players in order of descending strength...
     #   iterating over single_players first, which IS sorted already
     if singles:
-        matchups = print_singles_matchups(
+        print_singles_matchups(
             players=[
                 player for name, player in singles_players.items() if name in players
             ]
         )
-        print_singles_details(matchups)
+        print_singles_details()
     else:
-        matchups = print_doubles_matchups(
+        doubles_matchups = print_doubles_matchups(
             players=[
                 player for name, player in doubles_players.items() if name in players
-            ]
+            ],
+            delta_mu_threshold=15.0,
+            two_rd_threshold=15.0,
         )
-        print_doubles_details(matchups)
+        print_doubles_details(matchups=doubles_matchups)

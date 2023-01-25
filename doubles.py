@@ -180,7 +180,9 @@ def build_ratings() -> List[Player]:
     return sorted_players
 
 
-def print_doubles_matchups(players: List[Player]) -> List[tuple]:
+def print_doubles_matchups(
+    players: List[Player], delta_mu_threshold=3.0, two_rd_threshold=9.5
+) -> List[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -239,7 +241,10 @@ def print_doubles_matchups(players: List[Player]) -> List[tuple]:
                         )
                     )
                     # Short list only match ups with small delta mu and small sigma
-                    if _delta_rating > 3 or _2_rd_avg > 9.5:
+                    if (
+                        _delta_rating > delta_mu_threshold
+                        or _2_rd_avg > two_rd_threshold
+                    ):
                         n_skipped_matchups += 1
                         continue
 
