@@ -5,6 +5,7 @@ Created on Wed Jan 25 13:38:55 2023
 
 @author: shane
 """
+import math
 import sys
 
 from pong.matchups import eval_singles
@@ -15,6 +16,10 @@ if __name__ == "__main__":
     players = sys.argv[1:]
     N_PLAYERS = len(players)
     assert N_PLAYERS > 1, "Needs at least two players"
+
+    # Print meta-data
+    N_PAIRS = math.comb(N_PLAYERS, 2)
+    print(f"Evaluating {N_PAIRS} match ups...")
 
     # Print match up predictions
     for i1 in range(N_PLAYERS):

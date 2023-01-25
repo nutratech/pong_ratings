@@ -89,7 +89,15 @@ def print_title(title: str) -> None:
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print(title)
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("")
+    print()
+
+
+def print_subtitle(subtitle: str) -> None:
+    """Print a subtitle"""
+    print()
+    print(subtitle)
+    print("~" * len(subtitle))
+    print()
 
 
 def filter_players(_sorted_players: List[Player]) -> List[Player]:

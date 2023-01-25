@@ -7,15 +7,23 @@ Created on Mon Jan 23 10:19:13 2023
 Detailed information about requested match up(s)
 """
 import csv
+import math
 from typing import Dict
 
 import trueskill
+from tabulate import tabulate
 
 from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES, DRAW_PROB_DOUBLES
-from pong.core import print_title
+from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
 from pong.models import Player
-from pong.probs import p_at_least_k_wins, p_deuce, p_deuce_win, p_match
+from pong.probs import (
+    GAME_PERCENT_TO_POINT_PROB,
+    p_at_least_k_wins,
+    p_deuce,
+    p_deuce_win,
+    p_match,
+)
 
 
 def _build_players() -> Dict[str, Player]:
@@ -68,51 +76,82 @@ def _build_players() -> Dict[str, Player]:
 
 def eval_singles(username1: str, username2: str) -> None:
     """Print out stats for player1 vs. player2"""
+    # TODO: sort by rating, or not here?
     players_dict = _build_players()
 
-    singles_engine = glicko2.Glicko2()
+    glicko = glicko2.Glicko2()
 
     # Grab players from usernames
-    player1 = players_dict[username1]
-    player2 = players_dict[username2]
+    player1, player2 = players_dict[username1], players_dict[username2]
+    rating1, rating2 = player1.rating_singles, player2.rating_singles
+
+    # Calculate misc stats
+    _rd = int(round(math.sqrt((rating1.phi**2 + rating2.phi**2) / 2), -1))
 
     # Calculate probabilities
-    prob_game = singles_engine.expect_score(
-        singles_engine.scale_down(player1.rating_singles),
-        singles_engine.scale_down(player2.rating_singles),
-        singles_engine.reduce_impact(
-            singles_engine.scale_down(
-                player2.rating_singles,
-            )
-        ),
+    prob_game = glicko.expect_score(
+        glicko.scale_down(rating1),
+        glicko.scale_down(rating2),
+        glicko.reduce_impact(glicko.scale_down(rating2)),
     )
+
+    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 100)]
 
     prob_match = p_match(prob_game)
     prob_win_at_least_1 = p_at_least_k_wins(prob_game)
-    prob_deuce_reach = p_deuce(prob_game)
-    prob_deuce_win = p_deuce_win(prob_game)
+    percent_reach_deuce = round(p_deuce(prob_point)[11] * 100, 1)
+    percent_deuce_win = round(p_deuce_win(prob_point) * 100, 1)
 
     # Print off
-    print_title(f"{player1.username} & {player2.username}")
+    print_title(f"{player1.username} & {player2.username} (RD={_rd})")
     print(player1)
     print(player2)
+    # _series = [
+    #     (p.username, p.str_rating(singles=True), p.str_rating(singles=False))
+    #     for p in (player1, player2)
+    # ]
+    # print(tabulate(_series, headers=["", "singles", "doubles"]))
     print()
-    print(f"Game prob:         {round(prob_game, 4)}")
+
+    # Game probability
+    print(f"P(game):     {round(prob_game, 2)}")
+    print(f"P(point):    {round(prob_point, 2)}")
     print()
-    print(f"3 game match prob: {round(prob_match[2], 4)}")
-    print(f"5 game match prob: {round(prob_match[3], 4)}")
+
+    # Match probability, and related stats
+    _series = [
+        ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
+        (
+            "Win 1+ games",
+            round(prob_win_at_least_1[2], 2),
+            round(prob_win_at_least_1[3], 3),
+        ),
+        ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
+    ]
+    print(tabulate(_series, headers=["P(...)", "2/3", "3/5"]))
     print()
-    print(f"Prob to win 1+ games (3 game match): {round(prob_win_at_least_1[2], 4)}")
-    print(f"Prob to win 1+ games (5 game match): {round(prob_win_at_least_1[3], 4)}")
+
+    # Deuce probabilities
+    print(f"Prob to reach deuce: {percent_reach_deuce}%")
+    print(f"Prob to win deuce:   {percent_deuce_win}%")
     print()
-    print(f"Prob to win 2 straight: {round(prob_game**2, 4)}")
-    print(f"Prob to win 3 straight: {round(prob_game**3, 4)}")
-    print()
-    print(f"Prob to reach deuce: {round(prob_deuce_reach[11], 4)}")
-    print(f"Prob to win deuce:   {round(prob_deuce_win, 4)}")
-    # print(
-    #     tabulate.tabulate(
-    #         [(p.username, p.rating_singles, p.rating_doubles) for p in players],
-    #         headers=['username', 'singles', 'doubles']
-    #     )
-    # )
+
+    # New ratings (preview the changes)
+    _w_p1, _w_p2 = glicko.rate_1vs1(rating1, rating2)
+    _l_p1, _l_p2 = glicko.rate_1vs1(rating2, rating1)
+    _series = [
+        (
+            player1.username,
+            round(_w_p1.mu - player1.rating_singles.mu),
+            round(_l_p1.mu - player1.rating_singles.mu),
+        ),
+        (
+            player2.username,
+            round(_w_p2.mu - player2.rating_singles.mu),
+            round(_l_p2.mu - player2.rating_singles.mu),
+        ),
+    ]
+    _table = tabulate(
+        _series, headers=["rating changes", f"{username1} wins", f"{username1} loses"]
+    )
+    print(_table)
