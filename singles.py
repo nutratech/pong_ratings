@@ -134,7 +134,7 @@ def build_ratings() -> List[Player]:
     return sorted_players
 
 
-def print_singles_matchups(players: List[Player]) -> None:
+def print_singles_matchups(players: List[Player]) -> List[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -215,6 +215,8 @@ def print_singles_matchups(players: List[Player]) -> None:
         headers=["Player 1", "Player 2", "Δμ", "RD", "P(w)", "P(l)"],
     )
     print(_table)
+
+    return matchups
 
 
 def print_progresses(_players: List[Player]) -> None:

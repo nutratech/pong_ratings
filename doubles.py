@@ -180,7 +180,7 @@ def build_ratings() -> List[Player]:
     return sorted_players
 
 
-def print_matchups(players: List[Player]) -> None:
+def print_doubles_matchups(players: List[Player]) -> List[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -302,6 +302,8 @@ def print_matchups(players: List[Player]) -> None:
         f"skipped {n_skipped_matchups}"
     )
 
+    return matchups
+
 
 def print_progresses(_players: List[Player]) -> None:
     """Prints rating progress graphs"""
@@ -324,5 +326,5 @@ if __name__ == "__main__":
     cache_ratings_csv_file(_sorted_players, singles=False)
 
     # TODO: filter, or match based on club, or create greedy pairing algorithm
-    print_matchups(_sorted_players)
+    print_doubles_matchups(_sorted_players)
     print_progresses(_sorted_players)

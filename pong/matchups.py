@@ -13,7 +13,7 @@ from typing import Dict
 import trueskill
 from tabulate import tabulate
 
-from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES
+from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES, DRAW_PROB_DOUBLES
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
@@ -62,8 +62,6 @@ def build_players() -> tuple:
 def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> None:
     """
     Print out stats for player1 vs. player2
-    TODO:
-        - sort by rating, or not here?
     """
 
     # Only use singles ratings for this
@@ -100,7 +98,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    print_title(f"{player1.username} & {player2.username} (Δμ={_delta_mu}, RD={_rd})")
+    print_title(f"{username1} & {username2} (Δμ={_delta_mu}, RD={_rd})")
 
     # Game & Deuce probabilities
     # print_subtitle(f"Game & Deuce odds (for {username1})")
@@ -148,3 +146,42 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         _series, headers=["", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)"]
     )
     print(_table)
+
+
+def eval_doubles(
+    username1: str,
+    username2: str,
+    username3: str,
+    username4: str,
+    players: Dict[str, Player],
+) -> None:
+    """
+    Print out stats for (player1, player2) vs. (player3, player4)
+    """
+
+    # Only use doubles ratings for this
+    ts = trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)
+
+    # Alias players and ratings
+    player1, player2 = players[username1], players[username2]
+    player3, player4 = players[username3], players[username4]
+    rating1, rating2 = player1.rating_doubles, player2.rating_doubles
+    rating3, rating4 = player3.rating_doubles, player4.rating_doubles
+
+    # Calculate misc stats
+    _delta_mu = round(rating1.mu - rating2.mu)
+    _2rd = round(
+        1.96
+        * math.sqrt(
+            sum(r.sigma**2 for r in [rating1, rating2, rating3, rating4]) / 4
+        ),
+        1,
+    )
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Print off the details
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    print_title(
+        f"{username1} & {username2} vs. {username3} & {username4} "
+        f"(Δμ={_delta_mu}, 2σ={_2rd})"
+    )
