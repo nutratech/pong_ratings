@@ -107,11 +107,6 @@ def eval_singles(username1: str, username2: str) -> None:
     print_title(f"{player1.username} & {player2.username} (Δμ={_delta_mu}, RD={_rd})")
     print(player1)
     print(player2)
-    # _series = [
-    #     (p.username, p.str_rating(singles=True), p.str_rating(singles=False))
-    #     for p in (player1, player2)
-    # ]
-    # print(tabulate(_series, headers=["", "singles", "doubles"]))
     print()
 
     # Game & Deuce probabilities
