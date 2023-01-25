@@ -41,6 +41,7 @@ time.
 
   ./doubles.py
 
+
 Filtering Players
 ~~~~~~~~~~~~~~~~~
 
@@ -58,3 +59,13 @@ TODO
 ####
 
 - Preview change, calculate odds against particular opponent
+
+
+Match ups for given players
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can run the top-level script, e.g.
+
+.. code-block:: bash
+
+  ./matchups.py brandon shane benji amos
