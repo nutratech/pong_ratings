@@ -12,12 +12,12 @@ from typing import List
 from tabulate import tabulate
 
 from pong.core import (
+    add_club,
     build_csv_reader,
     cache_ratings_csv_file,
     filter_players,
     get_or_create_player_by_name,
     print_title,
-    add_club,
 )
 from pong.glicko2 import glicko2
 from pong.models import Player
@@ -210,6 +210,7 @@ def print_matchups(players: List[Player]) -> None:
     # Verify things
     assert len(matchups) == _n_choose_2_players, "Missed some match ups?"
 
+    # Print off best matches
     _table = tabulate(
         matchups[:_n_top],
         headers=["Player 1", "Player 2", "Δμ", "RD", "P(w)", "P(l)"],

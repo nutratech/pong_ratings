@@ -16,12 +16,12 @@ import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
 from pong.core import (
+    add_club,
     build_csv_reader,
     cache_ratings_csv_file,
     filter_players,
     get_or_create_player_by_name,
     print_title,
-    add_club,
 )
 from pong.models import Player
 from pong.tsutils import win_probability
@@ -186,14 +186,6 @@ def print_matchups(players: List[Player]) -> None:
     interesting play.
     """
 
-    # players = [Player(f"id_{x}") for x in range(20)]
-    # import numpy
-    # for player in players:
-    #     player.rating_doubles.mu = numpy.random.normal(25, 5, 1)[0]
-    #     player.rating_doubles.sigma = numpy.random.normal(25/3, 3, 1)[0]
-
-    #     print(player.rating_doubles)
-
     t_start = time.time()
     n_players = len(players)
     matchups = []
@@ -201,13 +193,13 @@ def print_matchups(players: List[Player]) -> None:
 
     _n_top = 100
     _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
-    _avg_cmps_per_second = 30000
+    _avg_cmp_per_second = 30000
 
     # Evaluate all possible match ups
     # pylint: disable=invalid-name
     print(
         os.linesep + f"Calculating {_n_choose_2_teams} match ups, "
-        f"should take ~{round(_n_choose_2_teams / _avg_cmps_per_second, 2)}s"
+        f"should take ~{round(_n_choose_2_teams / _avg_cmp_per_second, 2)}s"
     )
     for i1 in range(n_players):
         player1 = players[i1]
@@ -252,7 +244,7 @@ def print_matchups(players: List[Player]) -> None:
                         continue
 
                     # Compute quality metrics, and add to list
-                    # NOTE: commented out because it is relatively slow to calculate
+                    # NOTE: relatively slow to calculate
                     _quality_of_match = round(
                         trueskill.quality(
                             [
@@ -331,8 +323,6 @@ if __name__ == "__main__":
     _sorted_players = filter_players(build_ratings())
     cache_ratings_csv_file(_sorted_players, singles=False)
 
-    # _sorted_players = list(
-    #     filter(lambda x: x.rating_doubles.sigma * 1.96 < 9, _sorted_players)
-    # )
+    # TODO: filter, or match based on club, or create greedy pairing algorithm
     print_matchups(_sorted_players)
     print_progresses(_sorted_players)
