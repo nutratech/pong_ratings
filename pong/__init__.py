@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue 10 Jan 2023 12∶39∶06 PM EST
+
+@author: shane
+"""
 import math
 import os
 
