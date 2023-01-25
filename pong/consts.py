@@ -10,5 +10,7 @@ import os
 
 from pong import PROJECT_ROOT
 
-with open(os.path.join(PROJECT_ROOT, "resources", "prob_game_to_point.json")) as _f:
+with open(
+    os.path.join(PROJECT_ROOT, "resources", "prob_game_to_point.json"), encoding="utf-8"
+) as _f:
     GAME_PERCENT_TO_POINT_PROB = json.load(_f)

@@ -83,6 +83,13 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         glicko.scale_down(rating2),
         glicko.reduce_impact(glicko.scale_down(rating2)),
     )
+    prob_game2 = glicko.expect_score(
+        glicko.scale_down(rating2),
+        glicko.scale_down(rating1),
+        glicko.reduce_impact(glicko.scale_down(rating1)),
+    )
+    print(1 - prob_game)
+    print(prob_game2)
 
     prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
 
@@ -125,8 +132,23 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     _w_p1, _w_p2 = glicko.rate_1vs1(rating1, rating2)
     _l_p2, _l_p1 = glicko.rate_1vs1(rating2, rating1)
     _series = [
-        (player1.username, round(_w_p1.mu - rating1.mu), round(_l_p1.mu - rating1.mu)),
-        (player2.username, round(_w_p2.mu - rating2.mu), round(_l_p2.mu - rating2.mu)),
+        (
+            player1.username,
+            round(_w_p1.mu - rating1.mu),
+            round(_l_p1.mu - rating1.mu),
+            round(_w_p1.phi + _l_p1.phi - 2 * rating1.phi, 1),
+            round(_w_p1.sigma + _l_p1.sigma - 2 * rating1.sigma, 7),
+        ),
+        (
+            player2.username,
+            round(_w_p2.mu - rating2.mu),
+            round(_l_p2.mu - rating2.mu),
+            round(_w_p2.phi + _l_p2.phi - 2 * rating2.phi, 1),
+            round(_w_p2.sigma + _l_p2.sigma - 2 * rating2.sigma, 7),
+        ),
     ]
-    _table = tabulate(_series, headers=["", f"{username1} wins", f"{username1} loses"])
+    _table = tabulate(
+        _series,
+        headers=["", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)", "avg(Δσ)"],
+    )
     print(_table)
