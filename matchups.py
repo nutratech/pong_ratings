@@ -6,6 +6,7 @@ Created on Wed Jan 25 13:38:55 2023
 @author: shane
 """
 import math
+import os
 import sys
 
 from pong.matchups import eval_singles
@@ -13,7 +14,8 @@ from pong.matchups import eval_singles
 if __name__ == "__main__":
 
     # Parse player names
-    players = sys.argv[1:]
+    # NOTE: either pass in on command line or set in .env file
+    players = sys.argv[1:] or os.environ["PLAYERS"]
     N_PLAYERS = len(players)
     assert N_PLAYERS > 1, "Needs at least two players"
 
