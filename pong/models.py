@@ -5,12 +5,12 @@ Created on Sun 08 Jan 2023 11∶26∶34 PM EST
 @author: shane
 Player model used for singles & doubles ratings, username, wins/losses, etc
 """
-import math
 from typing import Union
 
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
 
+from pong import DRAW_PROB_DOUBLES
 from pong.glicko2 import glicko2
 
 
@@ -31,8 +31,9 @@ class Player:
         self.opponent_rating_losses_singles = []
 
         # Track doubles related stats
-        draw_prob = math.comb(20, 10) * (1 / 2) ** 20
-        self.stack_ratings_doubles = [trueskill.TrueSkill(draw_probability=draw_prob)]
+        self.stack_ratings_doubles = [
+            trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES),
+        ]
         self.partner_rating_doubles = []
         self.opponent_rating_wins_doubles = []
         self.opponent_rating_losses_doubles = []

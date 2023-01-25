@@ -12,29 +12,15 @@ from typing import List
 
 import requests
 
+from pong import (
+    CSV_GAMES_DOUBLES,
+    CSV_GAMES_SINGLES,
+    DOUBLES_URL,
+    PROJECT_ROOT,
+    SINGLES_URL,
+)
 from pong.env import PLAYERS_PRESENT
 from pong.models import Player
-
-
-# Hard-coded URL values pointing to our sheet
-def _url(gid: int) -> str:
-    _spreadsheet_key = "1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
-    return (
-        "https://docs.google.com/spreadsheet/ccc"
-        f"?key={_spreadsheet_key}"
-        f"&gid={gid}"
-        "&output=csv"
-    )
-
-
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
-SINGLES_URL = _url(834797930)
-DOUBLES_URL = _url(682349527)
-
-# Fall back (cached CSV files, if sheets.google.com is unreachable)
-SINGLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_singles.csv")
-DOUBLES_CSV = os.path.join(PROJECT_ROOT, "data", "games_doubles.csv")
 
 
 def get_google_sheet(url: str) -> bytes:
@@ -59,7 +45,7 @@ def cache_csv_file(_csv_bytes_output, singles=True) -> None:
     Fall back calculation in case sheets.google.com is unreachable.
     (Manually) verify no nefarious edits are made.
     """
-    csv_path = SINGLES_CSV if singles else DOUBLES_CSV
+    csv_path = CSV_GAMES_SINGLES if singles else CSV_GAMES_DOUBLES
     with open(csv_path, "wb") as _file:
         _file.write(_csv_bytes_output)
 
@@ -82,7 +68,7 @@ def build_csv_reader(singles=True) -> csv.reader:
         print(repr(err))
         print()
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
-        csv_path = SINGLES_CSV if singles else DOUBLES_CSV
+        csv_path = CSV_GAMES_SINGLES if singles else CSV_GAMES_DOUBLES
 
         return csv.reader(open(csv_path, encoding="utf-8"))
 
