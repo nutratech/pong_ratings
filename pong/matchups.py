@@ -173,7 +173,7 @@ def eval_doubles(
     rating3, rating4 = player3.rating_doubles, player4.rating_doubles
 
     # Calculate misc stats
-    _delta_mu = round(rating1.mu - rating2.mu, 1)
+    _delta_mu = round((rating1.mu + rating2.mu - rating3.mu - rating3.mu) / 2, 1)
     _2rd = round(
         1.96
         * math.sqrt(
@@ -218,7 +218,7 @@ def eval_doubles(
             round(prob_win_at_least_1[2], 2),
             round(prob_win_at_least_1[3], 3),
         ),
-        ("Win all games", round(prob_game ** 2, 2), round(prob_game ** 3, 2)),
+        ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
     ]
     print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
     print()
