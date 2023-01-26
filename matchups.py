@@ -67,12 +67,14 @@ if __name__ == "__main__":
         )
         print_singles_details()
     else:
+        print(doubles_players)
+        # exit()
         doubles_matchups = print_doubles_matchups(
             players=[
-                player for name, player in doubles_players.items() if name in _players
+                doubles_players[name] for name in _players
             ],
-            delta_mu_threshold=15.0,
-            two_rd_threshold=15.0,
+            # delta_mu_threshold=15.0,
+            # two_rd_threshold=15.0,
         )
         if N_PLAYERS < 6:
             print_doubles_details(matchups=doubles_matchups, players=doubles_players)
