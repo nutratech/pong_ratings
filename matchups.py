@@ -16,16 +16,14 @@ from pong.models import Player
 from singles import print_singles_matchups
 
 
-def print_singles_details() -> None:
+def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
     """Prints the details for each requested match-ups"""
-    # pylint: disable=invalid-name
-    for i1 in range(N_PLAYERS):
-        player1 = _players[i1]
-
-        for i2 in range(i1 + 1, N_PLAYERS):
-            player2 = _players[i2]
-
-            eval_singles(player1, player2, singles_players)
+    for matchup in matchups:
+        eval_singles(
+            matchup[0],
+            matchup[1],
+            players,
+        )
 
 
 def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
@@ -59,12 +57,12 @@ if __name__ == "__main__":
     # NOTE: convoluted way to sort players in order of descending strength...
     #   iterating over single_players first, which IS sorted already
     if singles:
-        print_singles_matchups(
+        singles_matchups = print_singles_matchups(
             players=[
                 player for name, player in singles_players.items() if name in _players
             ]
         )
-        print_singles_details()
+        print_singles_details(matchups=singles_matchups, players=singles_players)
     else:
         doubles_matchups = print_doubles_matchups(
             players=[
