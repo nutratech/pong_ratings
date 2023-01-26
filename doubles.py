@@ -286,7 +286,7 @@ def print_doubles_matchups(
         f"Pair ups [top {min(_n_top, _n_choose_2_teams)}, "
         f"({len(players)}C2*{len(players) - 2}C2)/2={_n_choose_2_teams} possible]"
     )
-    matchups.sort(key=lambda x: math.fabs(0.5 - x[-2]), reverse=True)
+    matchups.sort(key=lambda x: x[-2], reverse=True)
 
     # Verify things
     assert (

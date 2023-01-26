@@ -37,7 +37,8 @@ def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
             matchup[2],
             matchup[3],
             players,
-            prob_game=matchup[7],
+            prob_game=matchup[-1],
+            quality=matchup[-2],
         )
 
 
@@ -50,7 +51,6 @@ if __name__ == "__main__":
     assert N_PLAYERS > 1, "Needs at least two players"
 
     singles = not int(os.environ.get("DOUBLES") or 0)
-    print(singles)
 
     # Load players/ratings from CSV
     singles_players, doubles_players = build_players()
@@ -59,7 +59,6 @@ if __name__ == "__main__":
     # NOTE: convoluted way to sort players in order of descending strength...
     #   iterating over single_players first, which IS sorted already
     if singles:
-        print(f"Evaluating {math.comb(N_PLAYERS, 2)} match ups...")
         print_singles_matchups(
             players=[
                 player for name, player in singles_players.items() if name in _players
@@ -67,14 +66,12 @@ if __name__ == "__main__":
         )
         print_singles_details()
     else:
-        print(doubles_players)
-        # exit()
         doubles_matchups = print_doubles_matchups(
             players=[
-                doubles_players[name] for name in _players
+                player for name, player in doubles_players.items() if name in _players
             ],
-            # delta_mu_threshold=15.0,
-            # two_rd_threshold=15.0,
+            delta_mu_threshold=15.0,
+            two_rd_threshold=15.0,
         )
         if N_PLAYERS < 6:
             print_doubles_details(matchups=doubles_matchups, players=doubles_players)

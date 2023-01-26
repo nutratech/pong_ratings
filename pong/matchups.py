@@ -158,6 +158,7 @@ def eval_doubles(
     username4: str,
     players: Dict[str, Player],
     prob_game: float,
+    quality: float,
 ) -> None:
     """
     Print out stats for (player1, player2) vs. (player3, player4)
@@ -197,6 +198,10 @@ def eval_doubles(
         f"{username1} & {username2} vs. {username3} & {username4} "
         f"(Δμ={_delta_mu}, 2σ={_2rd})"
     )
+
+    # Quality
+    print(f"Q = {quality}")
+    print()
 
     # Game & Deuce probabilities
     # print_subtitle(f"Game & Deuce odds (for {username1})")
