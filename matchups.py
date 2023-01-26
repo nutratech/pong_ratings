@@ -5,7 +5,6 @@ Created on Wed Jan 25 13:38:55 2023
 
 @author: shane
 """
-import math
 import os
 import sys
 from typing import Dict, List
@@ -58,18 +57,14 @@ if __name__ == "__main__":
     #   iterating over single_players first, which IS sorted already
     if singles:
         singles_matchups = print_singles_matchups(
-            players=[
-                player for name, player in singles_players.items() if name in _players
-            ]
+            players=[singles_players[name] for name in _players],
         )
         print_singles_details(matchups=singles_matchups, players=singles_players)
     else:
         doubles_matchups = print_doubles_matchups(
-            players=[
-                player for name, player in doubles_players.items() if name in _players
-            ],
+            players=[doubles_players[name] for name in _players],
             delta_mu_threshold=15.0,
             two_rd_threshold=15.0,
         )
-        if N_PLAYERS < 6:
+        if N_PLAYERS < 7:
             print_doubles_details(matchups=doubles_matchups, players=doubles_players)
