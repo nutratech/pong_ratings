@@ -37,6 +37,7 @@ def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
             matchup[2],
             matchup[3],
             players,
+            p_game=matchup[7],
         )
 
 
@@ -48,7 +49,8 @@ if __name__ == "__main__":
     N_PLAYERS = len(_players)
     assert N_PLAYERS > 1, "Needs at least two players"
 
-    singles = not os.environ.get("DOUBLES")
+    singles = not int(os.environ.get("DOUBLES") or 0)
+    print(singles)
 
     # Load players/ratings from CSV
     singles_players, doubles_players = build_players()

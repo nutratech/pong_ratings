@@ -131,29 +131,33 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     _series = [
         (
             player1.username,
+            player1.str_rating(singles=True),
             round(_w_p1.mu - rating1.mu),
             round(_l_p1.mu - rating1.mu),
             round(_w_p1.phi + _l_p1.phi - 2 * rating1.phi, 1),
         ),
         (
             player2.username,
+            player2.str_rating(singles=True),
             round(_w_p2.mu - rating2.mu),
             round(_l_p2.mu - rating2.mu),
             round(_w_p2.phi + _l_p2.phi - 2 * rating2.phi, 1),
         ),
     ]
     _table = tabulate(
-        _series, headers=["", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)"]
+        _series, headers=["", "μ", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)"]
     )
     print(_table)
 
 
+# pylint: disable=too-many-arguments
 def eval_doubles(
     username1: str,
     username2: str,
     username3: str,
     username4: str,
     players: Dict[str, Player],
+    p_game: float,
 ) -> None:
     """
     Print out stats for (player1, player2) vs. (player3, player4)
@@ -178,6 +182,14 @@ def eval_doubles(
         1,
     )
 
+    # Calculate probabilities
+    p_point = GAME_PERCENT_TO_POINT_PROB[round(p_game * 10000)]
+
+    prob_match = p_match(p_game)
+    prob_win_at_least_1 = p_at_least_k_wins(p_game)
+    prob_deuce_reach = round(p_deuce(p_point)[11], 2)
+    prob_deuce_win = round(p_deuce_win(p_point), 2)
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -185,6 +197,31 @@ def eval_doubles(
         f"{username1} & {username2} vs. {username3} & {username4} "
         f"(Δμ={_delta_mu}, 2σ={_2rd})"
     )
+
+    # Game & Deuce probabilities
+    # print_subtitle(f"Game & Deuce odds (for {username1})")
+    _series = [
+        ("Game", round(p_game, 2)),
+        ("Point", round(p_point, 3)),
+        ("Deuce", prob_deuce_reach),
+        ("Win deuce", prob_deuce_win),
+    ]
+    print(tabulate(_series, headers=["x", "P(x)"]))
+    print()
+
+    # Match probability, and related stats
+    print_subtitle("Match odds and rating changes")
+    _series = [
+        ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
+        (
+            "Win 1+ games",
+            round(prob_win_at_least_1[2], 2),
+            round(prob_win_at_least_1[3], 3),
+        ),
+        ("Win all games", round(p_game**2, 2), round(p_game**3, 2)),
+    ]
+    print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
+    print()
 
     # New ratings (preview the changes)
     _w_t1, _w_t2 = tse.rate([(rating1, rating2), (rating3, rating4)])
