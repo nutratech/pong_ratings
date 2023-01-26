@@ -108,7 +108,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
     ]
-    print(tabulate(_series, headers=["", "P(...)"]))
+    print(tabulate(_series, headers=["x", "P(x)"]))
     print()
 
     # Match probability, and related stats
@@ -160,7 +160,7 @@ def eval_doubles(
     """
 
     # Only use doubles ratings for this
-    ts = trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)
+    tse = trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)
 
     # Alias players and ratings
     player1, player2 = players[username1], players[username2]
@@ -169,7 +169,7 @@ def eval_doubles(
     rating3, rating4 = player3.rating_doubles, player4.rating_doubles
 
     # Calculate misc stats
-    _delta_mu = round(rating1.mu - rating2.mu)
+    _delta_mu = round(rating1.mu - rating2.mu, 1)
     _2rd = round(
         1.96
         * math.sqrt(
@@ -185,3 +185,39 @@ def eval_doubles(
         f"{username1} & {username2} vs. {username3} & {username4} "
         f"(Δμ={_delta_mu}, 2σ={_2rd})"
     )
+
+    # New ratings (preview the changes)
+    _w_t1, _w_t2 = tse.rate([(rating1, rating2), (rating3, rating4)])
+    _l_t2, _l_t1 = tse.rate([(rating3, rating4), (rating1, rating2)])
+    _series = [
+        (
+            player1.username,
+            player1.str_rating(singles=False),
+            round(_w_t1[0].mu - rating1.mu, 1),
+            round(_l_t1[0].mu - rating1.mu, 1),
+            round(_w_t1[0].sigma + _l_t1[0].sigma - 2 * rating1.sigma, 1),
+        ),
+        (
+            player2.username,
+            player2.str_rating(singles=False),
+            round(_w_t1[1].mu - rating2.mu, 1),
+            round(_l_t1[1].mu - rating2.mu, 1),
+            round(_w_t1[1].sigma + _l_t1[1].sigma - 2 * rating2.sigma, 1),
+        ),
+        (
+            player3.username,
+            player3.str_rating(singles=False),
+            round(_w_t2[0].mu - rating3.mu, 1),
+            round(_l_t2[0].mu - rating3.mu, 1),
+            round(_w_t2[0].sigma + _l_t2[0].sigma - 2 * rating3.sigma, 1),
+        ),
+        (
+            player4.username,
+            player4.str_rating(singles=False),
+            round(_w_t2[1].mu - rating4.mu, 1),
+            round(_l_t2[1].mu - rating4.mu, 1),
+            round(_w_t2[1].sigma + _l_t2[1].sigma - 2 * rating4.sigma, 1),
+        ),
+    ]
+    _table = tabulate(_series, headers=["", "μ", "T1 wins", "T2 wins", "avg(Δσ)"])
+    print(_table)
