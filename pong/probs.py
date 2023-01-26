@@ -49,6 +49,21 @@ def p_game(p: float) -> Dict[int, float]:
     return {n: _p_n(n) for n in [11, 21]}
 
 
+def p_at_least_k_points(p: float, k: int) -> float:
+    """
+    Find the probability of winning at least k points in a game to 11.
+    :param p: Probability of winning an individual point
+    :param k: Points to win (k < 10)
+    """
+
+    def p_n(n: int) -> float:
+        """Probability to win exactly n points, n < 10"""
+        assert n < 10, "Can't calculate n > 9 pts"
+        return math.comb(11 + n, n) * p**n * (1 - p) ** 11
+
+    return 1 - sum(p_n(i) for i in range(k))
+
+
 def p_at_least_k_wins(p: float) -> Dict[int, float]:
     """
     Find the probability of winning at least k times out of a best of 3, 5, or 7.
