@@ -157,7 +157,7 @@ def eval_doubles(
     username3: str,
     username4: str,
     players: Dict[str, Player],
-    p_game: float,
+    prob_game: float,
 ) -> None:
     """
     Print out stats for (player1, player2) vs. (player3, player4)
@@ -183,12 +183,12 @@ def eval_doubles(
     )
 
     # Calculate probabilities
-    p_point = GAME_PERCENT_TO_POINT_PROB[round(p_game * 10000)]
+    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
 
-    prob_match = p_match(p_game)
-    prob_win_at_least_1 = p_at_least_k_wins(p_game)
-    prob_deuce_reach = round(p_deuce(p_point)[11], 2)
-    prob_deuce_win = round(p_deuce_win(p_point), 2)
+    prob_match = p_match(prob_game)
+    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
+    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
+    prob_deuce_win = round(p_deuce_win(prob_point), 2)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -201,8 +201,8 @@ def eval_doubles(
     # Game & Deuce probabilities
     # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
-        ("Game", round(p_game, 2)),
-        ("Point", round(p_point, 3)),
+        ("Game", round(prob_game, 2)),
+        ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
     ]
@@ -218,7 +218,7 @@ def eval_doubles(
             round(prob_win_at_least_1[2], 2),
             round(prob_win_at_least_1[3], 3),
         ),
-        ("Win all games", round(p_game**2, 2), round(p_game**3, 2)),
+        ("Win all games", round(prob_game ** 2, 2), round(prob_game ** 3, 2)),
     ]
     print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
     print()

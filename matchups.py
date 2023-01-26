@@ -37,7 +37,7 @@ def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
             matchup[2],
             matchup[3],
             players,
-            p_game=matchup[7],
+            prob_game=matchup[7],
         )
 
 
