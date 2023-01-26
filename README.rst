@@ -72,3 +72,5 @@ You can run the top-level script, e.g.
 
 **NOTE:** You can also run the script without player name arguments. Just set
 the ``PLAYERS`` variable as in the above section ("Filtering Players").
+
+You can switch between modes by setting ``DOUBLES=1`` in the ``.env`` file.

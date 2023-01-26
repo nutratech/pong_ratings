@@ -180,7 +180,9 @@ def build_ratings() -> List[Player]:
     return sorted_players
 
 
-def print_matchups(players: List[Player]) -> None:
+def print_doubles_matchups(
+    players: List[Player], delta_mu_threshold=3.0, two_rd_threshold=9.5
+) -> List[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -239,7 +241,10 @@ def print_matchups(players: List[Player]) -> None:
                         )
                     )
                     # Short list only match ups with small delta mu and small sigma
-                    if _delta_rating > 3 or _2_rd_avg > 9.5:
+                    if (
+                        _delta_rating > delta_mu_threshold
+                        or _2_rd_avg > two_rd_threshold
+                    ):
                         n_skipped_matchups += 1
                         continue
 
@@ -281,7 +286,7 @@ def print_matchups(players: List[Player]) -> None:
         f"Pair ups [top {min(_n_top, _n_choose_2_teams)}, "
         f"({len(players)}C2*{len(players) - 2}C2)/2={_n_choose_2_teams} possible]"
     )
-    matchups.sort(key=lambda x: math.fabs(0.5 - x[-2]), reverse=True)
+    matchups.sort(key=lambda x: x[-2], reverse=True)
 
     # Verify things
     assert (
@@ -301,6 +306,8 @@ def print_matchups(players: List[Player]) -> None:
         f"({round(_n_choose_2_teams / t_delta)}/s), "
         f"skipped {n_skipped_matchups}"
     )
+
+    return matchups
 
 
 def print_progresses(_players: List[Player]) -> None:
@@ -324,5 +331,5 @@ if __name__ == "__main__":
     cache_ratings_csv_file(_sorted_players, singles=False)
 
     # TODO: filter, or match based on club, or create greedy pairing algorithm
-    print_matchups(_sorted_players)
+    print_doubles_matchups(_sorted_players)
     print_progresses(_sorted_players)

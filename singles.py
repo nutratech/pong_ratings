@@ -134,7 +134,7 @@ def build_ratings() -> List[Player]:
     return sorted_players
 
 
-def print_matchups(players: List[Player]) -> None:
+def print_singles_matchups(players: List[Player]) -> List[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -216,6 +216,8 @@ def print_matchups(players: List[Player]) -> None:
     )
     print(_table)
 
+    return matchups
+
 
 def print_progresses(_players: List[Player]) -> None:
     """Prints rating progress graphs"""
@@ -237,7 +239,7 @@ if __name__ == "__main__":
     _sorted_players = filter_players(build_ratings())
     cache_ratings_csv_file(_sorted_players, singles=True)
 
-    print_matchups(_sorted_players)
+    print_singles_matchups(_sorted_players)
 
     # Filter players with a highly uncertain rating
     _sorted_players = list(
