@@ -59,6 +59,27 @@ def build_players() -> tuple:
     return singles_players, doubles_players
 
 
+def _inverse_probs(prob_game: float) -> Dict[str:float]:
+    """Returns common match / point / game metrics to both singles & doubles"""
+
+    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
+
+    prob_match = p_match(prob_game)
+    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
+    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
+    prob_deuce_win = round(p_deuce_win(prob_point), 2)
+    prob_win_6_out_of_6 = round(prob_game**6, 3)
+
+    return {
+        "prob_point": prob_point,
+        "prob_match": prob_match,
+        "prob_win_at_least_1": prob_win_at_least_1,
+        "prob_deuce_reach": prob_deuce_reach,
+        "prob_deuce_win": prob_deuce_win,
+        "prob_win_6_out_of_6": prob_win_6_out_of_6,
+    }
+
+
 def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> None:
     """
     Print out stats for player1 vs. player2
@@ -88,13 +109,14 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     )
     prob_game = (prob_p1_game + (1 - prob_p2_game)) / 2
 
-    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
+    inverse_probs = _inverse_probs(prob_game)
 
-    prob_match = p_match(prob_game)
-    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
-    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
-    prob_deuce_win = round(p_deuce_win(prob_point), 2)
-    prob_win_6_out_of_6 = round(prob_game**6, 3)
+    prob_point = inverse_probs["prob_point"]
+    prob_match = inverse_probs["prob_match"]
+    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
+    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs["prob_deuce_win"]
+    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -186,13 +208,14 @@ def eval_doubles(
     )
 
     # Calculate probabilities
-    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
+    inverse_probs = _inverse_probs(prob_game)
 
-    prob_match = p_match(prob_game)
-    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
-    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
-    prob_deuce_win = round(p_deuce_win(prob_point), 2)
-    prob_win_6_out_of_6 = round(prob_game**6, 3)
+    prob_point = inverse_probs["prob_point"]
+    prob_match = inverse_probs["prob_match"]
+    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
+    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs["prob_deuce_win"]
+    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
