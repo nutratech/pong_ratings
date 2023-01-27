@@ -8,7 +8,7 @@ from typing import Dict, Union
 
 import pytest
 
-from pong import DRAW_PROB_DOUBLES, probs
+from pong import probs
 
 # pylint: disable=invalid-name
 
@@ -41,7 +41,7 @@ def test_p_match(input_dict: Dict):
         # Near deuce, deuce, and post-deuce
         # (0.5, 8, 0.7),
         # (0.5, 9, 0.6),
-        (0.5, 10, 1 / 2 + DRAW_PROB_DOUBLES),
+        (0.5, 10, probs.p_deuce(0.5) + probs.p_game_straight(0.5)),
         # (0.5, 15, 0.2),
         # 0.4 to 0.6 expected results
         (0.4, 4, 0.84916349599744),

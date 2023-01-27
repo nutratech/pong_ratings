@@ -7,22 +7,30 @@ Probability tools used for side statistics.
 """
 import math
 import os
-from typing import Dict
 
 from tabulate import tabulate
 
 # pylint: disable=invalid-name
 
 
-def p_deuce(p: float) -> Dict[int, float]:
+def p_game_straight(p: float, n=11) -> float:
+    """
+    Probability of winning a game (without going to deuce, e.g. 11-9 or 11-0)
+    :param p: Probability of winning an individual point
+    :param n: Points to win game (e.g. 11 or 21)
+    """
+    return sum(
+        p**n * (1 - p) ** k * (math.comb(n - 1 + k, k)) for k in range(0, n - 1)
+    )
+
+
+def p_deuce(p: float, n=11) -> float:
     """
     Get probability of reaching 10-10 score, based on probability to win a point.
     :param p: Probability of winning an individual point
+    :param n: Points to win game (e.g. 11 or 21)
     """
-    return {
-        n: p ** (n - 1) * (1 - p) ** (n - 1) * math.comb(2 * (n - 1), n - 1)
-        for n in [11, 21]
-    }
+    return p ** (n - 1) * (1 - p) ** (n - 1) * math.comb(2 * (n - 1), n - 1)
 
 
 def p_deuce_win(p: float) -> float:
@@ -33,46 +41,39 @@ def p_deuce_win(p: float) -> float:
     return p**2 / (1 - 2 * p * (1 - p))
 
 
-def p_game(p: float) -> Dict[int, float]:
+def p_game(p: float, n=11) -> float:
     """
     Probability of winning a game, based on probability to win a point.
     :param p: Probability of winning an individual point
+    :param n: Points to win game (e.g. 11 or 21)
     """
-
-    def _p_n(n: int) -> float:
-        _sum = sum(
-            p**n * (1 - p) ** k * (math.comb(n - 1 + k, k)) for k in range(0, n - 1)
-        )
-        _sum += p_deuce(p)[n] * p_deuce_win(p)
-        return round(_sum, 3)
-
-    return {n: _p_n(n) for n in [11, 21]}
+    return p_game_straight(p, n) + p_deuce(p, n) * p_deuce_win(p)
 
 
 def p_at_least_k_points(p: float, k: int) -> float:
     """
     Find the probability of winning at least k points in a game to 11.
     :param p: Probability of winning an individual point
-    :param k: Points to win (k < 11)
+    :param k: Goal to score # of points (k < 11), e.g. 1, 4, or 6
     """
 
     assert k < 11, "Can't calculate k > 10 pts"
 
     # Probabilities based on game of 11 points (not 21)
     prob_lose_with_k_points = math.comb(11 + k, k) * p**k * (1 - p) ** 11
-    prob_deuce = p_deuce(p)[11]
-    prob_win = p_game(p)[11]
+    prob_deuce = p_deuce(p)
+    prob_win_straight = p_game_straight(p)
 
     # "Trivial case with k=0 has P=1.0"
     if k == 0:
         return 1.0
 
-    # k=10  =>  P(deuce) + P(win)
+    # k=10  =>  P(deuce) + P(straight win)
     if k == 10:
-        return prob_win + prob_deuce
+        return prob_deuce + prob_win_straight
 
     # k<10  =>  P(straight loss with k points) + P(deuce) + P(win)
-    return prob_lose_with_k_points + prob_deuce + prob_win
+    return prob_lose_with_k_points + prob_deuce + prob_win_straight
 
 
 def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
@@ -115,15 +116,13 @@ def p_match(p: float, n: int) -> float:
 
     :param p: Probability to win one game, between 0.0 - 1.0
     :param n: First to win n games, e.g. win 3 games => 5 game match
+
+    First few examples, best of 3, 5, and 7:
+        2: p**2 * (1 + 2 * (1 - p)),
+        3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
+        4: p**4 * (1 + 4 * (1 - p) + 10 * (1 - p) ** 2 + 20 * (1 - p) ** 3),
     """
-
     return p**n * sum(math.comb(n - 1 + k, k) * (1 - p) ** k for k in range(n))
-
-    # return {
-    #     2: p**2 * (1 + 2 * (1 - p)),
-    #     3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
-    #     4: p**4 * (1 + 4 * (1 - p) + 10 * (1 - p) ** 2 + 20 * (1 - p) ** 3),
-    # }
 
 
 def print_table_common_deuce_odds() -> None:
@@ -131,9 +130,8 @@ def print_table_common_deuce_odds() -> None:
     print(os.linesep + "Odds of reaching deuce")
     _series = []
     for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
-        _do = p_deuce(_po)
-        _20do = round(_do[11], 3)
-        _40do = round(_do[21], 3)
+        _20do = round(p_deuce(_po, n=11), 3)
+        _40do = round(p_deuce(_po, n=21), 3)
         _pwd = round(_po**2 / (1 - 2 * _po * (1 - _po)), 3)
         _series.append((_po, _20do, _40do, _pwd))
 
@@ -149,9 +147,8 @@ def print_table_common_game_odds() -> None:
     print(os.linesep + "Game odds")
     _series = []
     for _po in [0.5, 0.51, 0.55, 0.6, 0.65, 0.7, 0.8]:
-        _go = p_game(_po)
-        _11go = _go[11]
-        _21go = _go[21]
+        _11go = round(p_game(_po, n=11), 3)
+        _21go = round(p_game(_po, n=21), 3)
         _series.append((_po, _11go, _21go))
 
     _table = tabulate(
