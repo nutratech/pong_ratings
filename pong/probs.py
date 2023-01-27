@@ -64,11 +64,14 @@ def p_at_least_k_points(p: float, k: int) -> float:
     return 1 - sum(p_n(i) for i in range(k))
 
 
-def p_at_least_k_wins(p: float) -> Dict[int, float]:
+def p_at_least_k_wins_in_match(p: float, k: int) -> Dict[int, float]:
     """
     Find the probability of winning at least k times out of a best of 3, 5, or 7.
     :param p: Probability to win one game, between 0.0 - 1.0
+    :param k: Number of games to win
+    # TODO: p_at_least_k_wins_out_of_n_games()
     """
+    assert k < 5, "Only matches up to 7 games are supported, e.g. k=4"
 
     def _p_n_k(n: int, _k=1) -> float:
         """
@@ -153,7 +156,7 @@ def print_table_common_match_win_at_least_k_games_odds() -> None:
     print(os.linesep + "Chances to win at least 1 game")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
-        _mo = p_at_least_k_wins(_go)
+        _mo = p_at_least_k_wins_in_match(_go)
         _2mo = round(_mo[2], 3)
         _3mo = round(_mo[3], 3)
         _4mo = round(_mo[4], 3)

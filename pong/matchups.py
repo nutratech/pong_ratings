@@ -18,7 +18,7 @@ from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
 from pong.models import Player
-from pong.probs import p_at_least_k_wins, p_deuce, p_deuce_win, p_match
+from pong.probs import p_at_least_k_wins_in_match, p_deuce, p_deuce_win, p_match
 
 
 def build_players() -> tuple:
@@ -59,13 +59,13 @@ def build_players() -> tuple:
     return singles_players, doubles_players
 
 
-def _inverse_probs(prob_game: float) -> Dict[str:float]:
+def _inverse_probs(prob_game: float) -> Dict[str, float]:
     """Returns common match / point / game metrics to both singles & doubles"""
 
     prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
 
     prob_match = p_match(prob_game)
-    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
+    prob_win_at_least_1 = p_at_least_k_wins_in_match(prob_game)
     prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
     prob_deuce_win = round(p_deuce_win(prob_point), 2)
     prob_win_6_out_of_6 = round(prob_game**6, 3)
