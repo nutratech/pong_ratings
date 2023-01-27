@@ -17,25 +17,25 @@ from singles import print_singles_matchups
 
 def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
     """Prints the details for each requested match-ups"""
-    for matchup in matchups:
+    for pairing in matchups:
         eval_singles(
-            matchup[0],
-            matchup[1],
+            pairing[0],
+            pairing[1],
             players,
         )
 
 
 def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
     """Prints the details for each possible team pairing"""
-    for matchup in matchups:
+    for pairing in matchups:
         eval_doubles(
-            matchup[0],
-            matchup[1],
-            matchup[2],
-            matchup[3],
+            pairing[0],
+            pairing[1],
+            pairing[2],
+            pairing[3],
             players,
-            prob_game=matchup[-1],
-            quality=matchup[-2],
+            prob_game=pairing[-1],
+            quality=pairing[-2],
         )
 
 
@@ -57,12 +57,20 @@ if __name__ == "__main__":
     #   iterating over single_players first, which IS sorted already
     if singles:
         singles_matchups = print_singles_matchups(
-            players=[singles_players[name] for name in _players]
+            players=sorted(
+                [singles_players[name] for name in _players],
+                key=lambda p: p.rating_singles.mu,
+                reverse=True,
+            )
         )
         print_singles_details(matchups=singles_matchups, players=singles_players)
     else:
         doubles_matchups = print_doubles_matchups(
-            players=[doubles_players[name] for name in _players],
+            players=sorted(
+                [doubles_players[name] for name in _players],
+                key=lambda p: p.rating_doubles.mu,
+                reverse=True,
+            ),
             delta_mu_threshold=15.0,
             two_rd_threshold=15.0,
         )
