@@ -19,9 +19,8 @@ def p_game_straight(p: float, n=11) -> float:
     :param p: Probability of winning an individual point
     :param n: Points to win game (e.g. 11 or 21)
     """
-    return sum(
-        p**n * (1 - p) ** k * (math.comb(n - 1 + k, k)) for k in range(0, n - 1)
-    )
+    # Sums this expression up from k=0 to 9 (if n=11)
+    return sum(math.comb(n - 1 + k, k) * p**n * (1 - p) ** k for k in range(0, n - 1))
 
 
 def p_deuce(p: float, n=11) -> float:
@@ -85,10 +84,13 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     # TODO: p_at_least_k_wins_out_of_n_games()
     """
 
+    def _prob_lose_match_win_i_games(i: int) -> float:
+        return math.comb(n + i, i) * (1 - p) ** n * p**i
+
     assert n > 0, "Can't have a best of zero"
     assert 0 <= k < n, f"Desired wins k must be between 0 and {n}"
 
-    m = 2 * n - 1  # e.g. n=3, m=5
+    # m = 2 * n - 1  # e.g. n=3, m=5
 
     # Probabilities based on the match
     prob_match = p_match(p, n)
@@ -97,16 +99,19 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     if k == 0:
         return 1.0
 
-    def _p_n_k(n: int, _k=1) -> float:
-        """
-        :param n: Win n games to win the match, e.g. 2 or 3
-        :param _k: Win at least k games, e.g. win at least 1 game against a good player
-        """
-        if _k > n:
-            return -1.0
-        return 1 - (1 - p) ** n
+    # P(win) + Sum [P(lose & win i games), for i in range(k)]
+    return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k))
 
-    return _p_n_k(n)
+    # def _p_n_k(n: int, _k=1) -> float:
+    #     """
+    #     :param n: Win n games to win the match, e.g. 2 or 3
+    #     :param _k: Win at least k games, e.g. win at least 1 game against a good player
+    #     """
+    #     if _k > n:
+    #         return -1.0
+    #     return 1 - (1 - p) ** n
+    #
+    # return _p_n_k(n)
 
 
 def p_match(p: float, n: int) -> float:
