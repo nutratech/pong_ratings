@@ -90,28 +90,15 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     assert n > 0, "Can't have a best of zero"
     assert 0 <= k < n, f"Desired wins k must be between 0 and {n}"
 
-    # m = 2 * n - 1  # e.g. n=3, m=5
+    # Trivial case k=0 has P=1.0 for all match sizes
+    if k == 0:
+        return 1.0
 
     # Probabilities based on the match
     prob_match = p_match(p, n)
 
-    # "Trivial case k=0 has P=1.0 for all match sizes"
-    if k == 0:
-        return 1.0
-
     # P(win) + Sum [P(lose & win i games), for i in range(k)]
-    return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k))
-
-    # def _p_n_k(n: int, _k=1) -> float:
-    #     """
-    #     :param n: Win n games to win the match, e.g. 2 or 3
-    #     :param _k: Win at least k games, e.g. win at least 1 game against a good player
-    #     """
-    #     if _k > n:
-    #         return -1.0
-    #     return 1 - (1 - p) ** n
-    #
-    # return _p_n_k(n)
+    return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k, n))
 
 
 def p_match(p: float, n: int) -> float:
