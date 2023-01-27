@@ -8,7 +8,7 @@ Detailed information about requested match up(s)
 """
 import csv
 import math
-from typing import Dict
+from typing import Dict, Union
 
 import trueskill
 from tabulate import tabulate
@@ -59,13 +59,13 @@ def build_players() -> tuple:
     return singles_players, doubles_players
 
 
-def _inverse_probs(prob_game: float) -> Dict[str, float]:
+def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]]:
     """Returns common match / point / game metrics to both singles & doubles"""
 
     prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
 
     prob_match = p_match(prob_game)
-    prob_win_at_least_1 = p_at_least_k_wins_in_match(prob_game)
+    prob_win_at_least_1 = p_at_least_k_wins_in_match(prob_game, k=1)
     prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
     prob_deuce_win = round(p_deuce_win(prob_point), 2)
     prob_win_6_out_of_6 = round(prob_game**6, 3)

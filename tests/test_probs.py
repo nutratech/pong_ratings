@@ -7,7 +7,7 @@ Created on Thu Jan 26 15:03:24 2023
 
 import pytest
 
-from pong import probs, DRAW_PROB_DOUBLES
+from pong import DRAW_PROB_DOUBLES, probs
 
 
 @pytest.mark.parametrize(

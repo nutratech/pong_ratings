@@ -156,7 +156,8 @@ def print_table_common_match_win_at_least_k_games_odds() -> None:
     print(os.linesep + "Chances to win at least 1 game")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
-        _mo = p_at_least_k_wins_in_match(_go)
+        # TOD: hard coded k=1, for now that's all the equation supports
+        _mo = p_at_least_k_wins_in_match(_go, 1)
         _2mo = round(_mo[2], 3)
         _3mo = round(_mo[3], 3)
         _4mo = round(_mo[4], 3)
