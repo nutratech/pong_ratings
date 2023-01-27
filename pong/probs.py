@@ -53,49 +53,77 @@ def p_at_least_k_points(p: float, k: int) -> float:
     """
     Find the probability of winning at least k points in a game to 11.
     :param p: Probability of winning an individual point
-    :param k: Points to win (k < 10)
+    :param k: Points to win (k < 11)
     """
 
-    def p_n(n: int) -> float:
-        """Probability to win exactly n points, n < 10"""
-        assert n < 10, "Can't calculate n > 9 pts"
-        return math.comb(11 + n, n) * p**n * (1 - p) ** 11
+    assert k < 11, "Can't calculate k > 10 pts"
 
-    return 1 - sum(p_n(i) for i in range(k))
+    # Probabilities based on game of 11 points (not 21)
+    prob_lose_with_k_points = math.comb(11 + k, k) * p**k * (1 - p) ** 11
+    prob_deuce = p_deuce(p)[11]
+    prob_win = p_game(p)[11]
+
+    # "Trivial case with k=0 has P=1.0"
+    if k == 0:
+        return 1.0
+
+    # k=10  =>  P(deuce) + P(win)
+    if k == 10:
+        return prob_win + prob_deuce
+
+    # k<10  =>  P(straight loss with k points) + P(deuce) + P(win)
+    return prob_lose_with_k_points + prob_deuce + prob_win
 
 
-def p_at_least_k_wins_in_match(p: float, k: int) -> Dict[int, float]:
+def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     """
     Find the probability of winning at least k times out of a best of 3, 5, or 7.
     :param p: Probability to win one game, between 0.0 - 1.0
-    :param k: Number of games to win
+    :param n: Number of games to win the match
+    :param k: Desired number to win (e.g. win at least 1 in a best of 5)
     # TODO: p_at_least_k_wins_out_of_n_games()
     """
-    assert k < 5, "Only matches up to 7 games are supported, e.g. k=4"
+
+    assert n > 0, "Can't have a best of zero"
+    assert 0 <= k < n, f"Desired wins k must be between 0 and {n}"
+
+    m = 2 * n - 1  # e.g. n=3, m=5
+
+    # Probabilities based on the match
+    prob_match = p_match(p, n)
+
+    # "Trivial case k=0 has P=1.0 for all match sizes"
+    if k == 0:
+        return 1.0
 
     def _p_n_k(n: int, _k=1) -> float:
         """
         :param n: Win n games to win the match, e.g. 2 or 3
         :param _k: Win at least k games, e.g. win at least 1 game against a good player
         """
+        if _k > n:
+            return -1.0
         return 1 - (1 - p) ** n
 
-    return {n: _p_n_k(n) for n in [2, 3, 4]}
+    return _p_n_k(n)
 
 
-def p_match(p: float) -> Dict[int, float]:
+def p_match(p: float, n: int) -> float:
     """
     Calculate probability to win a match (best of 3 & best of 5), based on probability
     to win a game.
 
     :param p: Probability to win one game, between 0.0 - 1.0
+    :param n: First to win n games, e.g. win 3 games => 5 game match
     """
 
-    return {
-        2: p**2 * (1 + 2 * (1 - p)),
-        3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
-        4: p**4 * (1 + 4 * (1 - p) + 10 * (1 - p) ** 2 + 20 * (1 - p) ** 3),
-    }
+    return p**n * sum(math.comb(n - 1 + k, k) * (1 - p) ** k for k in range(n))
+
+    # return {
+    #     2: p**2 * (1 + 2 * (1 - p)),
+    #     3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
+    #     4: p**4 * (1 + 4 * (1 - p) + 10 * (1 - p) ** 2 + 20 * (1 - p) ** 3),
+    # }
 
 
 def print_table_common_deuce_odds() -> None:
@@ -138,10 +166,9 @@ def print_table_common_match_odds() -> None:
     print(os.linesep + "Match odds")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
-        _mo = p_match(_go)
-        _2mo = round(_mo[2], 3)
-        _3mo = round(_mo[3], 3)
-        _4mo = round(_mo[4], 3)
+        _2mo = round(p_match(_go, n=2), 3)
+        _3mo = round(p_match(_go, n=3), 3)
+        _4mo = round(p_match(_go, n=4), 3)
         _series.append((_go, _2mo, _3mo, _4mo))
 
     _table = tabulate(
@@ -156,11 +183,10 @@ def print_table_common_match_win_at_least_k_games_odds() -> None:
     print(os.linesep + "Chances to win at least 1 game")
     _series = []
     for _go in [0.05, 0.1, 0.2, 0.3, 0.4, 0.45, 0.5]:
-        # TOD: hard coded k=1, for now that's all the equation supports
-        _mo = p_at_least_k_wins_in_match(_go, 1)
-        _2mo = round(_mo[2], 3)
-        _3mo = round(_mo[3], 3)
-        _4mo = round(_mo[4], 3)
+        # TODO: hard coded k=1, for now that's all the equation supports
+        _2mo = round(p_at_least_k_wins_in_match(_go, n=2, k=1), 3)
+        _3mo = round(p_at_least_k_wins_in_match(_go, n=3, k=1), 3)
+        _4mo = round(p_at_least_k_wins_in_match(_go, n=4, k=1), 3)
         _series.append((_go, _2mo, _3mo, _4mo))
 
     _table = tabulate(
