@@ -49,6 +49,22 @@ def p_game(p: float, n=11) -> float:
     return p_game_straight(p, n) + p_deuce(p, n) * p_deuce_win(p)
 
 
+def p_match(p: float, n: int) -> float:
+    """
+    Calculate probability to win a match (best of 3 & best of 5), based on probability
+    to win a game.
+
+    :param p: Probability to win one game, between 0.0 - 1.0
+    :param n: First to win n games, e.g. win 3 games => 5 game match
+
+    First few examples, best of 3, 5, and 7:
+        2: p**2 * (1 + 2 * (1 - p)),
+        3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
+        4: p**4 * (1 + 4 * (1 - p) + 10 * (1 - p) ** 2 + 20 * (1 - p) ** 3),
+    """
+    return p**n * sum(math.comb(n - 1 + k, k) * (1 - p) ** k for k in range(n))
+
+
 def p_at_least_k_points(p: float, k: int) -> float:
     """
     Find the probability of winning at least k points in a game to 11.
@@ -85,7 +101,7 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     """
 
     def _prob_lose_match_win_i_games(i: int) -> float:
-        return math.comb(n + i, i) * (1 - p) ** n * p**i
+        return math.comb(n - 1 + i, i) * (1 - p) ** n * p**i
 
     assert n > 0, "Can't have a best of zero"
     assert 0 <= k < n, f"Desired wins k must be between 0 and {n}"
@@ -99,22 +115,6 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
 
     # P(win) + Sum [P(lose & win i games), for i in range(k)]
     return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k, n))
-
-
-def p_match(p: float, n: int) -> float:
-    """
-    Calculate probability to win a match (best of 3 & best of 5), based on probability
-    to win a game.
-
-    :param p: Probability to win one game, between 0.0 - 1.0
-    :param n: First to win n games, e.g. win 3 games => 5 game match
-
-    First few examples, best of 3, 5, and 7:
-        2: p**2 * (1 + 2 * (1 - p)),
-        3: p**3 * (1 + 3 * (1 - p) + 6 * (1 - p) ** 2),
-        4: p**4 * (1 + 4 * (1 - p) + 10 * (1 - p) ** 2 + 20 * (1 - p) ** 3),
-    """
-    return p**n * sum(math.comb(n - 1 + k, k) * (1 - p) ** k for k in range(n))
 
 
 def print_table_common_deuce_odds() -> None:

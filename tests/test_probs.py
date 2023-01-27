@@ -58,11 +58,15 @@ def test_p_at_least_k_points(p_p: float, k: int, p_k: float):
     "input_data",
     [
         # n=3 => m=5 (best of 5, first to win 3)
+        # Trivial cases
         {"n": 3, "p_g": 0.0, "k": 0, "p_k": 1.0},
         {"n": 3, "p_g": 0.0, "k": 1, "p_k": 0.0},
-        # (0.4, 4, 0.84916349599744),
-        # (0.5, 8, 0.640716552734375),
-        # (0.6, 4, 0.99518057693184),
+        # Other cases
+        {"n": 3, "p_g": 0.5, "k": 1, "p_k": 0.0},
+        {"n": 3, "p_g": 0.75, "k": 1, "p_k": 0.0},
+        {"n": 2, "p_g": 0.9, "k": 1, "p_k": 0.0},
+        {"n": 3, "p_g": 0.9, "k": 1, "p_k": 0.0},
+        {"n": 3, "p_g": 0.9, "k": 2, "p_k": 0.0},
     ],
 )
 def test_p_at_least_k_wins(input_data: Dict[str, Union[int, float]]):
