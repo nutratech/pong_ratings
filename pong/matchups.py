@@ -68,7 +68,7 @@ def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]
     prob_win_at_least_1 = {
         n: p_at_least_k_wins_in_match(prob_game, n, k=1) for n in [2, 3, 4]
     }
-    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
+    prob_deuce_reach = round(p_deuce(prob_point), 2)
     prob_deuce_win = round(p_deuce_win(prob_point), 2)
     prob_win_6_out_of_6 = round(prob_game**6, 3)
 
