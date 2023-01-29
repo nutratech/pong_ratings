@@ -117,6 +117,14 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k, n))
 
 
+def n_fair_handicap_points(p: float) -> int:
+    """
+    Start e.g. up 7-0 or 6-0 against a stronger opponent for fair odds ~0.5 of winning
+    """
+    print("Not implemented")
+    return 0
+
+
 def print_table_common_deuce_odds() -> None:
     """Print a table for common deuce odds"""
     print(os.linesep + "Odds of reaching deuce")
