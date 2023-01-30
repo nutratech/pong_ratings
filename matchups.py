@@ -46,6 +46,8 @@ if __name__ == "__main__":
     # NOTE: either pass in on command line or set in .env file
     _players = sys.argv[1:] or os.environ["PLAYERS"]
     N_PLAYERS = len(_players)
+
+    # TODO: support N_PLAYERS = 1, just match that one person with all others
     if N_PLAYERS < 2:
         sys.exit(f"Needs at least two players, got {N_PLAYERS}")
 
