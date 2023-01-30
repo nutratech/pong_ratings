@@ -6,6 +6,7 @@ Created on Sun Jan  8 23:34:31 2023
 @author: shane
 """
 import math
+import sys
 from datetime import date, datetime
 from typing import List
 
@@ -207,7 +208,8 @@ def print_singles_matchups(players: List[Player]) -> List[tuple]:
     matchups.sort(key=lambda x: x[-1], reverse=True)
 
     # Verify things
-    assert len(matchups) == _n_choose_2_players, "Missed some match ups?"
+    if len(matchups) != _n_choose_2_players:
+        sys.exit(f"Missed some match ups? {len(matchups)} != {_n_choose_2_players}")
 
     # Print off best matches
     _table = tabulate(

@@ -7,6 +7,7 @@ Shared utilities by both singles and doubles interface
 """
 import csv
 import os
+import sys
 from io import StringIO
 from typing import List
 
@@ -34,7 +35,8 @@ def get_google_sheet(url: str) -> bytes:
     """
 
     response = requests.get(url, timeout=2)
-    assert response.status_code == 200, "Wrong status code"
+    if response.status_code != 200:
+        sys.exit(f"Wrong status code, {response.status_code}")
 
     return response.content
 

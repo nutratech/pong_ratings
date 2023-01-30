@@ -7,6 +7,7 @@ Probability tools used for side statistics.
 """
 import math
 import os
+import sys
 
 from tabulate import tabulate
 
@@ -72,7 +73,8 @@ def p_at_least_k_points(p: float, k: int) -> float:
     :param k: Goal to score # of points (k < 11), e.g. 1, 4, or 6
     """
 
-    assert k < 11, "Can't calculate k > 10 pts"
+    if k > 10:
+        sys.exit("Can't calculate k > 10 pts")
 
     # Probabilities based on game of 11 points (not 21)
     prob_lose_with_k_points = math.comb(11 + k, k) * p**k * (1 - p) ** 11
@@ -103,8 +105,11 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     def _prob_lose_match_win_i_games(i: int) -> float:
         return math.comb(n - 1 + i, i) * (1 - p) ** n * p**i
 
-    assert n > 0, "Can't have a best of zero"
-    assert 0 <= k < n, f"Desired wins k must be between 0 and {n}"
+    if n < 1:
+        sys.exit("Can't have a best of zero")
+
+    if k < 0 or k > n:
+        sys.exit(f"Desired wins k must be between 0 and {n}")
 
     # Trivial case k=0 has P=1.0 for all match sizes
     if k == 0:

@@ -10,6 +10,7 @@ import sys
 from typing import Dict, List
 
 from doubles import print_doubles_matchups
+from pong.env import MODE_SINGLES
 from pong.matchups import build_players, eval_doubles, eval_singles
 from pong.models import Player
 from singles import print_singles_matchups
@@ -45,9 +46,8 @@ if __name__ == "__main__":
     # NOTE: either pass in on command line or set in .env file
     _players = sys.argv[1:] or os.environ["PLAYERS"]
     N_PLAYERS = len(_players)
-    assert N_PLAYERS > 1, "Needs at least two players"
-
-    singles = not int(os.environ.get("DOUBLES") or 0)
+    if N_PLAYERS < 2:
+        sys.exit(f"Needs at least two players, got {N_PLAYERS}")
 
     # Load players/ratings from CSV
     singles_players, doubles_players = build_players()
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # Print the overview table 1st, detail view 2nd
     # NOTE: convoluted way to sort players in order of descending strength...
     #   iterating over single_players first, which IS sorted already
-    if singles:
+    if MODE_SINGLES:
         singles_matchups = print_singles_matchups(
             players=sorted(
                 [singles_players[name] for name in _players],
