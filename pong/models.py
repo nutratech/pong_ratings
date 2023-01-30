@@ -5,7 +5,7 @@ Created on Sun 08 Jan 2023 11∶26∶34 PM EST
 @author: shane
 Player model used for singles & doubles ratings, username, wins/losses, etc
 """
-from typing import Union
+from typing import Dict, List, Union
 
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
@@ -27,19 +27,22 @@ class Player:
 
         # Track singles related stats
         self.stack_ratings_singles = [glicko2.Glicko2()]
-        self.opponent_rating_wins_singles = []
-        self.opponent_rating_losses_singles = []
+        self.opponent_rating_wins_singles: List[float] = []
+        self.opponent_rating_losses_singles: List[float] = []
 
         # Track doubles related stats
         self.stack_ratings_doubles = [
             trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES),
         ]
-        self.partner_rating_doubles = []
-        self.opponent_rating_wins_doubles = []
-        self.opponent_rating_losses_doubles = []
+        self.partner_rating_doubles: List[trueskill.TrueSkill()] = []
+        self.opponent_rating_wins_doubles: List[float] = []
+        self.opponent_rating_losses_doubles: List[float] = []
 
         # Used to decide home club
-        self.club_appearances = {"singles": {}, "doubles": {}}
+        self.club_appearances: Dict[str, Dict[str, int]] = {
+            "singles": {},
+            "doubles": {},
+        }
 
     def __str__(self) -> str:
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
@@ -106,7 +109,7 @@ class Player:
 
         return f"{_wins}-{_losses}"
 
-    def avg_opponent(self, singles=True) -> int:
+    def avg_opponent(self, singles=True) -> Union[int, float]:
         """Returns average opponent"""
         if singles:
             return round(
@@ -131,7 +134,7 @@ class Player:
             1,
         )
 
-    def best_win(self, singles=True) -> Union[None, int]:
+    def best_win(self, singles=True) -> Union[None, int, float]:
         """Returns best win"""
         if singles:
             if self.opponent_rating_wins_singles:
