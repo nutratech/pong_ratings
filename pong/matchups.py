@@ -116,7 +116,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     prob_point = inverse_probs["prob_point"]
     prob_match = inverse_probs["prob_match"]
     prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
-    print(prob_win_at_least_1)
+    # print(prob_win_at_least_1)
     prob_deuce_reach = inverse_probs["prob_deuce_reach"]
     prob_deuce_win = inverse_probs["prob_deuce_win"]
     prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
