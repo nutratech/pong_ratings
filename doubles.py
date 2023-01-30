@@ -210,16 +210,9 @@ def print_doubles_matchups(
             player2 = players[i2]
 
             # Second team
-            for i3 in range(i1 + 1, n_players):
-                # Can't play yourself
-                if i3 == i2:
-                    continue
+            for i3 in range(i1 + 2, n_players):
                 player3 = players[i3]
-
                 for i4 in range(i3 + 1, n_players):
-                    # Can't play yourself
-                    if i4 in (i2, i1):
-                        continue
                     player4 = players[i4]
 
                     # Compute rating difference and average RD
