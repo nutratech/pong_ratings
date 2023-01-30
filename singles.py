@@ -130,10 +130,6 @@ def build_ratings() -> List[Player]:
     )
     print(_table)
 
-    # TEMPORARY
-    me: Player = players["shane"]
-    print([round(x.mu) for x in me.stack_ratings_singles])
-
     # Used to build pairings / ideal matches
     return sorted_players
 

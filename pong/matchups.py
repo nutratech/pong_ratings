@@ -116,10 +116,10 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     prob_point = inverse_probs["prob_point"]
     prob_match = inverse_probs["prob_match"]
     prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
-    # print(prob_win_at_least_1)
+    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+
     prob_deuce_reach = inverse_probs["prob_deuce_reach"]
     prob_deuce_win = inverse_probs["prob_deuce_win"]
-    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -127,7 +127,6 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     print_title(f"{username1} & {username2} (Δμ={_delta_mu}, RD={_rd})")
 
     # Game & Deuce probabilities
-    # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
@@ -216,9 +215,10 @@ def eval_doubles(
     prob_point = inverse_probs["prob_point"]
     prob_match = inverse_probs["prob_match"]
     prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+
     prob_deuce_reach = inverse_probs["prob_deuce_reach"]
     prob_deuce_win = inverse_probs["prob_deuce_win"]
-    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -233,7 +233,6 @@ def eval_doubles(
     print()
 
     # Game & Deuce probabilities
-    # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
