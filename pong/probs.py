@@ -8,6 +8,7 @@ Probability tools used for side statistics.
 import math
 import os
 import sys
+from typing import Tuple
 
 from tabulate import tabulate
 
@@ -122,12 +123,19 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k, n))
 
 
-def n_fair_handicap_points(p: float) -> int:
+def n_fair_handicap_points(p: float, n=11) -> Tuple[int, float]:
     """
     Start e.g. up 7-0 or 6-0 against a stronger opponent for fair odds ~0.5 of winning
+    :param p: Probability of winning an individual point
+    :param n: Points to win game (e.g. 11 or 21)
     """
-    print("Not implemented")
-    return 0
+    odds = []
+    # TODO: add real functions for odds of winning for both players starting with k pts
+    odds.extend([(k, p**k) for k in range(n)])
+    # odds.extend([(k, p**k) for k in range(n)])
+    odds.sort(key=lambda x: math.fabs(x[1] - 0.5), reverse=True)
+
+    return odds[0]
 
 
 def print_table_common_deuce_odds() -> None:
