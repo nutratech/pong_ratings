@@ -133,24 +133,26 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
     # TODO: support p.rating(singles=singles)?
     if singles:
         _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_singles.csv")
-        headers = ["username", "mu", "phi", "sigma"]
+        headers = ["username", "mu", "phi", "sigma", "history"]
         _series = [
             (
                 p.username,
                 p.rating_singles.mu,
                 p.rating_singles.phi,
                 p.rating_singles.sigma,
+                [round(x.mu) for x in p.stack_ratings_singles],
             )
             for p in sorted_players
         ]
     else:
         _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_doubles.csv")
-        headers = ["username", "mu", "sigma"]
+        headers = ["username", "mu", "sigma", "history"]
         _series = [
             (
                 p.username,
                 p.rating_doubles.mu,
                 p.rating_doubles.sigma,
+                [round(x.mu, 1) for x in p.stack_ratings_doubles],
             )
             for p in sorted_players
         ]

@@ -12,8 +12,9 @@ from pong.env import PONG_SHEET_GID_DOUBLES, PONG_SHEET_GID_SINGLES, SPREADSHEET
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
-# Hard-coded URL values pointing to our sheet
 def _url(gid: int) -> str:
+    """Hard-coded URL values pointing to our sheet"""
+
     return (
         "https://docs.google.com/spreadsheet/ccc"
         f"?key={SPREADSHEET_KEY}"

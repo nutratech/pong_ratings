@@ -33,7 +33,12 @@ def do_games(
     """
 
     def _update_rating(_player1: Player, _player2: Player) -> None:
-        """Updates ratings."""
+        """
+        Updates ratings.
+        TODO:
+            - store date and other meta data in stack
+            - store whole glicko object in opponent_rating_wins_singles (not just mu)
+        """
 
         # Calculate new ratings
         _new_player1_rating, _new_player2_rating = glicko2.Glicko2().rate_1vs1(
