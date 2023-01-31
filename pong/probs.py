@@ -168,12 +168,12 @@ def n_fair_handicap_points(p: float, n=11) -> List[Tuple[int, float]]:
     :param n: Points to win game (e.g. 11 or 21)
     """
 
-    def _prob_game_handicap():
+    def _prob_game_handicap(_p: float):
         prob_game_handicap = [
             (
                 j,
-                p_game_straight_handicap(p, n=n, i=j)
-                + p_deuce_handicap(p, n=n, i=j) * p_deuce_win(p),
+                p_game_straight_handicap(_p, n=n, i=j)
+                + p_deuce_handicap(_p, n=n, i=j) * p_deuce_win(_p),
             )
             for j in range(n)
         ]
@@ -182,11 +182,10 @@ def n_fair_handicap_points(p: float, n=11) -> List[Tuple[int, float]]:
 
     if p > 0.5:
         # Use the lower value of P1 vs. P2 (P1 + P2 = 1.0)
-        p = 1 - p
-        return [(n, 1 - p) for n, p in _prob_game_handicap()]
+        return [(n, 1 - p) for n, p in _prob_game_handicap(1 - p)]
 
     # Otherwise return normal value
-    return _prob_game_handicap()
+    return _prob_game_handicap(p)
 
 
 def print_table_common_deuce_odds() -> None:
