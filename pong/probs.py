@@ -25,6 +25,20 @@ def p_game_straight(p: float, n=11) -> float:
     return sum(math.comb(n - 1 + k, k) * p**n * (1 - p) ** k for k in range(0, n - 1))
 
 
+def p_game_straight_handicap(p: float, n=11, i=0) -> float:
+    """
+    Probability of winning a game (without going to deuce, e.g. 11-9 or 11-0)
+    :param p: Probability of winning an individual point
+    :param n: Points to win game (e.g. 11 or 21)
+    :param i: Initial score of lower rated player (e.g. 0-6 starting score)
+    """
+    # Sums this expression up from k=0 to 9 (if n=11)
+    return sum(
+        math.comb(n - i - 1 + k, k) * p ** (n - i) * (1 - p) ** k
+        for k in range(0, n - 1)
+    )
+
+
 def p_deuce(p: float, n=11) -> float:
     """
     Get probability of reaching 10-10 score, based on probability to win a point.
@@ -32,6 +46,16 @@ def p_deuce(p: float, n=11) -> float:
     :param n: Points to win game (e.g. 11 or 21)
     """
     return p ** (n - 1) * (1 - p) ** (n - 1) * math.comb(2 * (n - 1), n - 1)
+
+
+def p_deuce_handicap(p: float, n=11, i=0) -> float:
+    """
+    Get probability of reaching 10-10 score, based on probability to win a point.
+    :param p: Probability of winning an individual point
+    :param n: Points to win game (e.g. 11 or 21)
+    :param i: Initial score of lower rated player (e.g. 0-6 starting score)
+    """
+    return p ** (n - i - 1) * (1 - p) ** (n - 1) * math.comb(2 * (n - 1) - i, n - i - 1)
 
 
 def p_deuce_win(p: float) -> float:
@@ -129,13 +153,26 @@ def n_fair_handicap_points(p: float, n=11) -> Tuple[int, float]:
     :param p: Probability of winning an individual point
     :param n: Points to win game (e.g. 11 or 21)
     """
-    odds = []
-    # TODO: add real functions for odds of winning for both players starting with k pts
-    odds.extend([(k, p**k) for k in range(n)])
-    # odds.extend([(k, p**k) for k in range(n)])
-    odds.sort(key=lambda x: math.fabs(x[1] - 0.5), reverse=True)
 
-    return odds[0]
+    def _prob_game_handicap():
+        prob_game_handicap = [
+            (
+                j,
+                p_game_straight_handicap(p, n=n, i=j)
+                + p_deuce_handicap(p, n=n, i=j) * p_deuce_win(p),
+            )
+            for j in range(11)
+        ]
+        prob_game_handicap.sort(key=lambda x: math.fabs(x[1] - 0.5), reverse=False)
+        return prob_game_handicap
+
+    if p > 0.5:
+        # Use the lower value of P1 vs. P2 (P1 + P2 = 1.0)
+        p = 1 - p
+        result = _prob_game_handicap()[0]
+        return result[0], 1 - result[1]
+    # Otherwise return normal value
+    return _prob_game_handicap()[0]
 
 
 def print_table_common_deuce_odds() -> None:

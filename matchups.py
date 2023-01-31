@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # Parse player names
     # NOTE: either pass in on command line or set in .env file
-    _players = sys.argv[1:] or os.environ["PLAYERS"]
+    _players = sys.argv[1:] or os.environ["PONG_PLAYERS"].split()
     N_PLAYERS = len(_players)
 
     # TODO: support N_PLAYERS = 1, just match that one person with all others

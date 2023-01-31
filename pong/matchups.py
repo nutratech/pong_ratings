@@ -128,6 +128,12 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     prob_deuce_win = inverse_probs["prob_deuce_win"]
 
     # Calculate other statistics
+    # prob_game_handicap = [
+    #     p_game_straight_handicap(prob_point, i=j)
+    #     + p_deuce_handicap(prob_point, i=j) * prob_deuce_win
+    #     for j in range(11)
+    # ]
+    # prob_deuce_handicap = p_deuce_handicap(0.5, i=0)
     fair_handicap = n_fair_handicap_points(prob_point)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,14 +147,15 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
+        # TODO: win 5/6, 4/6, 3/6, 2/6
         ("Win 6/6", prob_win_6_out_of_6),
     ]
     print(tabulate(_series, headers=["x", "P(x)"]))
     print()
 
     # Other stats
-    # print(f"Fair handicap {fair_handicap[0]}-0 (P={fair_handicap[1]})")
-    # print()
+    print(f"Fair handicap:    0-{fair_handicap[0]} (P={round(fair_handicap[1], 2)})")
+    print()
 
     # Match probability, and related stats
     print_subtitle("Match odds and rating changes")
