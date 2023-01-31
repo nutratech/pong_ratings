@@ -86,6 +86,13 @@ class Player:
             )
         return _abbrev_club(_club)
 
+    def clubs(self):
+        """Gets all the clubs someone has appeared at"""
+        _clubs = set()
+        _clubs.update(self.club_appearances["singles"])
+        _clubs.update(self.club_appearances["doubles"])
+        return _clubs
+
     def str_rating(self, singles=True) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
         if singles:
