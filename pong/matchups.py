@@ -128,12 +128,6 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     prob_deuce_win = inverse_probs["prob_deuce_win"]
 
     # Calculate other statistics
-    # prob_game_handicap = [
-    #     p_game_straight_handicap(prob_point, i=j)
-    #     + p_deuce_handicap(prob_point, i=j) * prob_deuce_win
-    #     for j in range(11)
-    # ]
-    # prob_deuce_handicap = p_deuce_handicap(0.5, i=0)
     fair_handicap = n_fair_handicap_points(prob_point)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
