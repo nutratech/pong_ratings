@@ -41,24 +41,11 @@ time.
 
   ./doubles.py
 
+  # Singles
+  ./matchups.py benji norm
 
-Filtering Players
-~~~~~~~~~~~~~~~~~
-
-When there are too many doubles pairings, you can filter by present players
-only.
-
-Add this to a ``.env`` file.
-
-.. code-block:: bash
-
-  PLAYERS=player1 player2 player3 player4
-
-
-TODO
-####
-
-- Preview change, calculate odds against particular opponent
+  # Doubles
+  PONG_DOUBLES=1 ./matchups.py shane mal norm amos benji
 
 
 Match ups for given players
@@ -74,3 +61,16 @@ You can run the top-level script, e.g.
 the ``PLAYERS`` variable as in the above section ("Filtering Players").
 
 You can switch between modes by setting ``DOUBLES=1`` in the ``.env`` file.
+
+
+Filtering Players
+~~~~~~~~~~~~~~~~~
+
+When there are too many doubles pairings, you can filter by present players
+only.
+
+Add this to a ``.env`` file.
+
+.. code-block:: bash
+
+  PONG_PLAYERS=player1 player2 player3 player4
