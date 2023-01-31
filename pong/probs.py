@@ -124,7 +124,6 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     :param p: Probability to win one game, between 0.0 - 1.0
     :param n: Number of games to win the match
     :param k: Desired number to win (e.g. win at least 1 in a best of 5)
-    # TODO: p_at_least_k_wins_out_of_n_games()
     """
 
     def _prob_lose_match_win_i_games(i: int) -> float:
@@ -145,6 +144,21 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
 
     # P(win) + Sum [P(lose & win i games), for i in range(k)]
     return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k, n))
+
+
+def p_at_least_k_wins_out_of_n_games(p: float, n: int, k: int) -> float:
+    """
+    Find the probability of winning at least k times out of a best of 3, 5, or 7.
+    :param p: Probability to win one game, between 0.0 - 1.0
+    :param n: Number of games to play
+    :param k: Desired number to win (e.g. win at least 2 out of 6)
+    """
+    if n < 1:
+        sys.exit(f"Can only calculate probability for 1 or more games, got n={n}")
+    if k > n:
+        print(f"WARN: got k>n ({k}>{n}, are you sure? This has no probability")
+        return 0
+    return sum(math.comb(n, i) * p**i * (1 - p) ** (n - i) for i in range(k, n + 1))
 
 
 def n_fair_handicap_points(p: float, n=11) -> Tuple[int, float]:

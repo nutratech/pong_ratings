@@ -21,6 +21,7 @@ from pong.models import Player
 from pong.probs import (
     n_fair_handicap_points,
     p_at_least_k_wins_in_match,
+    p_at_least_k_wins_out_of_n_games,
     p_deuce,
     p_deuce_win,
     p_match,
@@ -129,6 +130,11 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
 
     # Calculate other statistics
     fair_handicap = n_fair_handicap_points(prob_point)
+    _n_out_of = 10
+    prob_win_k_out_of_n = [
+        (k, round(p_at_least_k_wins_out_of_n_games(prob_game, n=_n_out_of, k=k), 4))
+        for k in range(_n_out_of + 1)
+    ]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -149,6 +155,8 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
 
     # Other stats
     print(f"Fair handicap:    0-{fair_handicap[0]} (P={round(fair_handicap[1], 2)})")
+    print()
+    print(tabulate(prob_win_k_out_of_n, headers=[f"Win n/{_n_out_of}", "P(n)"]))
     print()
 
     # Match probability, and related stats

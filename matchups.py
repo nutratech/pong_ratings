@@ -6,6 +6,7 @@ Created on Wed Jan 25 13:38:55 2023
 @author: shane
 """
 import os
+import shlex
 import sys
 from typing import Dict, List
 
@@ -44,7 +45,7 @@ if __name__ == "__main__":
 
     # Parse player names
     # NOTE: either pass in on command line or set in .env file
-    _players = sys.argv[1:] or os.environ["PONG_PLAYERS"].split()
+    _players = sys.argv[1:] or shlex.split(os.environ["PONG_PLAYERS"])
     N_PLAYERS = len(_players)
 
     # TODO: support N_PLAYERS = 1, just match that one person with all others
