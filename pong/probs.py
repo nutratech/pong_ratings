@@ -8,7 +8,7 @@ Probability tools used for side statistics.
 import math
 import os
 import sys
-from typing import Tuple
+from typing import List, Tuple
 
 from tabulate import tabulate
 
@@ -142,7 +142,7 @@ def p_at_least_k_wins_in_match(p: float, n: int, k: int) -> float:
     # Probabilities based on the match
     prob_match = p_match(p, n)
 
-    # P(win) + Sum [P(lose & win i games), for i in range(k)]
+    # P(win) + Sum [P(lose & win i games), for i in range(k, n)]
     return prob_match + sum(_prob_lose_match_win_i_games(i) for i in range(k, n))
 
 
@@ -161,7 +161,7 @@ def p_at_least_k_wins_out_of_n_games(p: float, n: int, k: int) -> float:
     return sum(math.comb(n, i) * p**i * (1 - p) ** (n - i) for i in range(k, n + 1))
 
 
-def n_fair_handicap_points(p: float, n=11) -> Tuple[int, float]:
+def n_fair_handicap_points(p: float, n=11) -> List[Tuple[int, float]]:
     """
     Start e.g. up 7-0 or 6-0 against a stronger opponent for fair odds ~0.5 of winning
     :param p: Probability of winning an individual point
@@ -175,7 +175,7 @@ def n_fair_handicap_points(p: float, n=11) -> Tuple[int, float]:
                 p_game_straight_handicap(p, n=n, i=j)
                 + p_deuce_handicap(p, n=n, i=j) * p_deuce_win(p),
             )
-            for j in range(11)
+            for j in range(n)
         ]
         prob_game_handicap.sort(key=lambda x: math.fabs(x[1] - 0.5), reverse=False)
         return prob_game_handicap
@@ -183,10 +183,10 @@ def n_fair_handicap_points(p: float, n=11) -> Tuple[int, float]:
     if p > 0.5:
         # Use the lower value of P1 vs. P2 (P1 + P2 = 1.0)
         p = 1 - p
-        result = _prob_game_handicap()[0]
-        return result[0], 1 - result[1]
+        return [(n, 1 - p) for n, p in _prob_game_handicap()]
+
     # Otherwise return normal value
-    return _prob_game_handicap()[0]
+    return _prob_game_handicap()
 
 
 def print_table_common_deuce_odds() -> None:

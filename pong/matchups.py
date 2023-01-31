@@ -129,10 +129,12 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     prob_deuce_win = inverse_probs["prob_deuce_win"]
 
     # Calculate other statistics
-    fair_handicap = n_fair_handicap_points(prob_point)
+    fair_handicap = [
+        (f"0-{n}", round(p, 3)) for n, p in n_fair_handicap_points(prob_point)
+    ]
     _n_out_of = 10
     prob_win_k_out_of_n = [
-        (k, round(p_at_least_k_wins_out_of_n_games(prob_game, n=_n_out_of, k=k), 4))
+        (k, round(p_at_least_k_wins_out_of_n_games(prob_game, n=_n_out_of, k=k), 3))
         for k in range(_n_out_of + 1)
     ]
 
@@ -147,16 +149,16 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
-        # TODO: win 5/6, 4/6, 3/6, 2/6
         ("Win 6/6", prob_win_6_out_of_6),
     ]
     print(tabulate(_series, headers=["x", "P(x)"]))
     print()
 
     # Other stats
-    print(f"Fair handicap:    0-{fair_handicap[0]} (P={round(fair_handicap[1], 2)})")
+    print_subtitle(f"Point handicaps & Win n+ out of {_n_out_of}")
+    print(tabulate(fair_handicap, headers=["H-cap", "P(w)"]))
     print()
-    print(tabulate(prob_win_k_out_of_n, headers=[f"Win n/{_n_out_of}", "P(n)"]))
+    print(tabulate(prob_win_k_out_of_n, headers=["n", "P(n+)"]))
     print()
 
     # Match probability, and related stats
