@@ -8,7 +8,7 @@ Detailed information about requested match up(s)
 """
 import csv
 import math
-from typing import Dict
+from typing import Dict, Union
 
 import trueskill
 from tabulate import tabulate
@@ -18,7 +18,14 @@ from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
 from pong.models import Player
-from pong.probs import p_at_least_k_wins, p_deuce, p_deuce_win, p_match
+from pong.probs import (
+    n_fair_handicap_points,
+    p_at_least_k_wins_in_match,
+    p_at_least_k_wins_out_of_n_games,
+    p_deuce,
+    p_deuce_win,
+    p_match,
+)
 
 
 def build_players() -> tuple:
@@ -59,6 +66,29 @@ def build_players() -> tuple:
     return singles_players, doubles_players
 
 
+def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]]:
+    """Returns common match / point / game metrics to both singles & doubles"""
+
+    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
+
+    prob_match = {n: p_match(prob_game, n) for n in [2, 3, 4]}
+    prob_win_at_least_1 = {
+        n: p_at_least_k_wins_in_match(prob_game, n, k=1) for n in [2, 3, 4]
+    }
+    prob_deuce_reach = round(p_deuce(prob_point), 2)
+    prob_deuce_win = round(p_deuce_win(prob_point), 2)
+    prob_win_6_out_of_6 = round(prob_game**6, 3)
+
+    return {
+        "prob_point": prob_point,
+        "prob_match": prob_match,
+        "prob_win_at_least_1": prob_win_at_least_1,
+        "prob_deuce_reach": prob_deuce_reach,
+        "prob_deuce_win": prob_deuce_win,
+        "prob_win_6_out_of_6": prob_win_6_out_of_6,
+    }
+
+
 def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> None:
     """
     Print out stats for player1 vs. player2
@@ -88,13 +118,25 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     )
     prob_game = (prob_p1_game + (1 - prob_p2_game)) / 2
 
-    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
+    inverse_probs = _inverse_probs(prob_game)
 
-    prob_match = p_match(prob_game)
-    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
-    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
-    prob_deuce_win = round(p_deuce_win(prob_point), 2)
-    prob_win_6_out_of_6 = round(prob_game**6, 3)
+    prob_point = inverse_probs["prob_point"]
+    prob_match = inverse_probs["prob_match"]
+    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+
+    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs["prob_deuce_win"]
+
+    # Calculate other statistics
+    fair_handicap = [
+        (f"0-{n}", round(p, 3)) for n, p in n_fair_handicap_points(prob_point)
+    ]
+    _n_out_of = 10
+    prob_win_k_out_of_n = [
+        (k, round(p_at_least_k_wins_out_of_n_games(prob_game, n=_n_out_of, k=k), 3))
+        for k in range(_n_out_of + 1)
+    ]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -102,7 +144,6 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     print_title(f"{username1} & {username2} (Δμ={_delta_mu}, RD={_rd})")
 
     # Game & Deuce probabilities
-    # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
@@ -111,6 +152,13 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         ("Win 6/6", prob_win_6_out_of_6),
     ]
     print(tabulate(_series, headers=["x", "P(x)"]))
+    print()
+
+    # Other stats
+    print_subtitle(f"Point handicaps & Win n+ out of {_n_out_of}")
+    print(tabulate(fair_handicap, headers=["H-cap", "P(w)"]))
+    print()
+    print(tabulate(prob_win_k_out_of_n, headers=["n", "P(n+)"]))
     print()
 
     # Match probability, and related stats
@@ -186,13 +234,15 @@ def eval_doubles(
     )
 
     # Calculate probabilities
-    prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
+    inverse_probs = _inverse_probs(prob_game)
 
-    prob_match = p_match(prob_game)
-    prob_win_at_least_1 = p_at_least_k_wins(prob_game)
-    prob_deuce_reach = round(p_deuce(prob_point)[11], 2)
-    prob_deuce_win = round(p_deuce_win(prob_point), 2)
-    prob_win_6_out_of_6 = round(prob_game**6, 3)
+    prob_point = inverse_probs["prob_point"]
+    prob_match = inverse_probs["prob_match"]
+    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+
+    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs["prob_deuce_win"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -207,7 +257,6 @@ def eval_doubles(
     print()
 
     # Game & Deuce probabilities
-    # print_subtitle(f"Game & Deuce odds (for {username1})")
     _series = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),

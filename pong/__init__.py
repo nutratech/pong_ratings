@@ -7,22 +7,24 @@ Created on Tue 10 Jan 2023 12∶39∶06 PM EST
 import math
 import os
 
+from pong.env import PONG_SHEET_GID_DOUBLES, PONG_SHEET_GID_SINGLES, SPREADSHEET_KEY
+
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
-# Hard-coded URL values pointing to our sheet
 def _url(gid: int) -> str:
-    spreadsheet_key = "1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A"
+    """Hard-coded URL values pointing to our sheet"""
+
     return (
         "https://docs.google.com/spreadsheet/ccc"
-        f"?key={spreadsheet_key}"
+        f"?key={SPREADSHEET_KEY}"
         f"&gid={gid}"
         "&output=csv"
     )
 
 
-SINGLES_URL = _url(834797930)
-DOUBLES_URL = _url(682349527)
+SINGLES_URL = _url(PONG_SHEET_GID_SINGLES)
+DOUBLES_URL = _url(PONG_SHEET_GID_DOUBLES)
 
 # Constants
 DRAW_PROB_DOUBLES = math.comb(20, 10) * (1 / 2) ** 20

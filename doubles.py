@@ -8,6 +8,7 @@ https://trueskill.org/
 """
 import math
 import os
+import sys
 import time
 from datetime import date, datetime
 from typing import List
@@ -214,10 +215,9 @@ def print_doubles_matchups(
                 if i3 == i2:
                     continue
                 player3 = players[i3]
-
                 for i4 in range(i3 + 1, n_players):
                     # Can't play yourself
-                    if i4 in (i2, i1):
+                    if i4 in {i3, i2}:
                         continue
                     player4 = players[i4]
 
@@ -289,9 +289,11 @@ def print_doubles_matchups(
     matchups.sort(key=lambda x: x[-2], reverse=True)
 
     # Verify things
-    assert (
-        len(matchups) + n_skipped_matchups == _n_choose_2_teams
-    ), "Missed some match ups?"
+    if len(matchups) + n_skipped_matchups != _n_choose_2_teams:
+        sys.exit(
+            f"Missed some match ups? "
+            f"{len(matchups)} + {n_skipped_matchups} != {_n_choose_2_teams}"
+        )
 
     # Print off best matches
     _table = tabulate(

@@ -6,6 +6,7 @@ Created on Sun Jan  8 23:34:31 2023
 @author: shane
 """
 import math
+import sys
 from datetime import date, datetime
 from typing import List
 
@@ -32,7 +33,12 @@ def do_games(
     """
 
     def _update_rating(_player1: Player, _player2: Player) -> None:
-        """Updates ratings."""
+        """
+        Updates ratings.
+        TODO:
+            - store date and other meta data in stack
+            - store whole glicko object in opponent_rating_wins_singles (not just mu)
+        """
 
         # Calculate new ratings
         _new_player1_rating, _new_player2_rating = glicko2.Glicko2().rate_1vs1(
@@ -207,7 +213,8 @@ def print_singles_matchups(players: List[Player]) -> List[tuple]:
     matchups.sort(key=lambda x: x[-1], reverse=True)
 
     # Verify things
-    assert len(matchups) == _n_choose_2_players, "Missed some match ups?"
+    if len(matchups) != _n_choose_2_players:
+        sys.exit(f"Missed some match ups? {len(matchups)} != {_n_choose_2_players}")
 
     # Print off best matches
     _table = tabulate(
