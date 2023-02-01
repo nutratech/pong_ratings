@@ -246,8 +246,6 @@ if __name__ == "__main__":
     _sorted_players = filter_players(build_ratings())
     cache_ratings_csv_file(_sorted_players, singles=True)
 
-    # print(next(p for p in _sorted_players if p.username == 'shane').clubs())
-
     print_singles_matchups(_sorted_players)
 
     # Filter players with a highly uncertain rating
