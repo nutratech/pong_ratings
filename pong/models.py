@@ -72,6 +72,7 @@ class Player:
                 "Viet Detroit (Grace Parish Warren)": "Viet",
                 "MTTA (Sparc Arena Novi)": "MTTA",
                 "Norm's": "Norm's",
+                "New Way Bar (Ferndale)": "New way",
             }[_club]
 
         if singles:
