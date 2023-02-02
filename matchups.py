@@ -13,7 +13,7 @@ from typing import Dict, List
 from doubles import print_doubles_matchups
 from pong.env import MODE_SINGLES
 from pong.matchups import build_players, eval_doubles, eval_singles
-from pong.models import Player
+from pong.models.player import Player
 from singles import print_singles_matchups
 
 

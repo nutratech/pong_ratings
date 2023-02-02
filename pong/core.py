@@ -21,7 +21,7 @@ from pong import (
     SINGLES_URL,
 )
 from pong.env import PLAYERS_PRESENT
-from pong.models import Player
+from pong.models.player import Player
 
 
 def get_google_sheet(url: str) -> bytes:

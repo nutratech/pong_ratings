@@ -21,7 +21,7 @@ from pong.core import (
     print_title,
 )
 from pong.glicko2 import glicko2
-from pong.models import Player
+from pong.models.player import Player
 
 
 def do_games(

@@ -25,8 +25,14 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
+        # WIP stuff
+        from pong.models.game import Game
+
+        self.singles_games: List[Game] = []
+
         # Track singles related stats
         self.stack_ratings_singles = [glicko2.Glicko2()]
+        # TODO: Glicko not float
         self.opponent_rating_wins_singles: List[float] = []
         self.opponent_rating_losses_singles: List[float] = []
 
@@ -35,6 +41,7 @@ class Player:
             trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES),
         ]
         self.partner_rating_doubles: List[trueskill.TrueSkill()] = []
+        # TODO: TrueSkill not float
         self.opponent_rating_wins_doubles: List[float] = []
         self.opponent_rating_losses_doubles: List[float] = []
 
