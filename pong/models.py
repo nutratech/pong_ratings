@@ -156,7 +156,8 @@ class Player:
     def __str__(self) -> str:
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
         return (
-            f"{self.username} [{self.str_rating()}, {self.str_rating(singles=False)}]"
+            f"{self.username} "
+            f"[{self.str_rating(mode=SINGLES)}, {self.str_rating(mode=DOUBLES)}]"
         )
 
     @property
@@ -183,9 +184,10 @@ class Player:
         _clubs.update(self.club_appearances["doubles"])
         return _clubs
 
-    def str_rating(self, singles=True) -> str:
+    def str_rating(self, mode: str) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
-        if singles:
+
+        if mode == SINGLES:
             _rating = round(self.rating_singles.mu)
             _uncertainty = round(self.rating_singles.phi * 1.96, -1)  # Round to 10s
         else:

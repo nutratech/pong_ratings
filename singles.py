@@ -117,7 +117,7 @@ def build_ratings() -> List[Player]:
         [
             (
                 p.username,
-                p.str_rating(singles=True),
+                p.str_rating(mode=SINGLES),
                 p.str_win_losses(mode=SINGLES),
                 round(max(x.mu for x in p.ratings[SINGLES])),
                 p.avg_opponent(mode=SINGLES),
