@@ -87,6 +87,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=True)
 
+    # pylint: disable=duplicate-code
     sets = []
     players: Dict[str, Player] = {}
     clubs = set()
@@ -134,6 +135,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
         ],
         headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp", "Club"],
     )
+    # pylint: disable=duplicate-code
     print(_table)
 
     # Show time elapsed
