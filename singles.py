@@ -239,7 +239,7 @@ if __name__ == "__main__":
 
     _sorted_players, _games, _clubs = build_ratings()
 
-    # TODO: make use of _clubs and _games now
+    # TODO: make use of _clubs and _games now. Filter uncertain ratings here?
     _sorted_players = filter_players(_sorted_players)
     cache_ratings_csv_file(_sorted_players, singles=True)
 
