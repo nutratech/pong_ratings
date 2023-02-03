@@ -10,12 +10,13 @@ import math
 import os
 import sys
 import time
-from datetime import date, datetime
-from typing import List
+from datetime import datetime
+from typing import List, Set, Tuple
 
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
+from pong import DOUBLES
 from pong.core import (
     add_club,
     build_csv_reader,
@@ -24,7 +25,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import Player
+from pong.models import Club, DoublesGames, Player
 from pong.tsutils import win_probability
 
 
@@ -56,23 +57,23 @@ def do_games(
         )
 
         # Push to list of ratings
-        _player1.stack_ratings_doubles.append(_new_team1_ratings[0])
-        _player2.stack_ratings_doubles.append(_new_team1_ratings[1])
+        _player1.ratings[DOUBLES].append(_new_team1_ratings[0])
+        _player2.ratings[DOUBLES].append(_new_team1_ratings[1])
         _player1.partner_rating_doubles.append(_player2.rating_doubles)
         _player2.partner_rating_doubles.append(_player1.rating_doubles)
 
-        _player3.stack_ratings_doubles.append(_new_team2_ratings[0])
-        _player4.stack_ratings_doubles.append(_new_team2_ratings[1])
+        _player3.ratings[DOUBLES].append(_new_team2_ratings[0])
+        _player4.ratings[DOUBLES].append(_new_team2_ratings[1])
         _player3.partner_rating_doubles.append(_player4.rating_doubles)
         _player4.partner_rating_doubles.append(_player3.rating_doubles)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
         for _player in [_player1, _player2]:
-            _player.opponent_rating_wins_doubles.append(
+            _player.opponent_ratings[DOUBLES]["wins"].append(
                 (_player3.rating_doubles.mu + _player4.rating_doubles.mu) / 2
             )
         for _player in [_player3, _player4]:
-            _player.opponent_rating_losses_doubles.append(
+            _player.opponent_ratings[DOUBLES]["wins"].append(
                 (_player1.rating_doubles.mu + _player2.rating_doubles.mu) / 2
             )
 
@@ -91,7 +92,7 @@ def do_games(
         _update_rating(player1, player2, player3, player4)
 
 
-def build_ratings() -> List[Player]:
+def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     """
     Main method which calculates ratings
 
@@ -103,33 +104,21 @@ def build_ratings() -> List[Player]:
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=False)
 
+    games = []
     players = {}  # Player mapping username -> "class" objects use to store ratings
+    clubs = set()
 
     # Process the CSV
-    for i, row in enumerate(reader):  # pylint: disable=duplicate-code
-
-        # Skip header row
-        if i == 0:
-            continue
-
-        # Parse fields
-        _ = date.fromisoformat(row[0])  # Not used for now
-        _winner1 = row[1].lower()
-        _winner2 = row[2].lower()
-
-        _winners_score = int(row[3].split("-")[0])
-        _losers_score = int(row[3].split("-")[1])
-
-        _loser1 = row[4].lower()
-        _loser2 = row[5].lower()
-
-        _location = row[6]  # Club name or location of game
+    for row in reader:
+        # Add game to list
+        game = DoublesGames(row)
+        games.append(game)
 
         # Check if players are already tracked, create if not
-        _winner_player1 = get_or_create_player_by_name(players, _winner1)
-        _winner_player2 = get_or_create_player_by_name(players, _winner2)
-        _loser_player1 = get_or_create_player_by_name(players, _loser1)
-        _loser_player2 = get_or_create_player_by_name(players, _loser2)
+        _winner_player1 = get_or_create_player_by_name(players, game.username1)
+        _winner_player2 = get_or_create_player_by_name(players, game.username2)
+        _loser_player1 = get_or_create_player_by_name(players, game.username3)
+        _loser_player2 = get_or_create_player_by_name(players, game.username4)
 
         # Run the algorithm and update ratings
         do_games(
@@ -137,22 +126,27 @@ def build_ratings() -> List[Player]:
             _winner_player2,
             _loser_player1,
             _loser_player2,
-            _winners_score,
-            _losers_score,
+            game.winner_score(),
+            game.loser_score(),
         )
 
         # Push to list of club locations
+        clubs.add(game.location)
         for player in [
             _winner_player1,
             _winner_player2,
             _loser_player1,
             _loser_player2,
         ]:
-            add_club(player, _location, singles=False)
+            add_club(player, club=game.location.name, mode=DOUBLES)
+
+    n_games = sum(sum(y for y in x.score) for x in games)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings?
-    print_title("Rankings")
+    print_title(
+        f"Rankings ({n_games} games, {len(players)} players, {len(clubs)} clubs)"
+    )
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_doubles.mu, reverse=True
     )
@@ -160,16 +154,16 @@ def build_ratings() -> List[Player]:
         [
             (
                 p.username,
-                p.str_rating(singles=False),
-                p.str_win_losses(singles=False),
-                round(max(x.mu for x in p.stack_ratings_doubles), 1),
-                p.avg_opponent(singles=False),
+                p.str_rating(mode=DOUBLES),
+                p.str_win_losses(mode=DOUBLES),
+                round(max(x.mu for x in p.ratings[DOUBLES]), 1),
+                p.avg_opponent(mode=DOUBLES),
                 round(
                     sum(x.mu for x in p.partner_rating_doubles)
                     / len(p.partner_rating_doubles),
                     1,
                 ),
-                p.home_club(singles=False),
+                p.home_club(mode=DOUBLES),
             )
             for p in sorted_players
         ],
@@ -178,7 +172,7 @@ def build_ratings() -> List[Player]:
     print(_table)
 
     # Used to build pairings / ideal matches
-    return sorted_players
+    return sorted_players, games, clubs
 
 
 def print_doubles_matchups(
@@ -317,9 +311,9 @@ def print_progresses(_players: List[Player]) -> None:
     print_title("Rating progress graphs")
     for _player in _players:
         print(
-            f"{_player.username} [{_player.str_rating(singles=False)}], "
-            f"peak {round(max(x.mu for x in _player.stack_ratings_doubles), 1)}, "
-            f"best win {_player.best_win(singles=False)}"
+            f"{_player.username} [{_player.str_rating(mode=DOUBLES)}], "
+            f"peak {round(max(x.mu for x in _player.ratings[DOUBLES]), 1)}, "
+            f"best win {_player.best_win(mode=DOUBLES)}"
         )
         _player.graph_ratings()
         print()
@@ -329,9 +323,13 @@ if __name__ == "__main__":
     print("DOUBLES")
     print(f"Last updated: {datetime.utcnow()}")
 
-    _sorted_players = filter_players(build_ratings())
+    _sorted_players, _games, _clubs = build_ratings()
+
+    # TODO: make use of _clubs and _games now. Filter uncertain ratings here?
+    _sorted_players = filter_players(_sorted_players)
     cache_ratings_csv_file(_sorted_players, singles=False)
 
     # TODO: filter, or match based on club, or create greedy pairing algorithm
+    #  this has O(n^4) complexity and won't scale
     print_doubles_matchups(_sorted_players)
     print_progresses(_sorted_players)

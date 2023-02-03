@@ -13,7 +13,13 @@ from typing import Dict, Union
 import trueskill
 from tabulate import tabulate
 
-from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES, DRAW_PROB_DOUBLES
+from pong import (
+    CSV_RATINGS_DOUBLES,
+    CSV_RATINGS_SINGLES,
+    DOUBLES,
+    DRAW_PROB_DOUBLES,
+    SINGLES,
+)
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
@@ -41,7 +47,7 @@ def build_players() -> tuple:
         for row in csv_reader:
             player = Player(username=row["username"])
 
-            player.stack_ratings_singles[0] = glicko2.Glicko2(
+            player.ratings[SINGLES][0] = glicko2.Glicko2(
                 mu=float(row["mu"]),
                 phi=float(row["phi"]),
                 sigma=float(row["sigma"]),
@@ -56,7 +62,7 @@ def build_players() -> tuple:
         for row in csv_reader:
             player = Player(username=row["username"])
 
-            player.stack_ratings_doubles[0] = trueskill.TrueSkill(
+            player.ratings[DOUBLES][0] = trueskill.TrueSkill(
                 mu=float(row["mu"]),
                 sigma=float(row["sigma"]),
             )
@@ -181,14 +187,14 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     _series = [
         (
             player1.username,
-            player1.str_rating(singles=True),
+            player1.str_rating(mode=SINGLES),
             round(_w_p1.mu - rating1.mu),
             round(_l_p1.mu - rating1.mu),
             round(_w_p1.phi + _l_p1.phi - 2 * rating1.phi, 1),
         ),
         (
             player2.username,
-            player2.str_rating(singles=True),
+            player2.str_rating(mode=SINGLES),
             round(_w_p2.mu - rating2.mu),
             round(_l_p2.mu - rating2.mu),
             round(_w_p2.phi + _l_p2.phi - 2 * rating2.phi, 1),
@@ -288,28 +294,28 @@ def eval_doubles(
     _series = [
         (
             player1.username,
-            player1.str_rating(singles=False),
+            player1.str_rating(mode=DOUBLES),
             round(_w_t1[0].mu - rating1.mu, 1),
             round(_l_t1[0].mu - rating1.mu, 1),
             round(_w_t1[0].sigma + _l_t1[0].sigma - 2 * rating1.sigma, 1),
         ),
         (
             player2.username,
-            player2.str_rating(singles=False),
+            player2.str_rating(mode=DOUBLES),
             round(_w_t1[1].mu - rating2.mu, 1),
             round(_l_t1[1].mu - rating2.mu, 1),
             round(_w_t1[1].sigma + _l_t1[1].sigma - 2 * rating2.sigma, 1),
         ),
         (
             player3.username,
-            player3.str_rating(singles=False),
+            player3.str_rating(mode=DOUBLES),
             round(_w_t2[0].mu - rating3.mu, 1),
             round(_l_t2[0].mu - rating3.mu, 1),
             round(_w_t2[0].sigma + _l_t2[0].sigma - 2 * rating3.sigma, 1),
         ),
         (
             player4.username,
-            player4.str_rating(singles=False),
+            player4.str_rating(mode=DOUBLES),
             round(_w_t2[1].mu - rating4.mu, 1),
             round(_l_t2[1].mu - rating4.mu, 1),
             round(_w_t2[1].sigma + _l_t2[1].sigma - 2 * rating4.sigma, 1),

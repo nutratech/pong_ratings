@@ -2,6 +2,10 @@
  Pong rankings
 ***************
 
+.. image:: https://github.com/nutratech/pong_ratings/actions/workflows/test.yml/badge.svg
+  :target: https://github.com/nutratech/pong_ratings/actions/workflows/test.yml
+  :alt: Test status unknown
+
 Link to the Google Sheet
 ########################
 
@@ -74,3 +78,9 @@ Add this to a ``.env`` file.
 .. code-block:: bash
 
   PONG_PLAYERS=player1 player2 player3 player4
+
+
+TODO
+####
+
+- Test on Windows

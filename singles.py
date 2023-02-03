@@ -7,11 +7,12 @@ Created on Sun Jan  8 23:34:31 2023
 """
 import math
 import sys
-from datetime import date, datetime
-from typing import List
+from datetime import datetime
+from typing import Dict, List, Sequence, Set, Tuple
 
 from tabulate import tabulate
 
+from pong import SINGLES
 from pong.core import (
     add_club,
     build_csv_reader,
@@ -21,7 +22,7 @@ from pong.core import (
     print_title,
 )
 from pong.glicko2 import glicko2
-from pong.models import Player
+from pong.models import Club, Player, SinglesGames
 
 
 def do_games(
@@ -37,7 +38,6 @@ def do_games(
         Updates ratings.
         TODO:
             - store date and other meta data in stack
-            - store whole glicko object in opponent_rating_wins_singles (not just mu)
         """
 
         # Calculate new ratings
@@ -46,13 +46,13 @@ def do_games(
         )
 
         # Push to list of ratings
-        _player1.stack_ratings_singles.append(_new_player1_rating)
-        _player2.stack_ratings_singles.append(_new_player2_rating)
+        _player1.ratings[SINGLES].append(_new_player1_rating)
+        _player2.ratings[SINGLES].append(_new_player2_rating)
 
         # Update list of opponent ratings (track e.g. worst defeat & biggest upset)
         # NOTE: these are just the mu values, but the main player stores the rating obj
-        _player1.opponent_rating_wins_singles.append(_player2.rating_singles.mu)
-        _player2.opponent_rating_losses_singles.append(_player1.rating_singles.mu)
+        _player1.opponent_ratings[SINGLES]["wins"].append(_player2.rating_singles.mu)
+        _player2.opponent_ratings[SINGLES]["losses"].append(_player1.rating_singles.mu)
 
     # Disallow scores like 2-5
     if _winner_score < _loser_score:
@@ -69,66 +69,60 @@ def do_games(
         _update_rating(player1, player2)
 
 
-def build_ratings() -> List[Player]:
+def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     """
-    Main method which calculates ratings
+    Main method which aggregates games, players, clubs.
+    And calculates ratings.
 
     TODO:
      - Support an API level interface?
-     - Preview points won / lost
-     - Points, server, other details statistics?
-     - Track a list of games, show a user's "home" club (most frequent location)
      - Filter RD > 300/350? Command-line flag / ENV VAR to force anyways?
     """
 
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=True)
 
-    players = {}  # Player mapping username -> "class" objects use to store ratings
+    games = []
+    players: Dict[str, Player] = {}
+    clubs = set()
 
     # Process the CSV
-    for i, row in enumerate(reader):
-
-        # Skip header row
-        if i == 0:
-            continue
-
-        # Parse fields
-        _ = date.fromisoformat(row[0])  # Not used for now
-        _winner = row[1].lower()
-        _loser = row[2].lower()
-
-        _winner_score = int(row[3].split("-")[0])
-        _loser_score = int(row[3].split("-")[1])
-
-        _location = row[4]  # Club name or location of game
+    for row in reader:
+        # Add game to list
+        game = SinglesGames(row)
+        games.append(game)
 
         # Check if players are already tracked, create if not
-        _winner_player = get_or_create_player_by_name(players, _winner)
-        _loser_player = get_or_create_player_by_name(players, _loser)
+        _winner_player = get_or_create_player_by_name(players, game.username1)
+        _loser_player = get_or_create_player_by_name(players, game.username2)
 
         # Run the algorithm and update ratings
-        do_games(_winner_player, _loser_player, _winner_score, _loser_score)
+        do_games(_winner_player, _loser_player, game.winner_score(), game.loser_score())
 
-        # Push to list of club locations
-        add_club(_winner_player, _location, singles=True)
-        add_club(_loser_player, _location, singles=True)
+        # Push to list of club appearances
+        clubs.add(game.location)
+        add_club(_winner_player, club=game.location.name, mode=SINGLES)
+        add_club(_loser_player, club=game.location.name, mode=SINGLES)
+
+    n_games = sum(sum(y for y in x.score) for x in games)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings? Group by home club?
-    print_title("Rankings")
+    print_title(
+        f"Rankings ({n_games} games, {len(players)} players, {len(clubs)} clubs)"
+    )
     sorted_players = sorted(
-        players.values(), key=lambda x: x.rating_singles.mu, reverse=True
+        players.values(), key=lambda x: float(x.rating_singles.mu), reverse=True
     )
     _table = tabulate(
         [
             (
                 p.username,
-                p.str_rating(singles=True),
-                p.str_win_losses(singles=True),
-                round(max(x.mu for x in p.stack_ratings_singles)),
-                p.avg_opponent(singles=True),
-                p.home_club(singles=True),
+                p.str_rating(mode=SINGLES),
+                p.str_win_losses(mode=SINGLES),
+                round(max(x.mu for x in p.ratings[SINGLES])),
+                p.avg_opponent(mode=SINGLES),
+                p.home_club(mode=SINGLES),
             )
             for p in sorted_players
         ],
@@ -137,10 +131,10 @@ def build_ratings() -> List[Player]:
     print(_table)
 
     # Used to build pairings / ideal matches
-    return sorted_players
+    return sorted_players, games, clubs
 
 
-def print_singles_matchups(players: List[Player]) -> List[tuple]:
+def print_singles_matchups(players: List[Player]) -> Sequence[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -210,7 +204,7 @@ def print_singles_matchups(players: List[Player]) -> List[tuple]:
         f"Pair ups [top {min(_n_top, _n_choose_2_players)}, "
         f"{len(players)}C2={_n_choose_2_players} possible]"
     )
-    matchups.sort(key=lambda x: x[-1], reverse=True)
+    matchups.sort(key=lambda x: float(x[-1]), reverse=True)
 
     # Verify things
     if len(matchups) != _n_choose_2_players:
@@ -231,9 +225,9 @@ def print_progresses(_players: List[Player]) -> None:
     print_title("Rating progress graphs")
     for _player in _players:
         print(
-            f"{_player.username} [{_player.str_rating()}], "
-            f"peak {round(max(x.mu for x in _player.stack_ratings_singles))}, "
-            f"best win {_player.best_win()}"
+            f"{_player.username} [{_player.str_rating(mode=SINGLES)}], "
+            f"peak {round(max(x.mu for x in _player.ratings[SINGLES]))}, "
+            f"best win {_player.best_win(mode=SINGLES)}"
         )
         _player.graph_ratings()
         print()
@@ -243,7 +237,10 @@ if __name__ == "__main__":
     print("SINGLES")
     print(f"Last updated: {datetime.utcnow()}")
 
-    _sorted_players = filter_players(build_ratings())
+    _sorted_players, _games, _clubs = build_ratings()
+
+    # TODO: make use of _clubs and _games now. Filter uncertain ratings here?
+    _sorted_players = filter_players(_sorted_players)
     cache_ratings_csv_file(_sorted_players, singles=True)
 
     print_singles_matchups(_sorted_players)

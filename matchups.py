@@ -42,7 +42,6 @@ def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
 
 
 if __name__ == "__main__":
-
     # Parse player names
     # NOTE: either pass in on command line or set in .env file
     _players = sys.argv[1:] or shlex.split(os.environ["PONG_PLAYERS"])
