@@ -92,6 +92,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     clubs = set()
 
     t_start = time.time()
+
     # Process the CSV
     for row in reader:
         # Add game to list

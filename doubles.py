@@ -72,7 +72,7 @@ def do_games(
                 (_player3.rating_doubles.mu + _player4.rating_doubles.mu) / 2
             )
         for _player in [_player3, _player4]:
-            _player.opponent_ratings[DOUBLES]["wins"].append(
+            _player.opponent_ratings[DOUBLES]["losses"].append(
                 (_player1.rating_doubles.mu + _player2.rating_doubles.mu) / 2
             )
 
@@ -113,6 +113,8 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     sets = []
     players: Dict[str, Player] = {}
     clubs = set()
+
+    t_start = time.time()
 
     # Process the CSV
     for row in reader:
@@ -166,6 +168,14 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
         headers=["Username", "TrueSkill", "W/L", "Top", "Avg opp", "T mate", "Club"],
     )
     print(_table)
+
+    # Show time elapsed
+    t_delta = time.time() - t_start
+    print()
+    print(
+        f"Analyzed {len(sets)} CSV lines in {round(1000 * t_delta, 1)} ms "
+        f"({round(len(sets) / t_delta)}/s)"
+    )
 
     # Used to build pairings / ideal matches
     return sorted_players, sets, clubs

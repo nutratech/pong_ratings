@@ -227,7 +227,10 @@ class Player:
 
     def best_win(self, mode: str) -> Union[None, int, float]:
         """Returns best win"""
-        _best_win = max(self.opponent_ratings[mode]["wins"])
+        try:
+            _best_win = max(self.opponent_ratings[mode]["wins"])
+        except ValueError:
+            return None
 
         if mode == SINGLES:
             return round(_best_win)
