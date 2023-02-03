@@ -11,7 +11,7 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import List
+from typing import List, Set, Tuple
 
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
@@ -25,7 +25,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models import DoublesGames, Player
+from pong.models import Club, DoublesGames, Player
 from pong.tsutils import win_probability
 
 
@@ -92,7 +92,7 @@ def do_games(
         _update_rating(player1, player2, player3, player4)
 
 
-def build_ratings() -> List[Player]:
+def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     """
     Main method which calculates ratings
 
@@ -110,6 +110,7 @@ def build_ratings() -> List[Player]:
 
     # Process the CSV
     for row in reader:
+        # Add game to list
         game = DoublesGames(row)
         games.append(game)
 
@@ -171,7 +172,7 @@ def build_ratings() -> List[Player]:
     print(_table)
 
     # Used to build pairings / ideal matches
-    return sorted_players
+    return sorted_players, games, clubs
 
 
 def print_doubles_matchups(
@@ -310,7 +311,7 @@ def print_progresses(_players: List[Player]) -> None:
     print_title("Rating progress graphs")
     for _player in _players:
         print(
-            f"{_player.username} [{_player.str_rating(singles=False)}], "
+            f"{_player.username} [{_player.str_rating(mode=DOUBLES)}], "
             f"peak {round(max(x.mu for x in _player.ratings[DOUBLES]), 1)}, "
             f"best win {_player.best_win(mode=DOUBLES)}"
         )
@@ -322,9 +323,13 @@ if __name__ == "__main__":
     print("DOUBLES")
     print(f"Last updated: {datetime.utcnow()}")
 
-    _sorted_players = filter_players(build_ratings())
+    _sorted_players, _games, _clubs = build_ratings()
+
+    # TODO: make use of _clubs and _games now
+    _sorted_players = filter_players(_sorted_players)
     cache_ratings_csv_file(_sorted_players, singles=False)
 
     # TODO: filter, or match based on club, or create greedy pairing algorithm
+    #  this has O(n^4) complexity and won't scale
     print_doubles_matchups(_sorted_players)
     print_progresses(_sorted_players)

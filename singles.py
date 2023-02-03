@@ -8,7 +8,7 @@ Created on Sun Jan  8 23:34:31 2023
 import math
 import sys
 from datetime import datetime
-from typing import List
+from typing import List, Set, Tuple
 
 from tabulate import tabulate
 
@@ -22,7 +22,7 @@ from pong.core import (
     print_title,
 )
 from pong.glicko2 import glicko2
-from pong.models import Player, SinglesGames
+from pong.models import Club, Player, SinglesGames
 
 
 def do_games(
@@ -69,7 +69,7 @@ def do_games(
         _update_rating(player1, player2)
 
 
-def build_ratings() -> List[Player]:
+def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     """
     Main method which aggregates games, players, clubs.
     And calculates ratings.
@@ -88,6 +88,7 @@ def build_ratings() -> List[Player]:
 
     # Process the CSV
     for row in reader:
+        # Add game to list
         game = SinglesGames(row)
         games.append(game)
 
@@ -99,7 +100,7 @@ def build_ratings() -> List[Player]:
         do_games(_winner_player, _loser_player, game.winner_score(), game.loser_score())
 
         # Push to list of club appearances
-        clubs.add(game.location.name)
+        clubs.add(game.location)
         add_club(_winner_player, club=game.location.name, mode=SINGLES)
         add_club(_loser_player, club=game.location.name, mode=SINGLES)
 
@@ -130,7 +131,7 @@ def build_ratings() -> List[Player]:
     print(_table)
 
     # Used to build pairings / ideal matches
-    return sorted_players
+    return sorted_players, games, clubs
 
 
 def print_singles_matchups(players: List[Player]) -> List[tuple]:
@@ -224,7 +225,7 @@ def print_progresses(_players: List[Player]) -> None:
     print_title("Rating progress graphs")
     for _player in _players:
         print(
-            f"{_player.username} [{_player.str_rating()}], "
+            f"{_player.username} [{_player.str_rating(mode=SINGLES)}], "
             f"peak {round(max(x.mu for x in _player.ratings[SINGLES]))}, "
             f"best win {_player.best_win(mode=SINGLES)}"
         )
@@ -236,7 +237,10 @@ if __name__ == "__main__":
     print("SINGLES")
     print(f"Last updated: {datetime.utcnow()}")
 
-    _sorted_players = filter_players(build_ratings())
+    _sorted_players, _games, _clubs = build_ratings()
+
+    # TODO: make use of _clubs and _games now
+    _sorted_players = filter_players(_sorted_players)
     cache_ratings_csv_file(_sorted_players, singles=True)
 
     print_singles_matchups(_sorted_players)
