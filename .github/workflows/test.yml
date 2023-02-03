@@ -29,10 +29,10 @@ jobs:
         run: pip install -r requirements.txt -r requirements-lint.txt
 
       - name: Lint
-        run: PATH=~/.local/bin:$PATH make lint
+        run: make lint
 
       - name: Test
-        run: PATH=~/.local/bin:$PATH make test
+        run: make test
 
       - name: Basic CLI Integration Tests
         run: |
