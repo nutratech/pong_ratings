@@ -20,7 +20,6 @@ from pong import (
     CSV_RATINGS_SINGLES,
     DOUBLES,
     DOUBLES_CSV_URL,
-    PROJECT_ROOT,
     SINGLES,
     SINGLES_CSV_URL,
 )
@@ -32,10 +31,7 @@ def get_google_sheet(url: str) -> bytes:
     """
     Returns a byte array (string)
     TODO:
-      - Cache these on the filesystem, commit, and have the network latency be an
-        optional step to "refresh" the data in real time.
-        But also allow running instantly on old (cached) CSV files.
-      - Support multiple sheets per document (e.g. separate "doubles games" sheet)?
+      - Allow running instantly on old (cached) CSV files.
     """
 
     response = requests.get(url, timeout=2)
