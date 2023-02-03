@@ -25,7 +25,7 @@ from pong import probs
         {"p_g": 0.3, "n": 4, "p_m": 0.12603599999999998},
     ],
 )
-def test_p_match(input_dict: Dict):
+def test_p_match(input_dict: Dict) -> None:
     """Tests the P_match(P_game) function"""
     p_g, n, p_m = input_dict["p_g"], input_dict["n"], input_dict["p_m"]
     assert probs.p_match(p_g, n) == p_m
@@ -49,7 +49,7 @@ def test_p_match(input_dict: Dict):
         (0.6, 4, 0.99518057693184),
     ],
 )
-def test_p_at_least_k_points(p_p: float, k: int, p_k: float):
+def test_p_at_least_k_points(p_p: float, k: int, p_k: float) -> None:
     """Tests common values for winning >= k points (in a game of 11)"""
     assert probs.p_at_least_k_points(p_p, k) == p_k
 
@@ -69,12 +69,12 @@ def test_p_at_least_k_points(p_p: float, k: int, p_k: float):
         {"n": 3, "p_g": 0.9, "k": 2, "p_k": 0.0},
     ],
 )
-def test_p_at_least_k_wins(input_data: Dict[str, Union[int, float]]):
+def test_p_at_least_k_wins(input_data: Dict[str, Union[int, float]]) -> None:
     """Test common values for winning at least k games (match of 3, 5, or 7)"""
-    p_g = input_data["p_g"]
-    k = input_data["k"]
-    p_k = input_data["p_k"]
-    n = input_data["n"]
+    p_g = float(input_data["p_g"])
+    k = int(input_data["k"])
+    p_k = float(input_data["p_k"])
+    n = int(input_data["n"])
     assert probs.p_at_least_k_wins_in_match(p_g, n, k) == p_k
 
 

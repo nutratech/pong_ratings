@@ -8,7 +8,7 @@ Created on Wed Jan 25 13:38:55 2023
 import os
 import shlex
 import sys
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from doubles import print_doubles_matchups
 from pong.env import MODE_SINGLES
@@ -21,7 +21,10 @@ from pong.models import Player
 from singles import print_singles_matchups
 
 
-def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
+def print_singles_details(
+    matchups: List[Tuple[str, str, int, int, float, float]],
+    players: Dict[str, Player],
+) -> None:
     """Prints the details for each requested match-ups"""
     for pairing in matchups:
         detailed_match_ups_singles(
@@ -31,7 +34,10 @@ def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
         )
 
 
-def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
+def print_doubles_details(
+    matchups: List[Tuple[str, str, str, str, float, int, float, float]],
+    players: Dict[str, Player],
+) -> None:
     """Prints the details for each possible team pairing"""
     for pairing in matchups:
         detailed_match_ups_doubles(
@@ -65,7 +71,7 @@ if __name__ == "__main__":
         singles_matchups = print_singles_matchups(
             players=sorted(
                 [singles_players[name] for name in _players],
-                key=lambda p: p.rating_singles.mu,
+                key=lambda p: p.rating_singles.mu,  # type: ignore
                 reverse=True,
             )
         )
@@ -74,7 +80,7 @@ if __name__ == "__main__":
         doubles_matchups = print_doubles_matchups(
             players=sorted(
                 [doubles_players[name] for name in _players],
-                key=lambda p: p.rating_doubles.mu,
+                key=lambda p: p.rating_doubles.mu,  # type: ignore
                 reverse=True,
             ),
             delta_mu_threshold=15.0,

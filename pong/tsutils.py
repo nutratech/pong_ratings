@@ -23,4 +23,4 @@ def win_probability(team1: Tuple, team2: Tuple) -> float:
     sum_sigma = sum(r.sigma**2 for r in itertools.chain(team1, team2))
     size = len(team1) + len(team2)
     denom = math.sqrt(size * (BETA * BETA) + sum_sigma)
-    return trueskill.global_env().cdf(delta_mu / denom)
+    return float(trueskill.global_env().cdf(delta_mu / denom))

@@ -12,13 +12,12 @@ _help:
 # Initialize & clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-init:
+init:	## Install requirements and sub-modules
 	git submodule update --init
 	pip install -r requirements.txt -r requirements-lint.txt
 
-clean:
-	rm -rf .coverage __pycache__/ .pytest_cache/ .mypy_cache/
-	rm -rf $(shell find . -name .mypy_cache) $(shell find . -name .pytest_cache)
+clean:	## Clean up pycache/ and other left overs
+	rm -rf $(shell find . -name .coverage -o -name __pycache__ -o -name .pytest_cache -o -name .mypy_cache)
 
 
 

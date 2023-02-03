@@ -134,7 +134,9 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     return sorted_players, games, clubs
 
 
-def print_singles_matchups(players: List[Player]) -> List[tuple]:
+def print_singles_matchups(
+    players: List[Player],
+) -> List[Tuple[str, str, int, int, float, float]]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.

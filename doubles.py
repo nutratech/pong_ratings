@@ -11,7 +11,7 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
@@ -105,7 +105,7 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     reader = build_csv_reader(singles=False)
 
     games = []
-    players = {}  # Player mapping username -> "class" objects use to store ratings
+    players: Dict[str, Player] = {}
     clubs = set()
 
     # Process the CSV
@@ -132,13 +132,10 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
 
         # Push to list of club locations
         clubs.add(game.location)
-        for player in [
-            _winner_player1,
-            _winner_player2,
-            _loser_player1,
-            _loser_player2,
-        ]:
-            add_club(player, club=game.location.name, mode=DOUBLES)
+        add_club(_winner_player1, club=game.location.name, mode=DOUBLES)
+        add_club(_winner_player2, club=game.location.name, mode=DOUBLES)
+        add_club(_loser_player1, club=game.location.name, mode=DOUBLES)
+        add_club(_loser_player2, club=game.location.name, mode=DOUBLES)
 
     n_games = sum(sum(y for y in x.score) for x in games)
 
@@ -176,8 +173,10 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
 
 
 def print_doubles_matchups(
-    players: List[Player], delta_mu_threshold=3.0, two_rd_threshold=9.5
-) -> List[tuple]:
+    players: List[Player],
+    delta_mu_threshold: float = 3.0,
+    two_rd_threshold: float = 9.5,
+) -> List[Tuple[str, str, str, str, float, int, float, float]]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -216,13 +215,18 @@ def print_doubles_matchups(
                     player4 = players[i4]
 
                     # Compute rating difference and average RD
-                    _delta_rating = (
-                        player1.rating_doubles.mu
-                        + player2.rating_doubles.mu
-                        - player3.rating_doubles.mu
-                        - player4.rating_doubles.mu
-                    ) / 2
-                    _delta_rating = round(_delta_rating, 1)
+                    _delta_rating = float(
+                        round(
+                            (
+                                player1.rating_doubles.mu
+                                + player2.rating_doubles.mu
+                                - player3.rating_doubles.mu
+                                - player4.rating_doubles.mu
+                            )
+                            / 2,
+                            1,
+                        )
+                    )
 
                     _2_rd_avg = round(
                         1.96
@@ -244,14 +248,16 @@ def print_doubles_matchups(
 
                     # Compute quality metrics, and add to list
                     # NOTE: relatively slow to calculate
-                    _quality_of_match = round(
-                        trueskill.quality(
-                            [
-                                (player1.rating_doubles, player2.rating_doubles),
-                                (player3.rating_doubles, player4.rating_doubles),
-                            ]
-                        ),
-                        2,
+                    _quality_of_match = float(
+                        round(
+                            trueskill.quality(
+                                [
+                                    (player1.rating_doubles, player2.rating_doubles),
+                                    (player3.rating_doubles, player4.rating_doubles),
+                                ]
+                            ),
+                            2,
+                        )
                     )
                     _win_probability = round(
                         win_probability(
