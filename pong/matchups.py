@@ -95,7 +95,9 @@ def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]
     }
 
 
-def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> None:
+def detailed_match_ups_singles(
+    username1: str, username2: str, players: Dict[str, Player]
+) -> None:
     """
     Print out stats for player1 vs. player2
     """
@@ -208,7 +210,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
 
 
 # pylint: disable=too-many-arguments
-def eval_doubles(
+def detailed_match_ups_doubles(
     username1: str,
     username2: str,
     username3: str,

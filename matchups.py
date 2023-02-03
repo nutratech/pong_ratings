@@ -12,7 +12,11 @@ from typing import Dict, List
 
 from doubles import print_doubles_matchups
 from pong.env import MODE_SINGLES
-from pong.matchups import build_players, eval_doubles, eval_singles
+from pong.matchups import (
+    build_players,
+    detailed_match_ups_doubles,
+    detailed_match_ups_singles,
+)
 from pong.models import Player
 from singles import print_singles_matchups
 
@@ -20,7 +24,7 @@ from singles import print_singles_matchups
 def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
     """Prints the details for each requested match-ups"""
     for pairing in matchups:
-        eval_singles(
+        detailed_match_ups_singles(
             pairing[0],
             pairing[1],
             players,
@@ -30,7 +34,7 @@ def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
 def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
     """Prints the details for each possible team pairing"""
     for pairing in matchups:
-        eval_doubles(
+        detailed_match_ups_doubles(
             pairing[0],
             pairing[1],
             pairing[2],
