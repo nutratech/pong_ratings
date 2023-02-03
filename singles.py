@@ -53,6 +53,7 @@ def do_games(player1: Player, player2: Player, games: SinglesGames) -> None:
         _player1.opponent_ratings[SINGLES]["wins"].append(_player2.rating_singles.mu)
         _player2.opponent_ratings[SINGLES]["losses"].append(_player1.rating_singles.mu)
 
+    # pylint: disable=duplicate-code
     # Disallow scores like 2-5
     if games.winner_score() < games.loser_score():
         raise ValueError(
@@ -104,6 +105,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
         # Run the algorithm and update ratings
         do_games(_winner_player, _loser_player, games)
 
+        # pylint: disable=duplicate-code
         # Push to list of club appearances
         clubs.add(games.location)
 
