@@ -154,14 +154,14 @@ def detailed_match_ups_singles(
     print_title(f"{username1} & {username2} (Δμ={_delta_mu}, RD={_rd})")
 
     # Game & Deuce probabilities
-    _series = [
+    _series_gdp = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
         ("Win 6/6", prob_win_6_out_of_6),
     ]
-    print(tabulate(_series, headers=["x", "P(x)"]))
+    print(tabulate(_series_gdp, headers=["x", "P(x)"]))
     print()
 
     # Other stats
@@ -173,7 +173,7 @@ def detailed_match_ups_singles(
 
     # Match probability, and related stats
     print_subtitle("Match odds and rating changes")
-    _series = [
+    _series_mp = [
         ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
         (
             "Win 1+ games",
@@ -182,13 +182,13 @@ def detailed_match_ups_singles(
         ),
         ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
     ]
-    print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
+    print(tabulate(_series_mp, headers=["P(...)", "3-game", "5-game"]))
     print()
 
     # New ratings (preview the changes)
     _w_p1, _w_p2 = glicko.rate_1vs1(rating1, rating2)
     _l_p2, _l_p1 = glicko.rate_1vs1(rating2, rating1)
-    _series = [
+    _series_pr = [
         (
             player1.username,
             player1.str_rating(mode=SINGLES),
@@ -205,7 +205,7 @@ def detailed_match_ups_singles(
         ),
     ]
     _table = tabulate(
-        _series,
+        _series_pr,
         headers=["Player", "μ", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)"],
     )
     print(_table)
@@ -270,19 +270,19 @@ def detailed_match_ups_doubles(
     print()
 
     # Game & Deuce probabilities
-    _series = [
+    _series_gdp = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
         ("Win 6/6", prob_win_6_out_of_6),
     ]
-    print(tabulate(_series, headers=["x", "P(x)"]))
+    print(tabulate(_series_gdp, headers=["x", "P(x)"]))
     print()
 
     # Match probability, and related stats
     print_subtitle("Match odds and rating changes")
-    _series = [
+    _series_mp = [
         ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
         (
             "Win 1+ games",
@@ -291,13 +291,13 @@ def detailed_match_ups_doubles(
         ),
         ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
     ]
-    print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
+    print(tabulate(_series_mp, headers=["P(...)", "3-game", "5-game"]))
     print()
 
     # New ratings (preview the changes)
     _w_t1, _w_t2 = tse.rate([(rating1, rating2), (rating3, rating4)])
     _l_t2, _l_t1 = tse.rate([(rating3, rating4), (rating1, rating2)])
-    _series = [
+    _series_pr = [
         (
             player1.username,
             player1.str_rating(mode=DOUBLES),
@@ -327,5 +327,8 @@ def detailed_match_ups_doubles(
             round(_w_t2[1].sigma + _l_t2[1].sigma - 2 * rating4.sigma, 1),
         ),
     ]
-    _table = tabulate(_series, headers=["Player", "μ", "T1 wins", "T2 wins", "avg(Δσ)"])
+    _table = tabulate(
+        _series_pr,
+        headers=["Player", "μ", "T1 wins", "T2 wins", "avg(Δσ)"],
+    )
     print(_table)
