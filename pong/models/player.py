@@ -25,10 +25,10 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
-        # WIP stuff
-        from pong.models.game import Game
-
-        self.singles_games: List[Game] = []
+        # # WIP stuff
+        # from pong.models.game import Game
+        #
+        # self.singles_games: List[Game] = []
 
         # Track singles related stats
         self.stack_ratings_singles = [glicko2.Glicko2()]
