@@ -44,7 +44,7 @@ lint:	## Lint the code
 	flake8 --statistics --doctests $(ALL_LINT_LOCS)
 	pylint $(ALL_LINT_LOCS)
 	# failing lints
-	- mypy $(ALL_LINT_LOCS)
+	mypy $(ALL_LINT_LOCS)
 
 test:	## Test the code
 	coverage run -m pytest tests/

@@ -38,11 +38,19 @@ def do_games(player1: Player, player2: Player, games: SinglesGames) -> None:
         TODO:
             - store date and other meta data in stack
         """
+        glicko = glicko2.Glicko2()
+
+        _rating1 = _player1.rating_singles
+        rating1 = glicko.create_rating(
+            mu=_rating1.mu, phi=_rating1.phi, sigma=_rating1.sigma
+        )
+        _rating2 = _player2.rating_singles
+        rating2 = glicko.create_rating(
+            mu=_rating2.mu, phi=_rating2.phi, sigma=_rating2.sigma
+        )
 
         # Calculate new ratings
-        _new_player1_rating, _new_player2_rating = glicko2.Glicko2().rate_1vs1(
-            _player1.rating_singles, _player2.rating_singles
-        )
+        _new_player1_rating, _new_player2_rating = glicko.rate_1vs1(rating1, rating2)
 
         # Push to list of ratings
         _player1.ratings[SINGLES].append(_new_player1_rating)

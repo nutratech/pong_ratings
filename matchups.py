@@ -71,7 +71,7 @@ if __name__ == "__main__":
         singles_matchups = print_singles_matchups(
             players=sorted(
                 [singles_players[name] for name in _players],
-                key=lambda p: p.rating_singles.mu,  # type: ignore
+                key=lambda p: p.rating_singles.mu,
                 reverse=True,
             )
         )
