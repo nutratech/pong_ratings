@@ -16,8 +16,11 @@ init:	## Install requirements and sub-modules
 	git submodule update --init
 	pip install -r requirements.txt -r requirements-lint.txt
 
+ALL_CLEAN_LOCS=pong/ tests/
+ALL_CLEAN_ARGS=-name .coverage -o -name __pycache__ -o -name .pytest_cache -o -name .mypy_cache
 clean:	## Clean up pycache/ and other left overs
-	rm -rf $(shell find . -name .coverage -o -name __pycache__ -o -name .pytest_cache -o -name .mypy_cache)
+	rm -rf $(shell find . -maxdepth 1 $(ALL_CLEAN_ARGS))
+	rm -rf $(shell find $(ALL_CLEAN_LOCS) $(ALL_CLEAN_ARGS))
 
 
 
