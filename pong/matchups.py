@@ -297,6 +297,7 @@ def detailed_match_ups_doubles(
     # New ratings (preview the changes)
     _w_t1, _w_t2 = tse.rate([(rating1, rating2), (rating3, rating4)])
     _l_t2, _l_t1 = tse.rate([(rating3, rating4), (rating1, rating2)])
+    # noinspection DuplicatedCode
     _series_pr = [
         (
             player1.username,

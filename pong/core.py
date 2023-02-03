@@ -16,6 +16,8 @@ import requests
 from pong import (
     CSV_GAMES_DOUBLES,
     CSV_GAMES_SINGLES,
+    CSV_RATINGS_DOUBLES,
+    CSV_RATINGS_SINGLES,
     DOUBLES,
     DOUBLES_CSV_URL,
     PROJECT_ROOT,
@@ -136,27 +138,29 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles: bool) -> None:
 
     # TODO: support p.rating(singles=singles)?
     if singles:
-        _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_singles.csv")
-        headers = ["username", "mu", "phi", "sigma", "history"]
+        _file_path = CSV_RATINGS_SINGLES
+        headers = ["username", "mu", "phi", "sigma", "history", "clubs"]
         _series = [
             (
                 p.username,
                 p.rating_singles.mu,
                 p.rating_singles.phi,
                 p.rating_singles.sigma,
-                [round(x.mu) for x in p.ratings[SINGLES]],
+                " ".join(str(round(x.mu)) for x in p.ratings[SINGLES]),
+                "|".join(p.clubs()),
             )
             for p in sorted_players
         ]
     else:
-        _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_doubles.csv")
-        headers = ["username", "mu", "sigma", "history"]
+        _file_path = CSV_RATINGS_DOUBLES
+        headers = ["username", "mu", "sigma", "history", "clubs"]
         _series = [
             (  # type: ignore
                 p.username,
                 p.rating_doubles.mu,
                 p.rating_doubles.sigma,
-                [round(x.mu, 1) for x in p.ratings[DOUBLES]],
+                " ".join(str(round(x.mu, 1)) for x in p.ratings[DOUBLES]),
+                "|".join(p.clubs()),
             )
             for p in sorted_players
         ]
