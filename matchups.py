@@ -75,8 +75,8 @@ if __name__ == "__main__":
         singles_matchups = print_singles_matchups(
             players=sorted(
                 # TODO: where should this be filtered or decided?
-                # [singles_players[name] for name in _players],
-                singles_players.values(),
+                [singles_players[name] for name in _players],
+                # singles_players.values(),
                 key=lambda p: p.rating_singles.mu,
                 reverse=True,
             )
@@ -85,8 +85,8 @@ if __name__ == "__main__":
     else:
         doubles_matchups = print_doubles_matchups(
             players=sorted(
-                # [doubles_players[name] for name in _players],
-                doubles_players.values(),
+                [doubles_players[name] for name in _players],
+                # doubles_players.values(),
                 key=lambda p: p.rating_doubles.mu,  # type: ignore
                 reverse=True,
             ),

@@ -199,6 +199,8 @@ def print_doubles_matchups(
     n_skipped_matchups = 0
 
     _n_top = 100
+    # TODO: resolve ValueError with len(players) < 2, allow to just do the pair ups for
+    #   that one person with everyone else, or that club, or something specific
     _n_choose_2_teams = math.comb(len(players), 2) * math.comb(len(players) - 2, 2) // 2
     _avg_cmp_per_second = 30000
 
