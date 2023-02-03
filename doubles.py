@@ -107,7 +107,6 @@ def build_ratings() -> List[Player]:
 
     # Process the CSV
     for i, row in enumerate(reader):  # pylint: disable=duplicate-code
-
         # Skip header row
         if i == 0:
             continue

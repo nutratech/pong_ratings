@@ -88,7 +88,6 @@ def build_ratings() -> List[Player]:
 
     # Process the CSV
     for i, row in enumerate(reader):
-
         # Skip header row
         if i == 0:
             continue

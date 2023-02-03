@@ -30,7 +30,6 @@ class Game:
         winners_score: int,
         losers_score: int,
     ) -> None:
-
         if len(players) not in {2, 4}:
             raise ValueError("Number of players must be either 2 or 4")
 
