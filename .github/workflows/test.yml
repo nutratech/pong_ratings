@@ -17,8 +17,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Count lines of source code
-        run: cloc HEAD
+      # - name: Count lines of source code
+      #   run: cloc HEAD
 
       - name: Reload Cache / pip
         uses: actions/cache@v3
