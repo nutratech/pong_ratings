@@ -18,10 +18,10 @@ from pong import (
     CSV_GAMES_SINGLES,
     CSV_RATINGS_DOUBLES,
     CSV_RATINGS_SINGLES,
+    CSV_URL_DOUBLES,
+    CSV_URL_SINGLES,
     DOUBLES,
-    DOUBLES_CSV_URL,
     SINGLES,
-    SINGLES_CSV_URL,
 )
 from pong.env import PLAYERS_PRESENT
 from pong.models import Player
@@ -56,7 +56,7 @@ def build_csv_reader(singles: bool) -> csv.DictReader:
     """Returns a csv.reader() object"""
 
     try:
-        url = SINGLES_CSV_URL if singles else DOUBLES_CSV_URL
+        url = CSV_URL_SINGLES if singles else CSV_URL_DOUBLES
         _csv_bytes_output = get_google_sheet(url)
         _csv_file = StringIO(_csv_bytes_output.decode())
         cache_csv_file(_csv_bytes_output, singles=singles)

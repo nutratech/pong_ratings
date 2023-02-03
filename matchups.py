@@ -57,9 +57,13 @@ if __name__ == "__main__":
     _players = sys.argv[1:] or shlex.split(os.environ.get("PONG_PLAYERS") or str())
     N_PLAYERS = len(_players)
 
-    # TODO: support N_PLAYERS = 1, just match that one person with all others
-    if N_PLAYERS < 2:
-        sys.exit(f"Needs at least two players, got {N_PLAYERS}")
+    # TODO: set _n_top to be arbitrarily large?
+    if N_PLAYERS == 0:
+        pass
+        # TODO: Only pair up by clubs by default? For detailed statistics?
+    elif N_PLAYERS == 1:
+        pass
+        # TODO: support N_PLAYERS = 1, just match that one person with all others
 
     # Load players/ratings from CSV
     singles_players, doubles_players = build_players()
@@ -70,7 +74,9 @@ if __name__ == "__main__":
     if MODE_SINGLES:
         singles_matchups = print_singles_matchups(
             players=sorted(
-                [singles_players[name] for name in _players],
+                # TODO: where should this be filtered or decided?
+                # [singles_players[name] for name in _players],
+                singles_players.values(),
                 key=lambda p: p.rating_singles.mu,
                 reverse=True,
             )
@@ -79,7 +85,8 @@ if __name__ == "__main__":
     else:
         doubles_matchups = print_doubles_matchups(
             players=sorted(
-                [doubles_players[name] for name in _players],
+                # [doubles_players[name] for name in _players],
+                doubles_players.values(),
                 key=lambda p: p.rating_doubles.mu,  # type: ignore
                 reverse=True,
             ),

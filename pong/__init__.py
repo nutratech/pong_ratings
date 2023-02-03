@@ -24,8 +24,8 @@ def _url(gid: int) -> str:
 
 
 # URLs to google sheets for singles & doubles CSVs
-SINGLES_CSV_URL = _url(PONG_SHEET_GID_SINGLES)
-DOUBLES_CSV_URL = _url(PONG_SHEET_GID_DOUBLES)
+CSV_URL_SINGLES = _url(PONG_SHEET_GID_SINGLES)
+CSV_URL_DOUBLES = _url(PONG_SHEET_GID_DOUBLES)
 
 # Constants
 DRAW_PROB_DOUBLES = math.comb(20, 10) * (1 / 2) ** 20

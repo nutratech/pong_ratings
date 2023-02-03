@@ -8,7 +8,7 @@ Detailed information about requested match up(s)
 """
 import csv
 import math
-from typing import Dict, Tuple, Union
+from typing import Dict, Set, Tuple, Union
 
 import trueskill
 from tabulate import tabulate
@@ -34,11 +34,20 @@ from pong.probs import (
 )
 
 
+def add_player_to_club(player: Player, club: str, clubs: Dict[str, Set[str]]) -> None:
+    """Create a club (if it doesn't exist) and add a player to its list"""
+    if club in clubs:
+        clubs[club].add(player.username)
+    else:
+        clubs[club] = set(player.username)
+
+
 def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
     """Builds the players from the updated ratings_*.csv file"""
 
     singles_players: Dict[str, Player] = {}
     doubles_players: Dict[str, Player] = {}
+    clubs: Dict[str, Set[str]] = {}
 
     # Singles
     with open(CSV_RATINGS_SINGLES, encoding="utf-8") as _f:
@@ -47,12 +56,18 @@ def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
         for row in csv_reader:
             player = Player(username=row["username"])
 
+            # Set rating
             player.ratings[SINGLES][0] = glicko2.Glicko2(
                 mu=float(row["mu"]),
                 phi=float(row["phi"]),
                 sigma=float(row["sigma"]),
             )
 
+            # Populate player's clubs
+            for club in row["clubs"].split("|"):
+                add_player_to_club(player, club, clubs)
+
+            # Add to list
             singles_players[player.username] = player
 
     # Doubles
@@ -62,11 +77,17 @@ def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
         for row in csv_reader:
             player = Player(username=row["username"])
 
+            # Set rating
             player.ratings[DOUBLES][0] = trueskill.TrueSkill(
                 mu=float(row["mu"]),
                 sigma=float(row["sigma"]),
             )
 
+            # Populate player's clubs
+            for club in row["clubs"].split("|"):
+                add_player_to_club(player, club, clubs)
+
+            # Add to list
             doubles_players[player.username] = player
 
     return singles_players, doubles_players
