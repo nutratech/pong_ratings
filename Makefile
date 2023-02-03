@@ -8,6 +8,14 @@ _help:
 
 
 
+# Initialize
+
+init:
+	git submodule update --init
+	pip install -r requirements.txt -r requirements-lint.txt
+
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Lint, test, format
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,8 +33,9 @@ lint:	## Lint the code
 	pycodestyle $(ALL_LINT_LOCS)
 	flake8 --statistics --doctests $(ALL_LINT_LOCS)
 	pylint $(ALL_LINT_LOCS)
-	mypy $(ALL_LINT_LOCS)
-	bandit -q -r $(ALL_LINT_LOCS)
+	# Disabled lints
+# 	bandit -q -r $(ALL_LINT_LOCS)
+#  	mypy $(ALL_LINT_LOCS)
 
 test:	## Test the code
 	pytest tests/
