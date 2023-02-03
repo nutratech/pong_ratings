@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps76]
 
     steps:
       - name: Checkout
@@ -17,8 +17,8 @@ jobs:
         with:
           submodules: recursive
 
-      # - name: Count lines of source code
-      #   run: cloc HEAD
+      - name: Count lines of source code
+        run: cloc HEAD
 
       - name: Reload Cache / pip
         uses: actions/cache@v3
@@ -42,3 +42,10 @@ jobs:
           ./singles.py
           ./doubles.py
           ./matchups.py thomas mal shane benji norm
+
+      - name: Submit coverage report / coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip install -U coveralls
+          PATH=~/.local/bin:$PATH coveralls --service=github
