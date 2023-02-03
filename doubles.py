@@ -301,6 +301,8 @@ def print_doubles_matchups(
         headers=["Team 1", "Team 1", "Team 2", "Team 2", "Δμ", "2σ", "Q", "P(w)"],
     )
     print(_table)
+
+    # Show time elapsed
     t_delta = time.time() - t_start
     print()
     print(

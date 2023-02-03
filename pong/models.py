@@ -39,14 +39,14 @@ class Club:
         self.name = CLUB_DICT[name]
 
         # Other values populated bi-directionally
-        self.games = []
-        self.players = []
+        self.games = []  # type: ignore
+        self.players = []  # type: ignore
 
     def __str__(self) -> str:
         return self.name
 
     def __eq__(self, other) -> bool:
-        return self.name == other.name
+        return bool(self.name == other.name)
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -124,18 +124,18 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
-        # WIP stuff
-        # self.singles_games = []
-        self.games = {
-            "singles": {
-                "wins": [],
-                "losses": [],
-            },
-            "doubles": {
-                "wins": [],
-                "losses": [],
-            },
-        }
+        # # WIP stuff
+        # # self.singles_games = []
+        # self.games = {
+        #     "singles": {
+        #         "wins": [],
+        #         "losses": [],
+        #     },
+        #     "doubles": {
+        #         "wins": [],
+        #         "losses": [],
+        #     },
+        # }
         # NOTE: length of this is one longer than other arrays
         self.ratings = {
             "singles": [glicko2.Glicko2()],
@@ -205,8 +205,8 @@ class Player:
     def str_win_losses(self, mode: str) -> str:
         """Returns e.g. 5-2"""
 
-        n_wins = len(self.games[mode]["wins"])
-        n_losses = len(self.games[mode]["losses"])
+        n_wins = len(self.opponent_ratings[mode]["wins"])
+        n_losses = len(self.opponent_ratings[mode]["losses"])
 
         return f"{n_wins}-{n_losses}"
 
@@ -231,7 +231,7 @@ class Player:
 
         if mode == SINGLES:
             return round(_best_win)
-        return round(_best_win, 1)
+        return float(round(_best_win, 1))
 
     def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
         """

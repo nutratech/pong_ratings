@@ -7,6 +7,7 @@ Created on Sun Jan  8 23:34:31 2023
 """
 import math
 import sys
+import time
 from datetime import datetime
 from typing import Dict, List, Set, Tuple
 
@@ -86,6 +87,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     players: Dict[str, Player] = {}
     clubs = set()
 
+    t_start = time.time()
     # Process the CSV
     for row in reader:
         # Add game to list
@@ -129,6 +131,14 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
         headers=["Username", "Glicko 2", "W/L", "Top", "Avg opp", "Club"],
     )
     print(_table)
+
+    # Show time elapsed
+    t_delta = time.time() - t_start
+    print()
+    print(
+        f"Analyzed {len(games)} CSV lines in {round(1000 * t_delta, 1)} ms "
+        f"({round(len(games) / t_delta)}/s)"
+    )
 
     # Used to build pairings / ideal matches
     return sorted_players, games, clubs

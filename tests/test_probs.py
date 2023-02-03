@@ -35,7 +35,7 @@ def test_p_match(input_dict: Dict) -> None:
     "p_p,k,p_k",
     [
         # All or nothing cases
-        # (0.0, 0, 1.0),
+        (0.0, 0, 1.0),
         (0.0, 1, 0.0),
         (1.0, 10, 1.0),
         # Near deuce, deuce, and post-deuce
