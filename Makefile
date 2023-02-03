@@ -32,11 +32,11 @@ lint:	## Lint the code
 	black --check $(ALL_LINT_LOCS)
 	# lint Python
 	pycodestyle $(ALL_LINT_LOCS)
+	bandit -c .banditrc -q -r $(ALL_LINT_LOCS)
 	flake8 --statistics --doctests $(ALL_LINT_LOCS)
 	pylint $(ALL_LINT_LOCS)
-	# Disabled lints
-# 	bandit -q -r $(ALL_LINT_LOCS)
-#  	mypy $(ALL_LINT_LOCS)
+	# failing lints
+	- mypy $(ALL_LINT_LOCS)
 
 test:	## Test the code
 	pytest tests/

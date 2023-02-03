@@ -74,6 +74,7 @@ def build_csv_reader(singles=True) -> csv.reader:
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
         csv_path = CSV_GAMES_SINGLES if singles else CSV_GAMES_DOUBLES
 
+        # pylint: disable=consider-using-with
         reader = csv.DictReader(open(csv_path, encoding="utf-8"))
         reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
         return reader

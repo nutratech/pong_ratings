@@ -153,10 +153,6 @@ class Player:
     def home_club(self, singles=True) -> str:
         """Gets the most frequent place of playing"""
 
-        def _abbrev_club(_club: str) -> str:
-            _pong_det = "Pong Det"
-            return CLUB_DICT[_club]
-
         if singles:
             _club = max(
                 self.club_appearances["singles"],
@@ -167,7 +163,7 @@ class Player:
                 self.club_appearances["doubles"],
                 key=self.club_appearances["doubles"].get,
             )
-        return _abbrev_club(_club)
+        return CLUB_DICT[_club]
 
     def clubs(self):
         """Gets all the clubs someone has appeared at"""
