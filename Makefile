@@ -23,6 +23,7 @@ init:
 ALL_LINT_LOCS=*.py pong/ tests/
 
 format:	## Format the code
+	isort $(ALL_LINT_LOCS)
 	black $(ALL_LINT_LOCS)
 
 lint:	## Lint the code

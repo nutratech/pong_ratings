@@ -24,7 +24,7 @@ from pong.core import (
     get_or_create_player_by_name,
     print_title,
 )
-from pong.models.player import Player
+from pong.models import Player
 from pong.tsutils import win_probability
 
 

@@ -16,12 +16,12 @@ import requests
 from pong import (
     CSV_GAMES_DOUBLES,
     CSV_GAMES_SINGLES,
-    DOUBLES_URL,
+    DOUBLES_CSV_URL,
     PROJECT_ROOT,
-    SINGLES_URL,
+    SINGLES_CSV_URL,
 )
 from pong.env import PLAYERS_PRESENT
-from pong.models.player import Player
+from pong.models import Player
 
 
 def get_google_sheet(url: str) -> bytes:
@@ -56,12 +56,14 @@ def build_csv_reader(singles=True) -> csv.reader:
     """Returns a csv.reader() object"""
 
     try:
-        url = SINGLES_URL if singles else DOUBLES_URL
+        url = SINGLES_CSV_URL if singles else DOUBLES_CSV_URL
         _csv_bytes_output = get_google_sheet(url)
         _csv_file = StringIO(_csv_bytes_output.decode())
         cache_csv_file(_csv_bytes_output, singles=singles)
 
-        return csv.reader(_csv_file)
+        reader = csv.DictReader(_csv_file)
+        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+        return reader
 
     except (
         requests.exceptions.ConnectionError,
@@ -72,7 +74,9 @@ def build_csv_reader(singles=True) -> csv.reader:
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
         csv_path = CSV_GAMES_SINGLES if singles else CSV_GAMES_DOUBLES
 
-        return csv.reader(open(csv_path, encoding="utf-8"))
+        reader = csv.DictReader(open(csv_path, encoding="utf-8"))
+        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+        return reader
 
 
 def get_or_create_player_by_name(players: dict, username: str) -> Player:

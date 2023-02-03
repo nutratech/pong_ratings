@@ -17,7 +17,7 @@ from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES, DRAW_PROB_DOUBLES
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
-from pong.models.player import Player
+from pong.models import Player
 from pong.probs import (
     n_fair_handicap_points,
     p_at_least_k_wins_in_match,

@@ -7,21 +7,19 @@ Created on Sun Jan  8 23:34:31 2023
 """
 import math
 import sys
-from datetime import date, datetime
+from datetime import datetime
 from typing import List
 
 from tabulate import tabulate
 
 from pong.core import (
-    add_club,
     build_csv_reader,
     cache_ratings_csv_file,
     filter_players,
-    get_or_create_player_by_name,
     print_title,
 )
 from pong.glicko2 import glicko2
-from pong.models.player import Player
+from pong.models import Player, SinglesGames
 
 
 def do_games(
@@ -84,34 +82,34 @@ def build_ratings() -> List[Player]:
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=True)
 
+    games = []
     players = {}  # Player mapping username -> "class" objects use to store ratings
 
     # Process the CSV
-    for i, row in enumerate(reader):
-        # Skip header row
-        if i == 0:
-            continue
+    for row in reader:
+        game = SinglesGames(row)
+        games.append(game)
 
-        # Parse fields
-        _ = date.fromisoformat(row[0])  # Not used for now
-        _winner = row[1].lower()
-        _loser = row[2].lower()
-
-        _winner_score = int(row[3].split("-")[0])
-        _loser_score = int(row[3].split("-")[1])
-
-        _location = row[4]  # Club name or location of game
-
-        # Check if players are already tracked, create if not
-        _winner_player = get_or_create_player_by_name(players, _winner)
-        _loser_player = get_or_create_player_by_name(players, _loser)
-
-        # Run the algorithm and update ratings
-        do_games(_winner_player, _loser_player, _winner_score, _loser_score)
-
-        # Push to list of club locations
-        add_club(_winner_player, _location, singles=True)
-        add_club(_loser_player, _location, singles=True)
+        # # Parse fields
+        # _ = date.fromisoformat(row[0])  # Not used for now
+        # _winner = row[1].lower()
+        # _loser = row[2].lower()
+        #
+        # _winner_score = int(row[3].split("-")[0])
+        # _loser_score = int(row[3].split("-")[1])
+        #
+        # _location = row[4]  # Club name or location of game
+        #
+        # # Check if players are already tracked, create if not
+        # _winner_player = get_or_create_player_by_name(players, _winner)
+        # _loser_player = get_or_create_player_by_name(players, _loser)
+        #
+        # # Run the algorithm and update ratings
+        # do_games(_winner_player, _loser_player, _winner_score, _loser_score)
+        #
+        # # Push to list of club locations
+        # add_club(_winner_player, _location, singles=True)
+        # add_club(_loser_player, _location, singles=True)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings? Group by home club?

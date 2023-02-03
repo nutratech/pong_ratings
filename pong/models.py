@@ -3,9 +3,11 @@
 Created on Sun 08 Jan 2023 11∶26∶34 PM EST
 
 @author: shane
-Game model used for players, location, date, outcome, etc
-Player model used for singles & doubles ratings, username, wins/losses, etc
+Game model used for players, location, date, outcome, etc.
+Player model used for singles & doubles ratings, username, wins/losses, etc.
+Club model used for grouping games and players to location names.
 """
+import sys
 from datetime import date
 from typing import Dict, List, Union
 
@@ -15,75 +17,83 @@ import trueskill  # pylint: disable=import-error
 from pong import DRAW_PROB_DOUBLES
 from pong.glicko2 import glicko2
 
+# pylint: disable=too-few-public-methods
 
-class Game:
+_PONG_DET = "Pong Det"
+CLUB_DICT = {
+    "Pong Detroit": _PONG_DET,
+    "Pong Detroit (Bert's)": _PONG_DET,
+    "Pong Detroit (Magee's)": _PONG_DET,
+    "Viet Detroit (Grace Parish Warren)": "Viet",
+    "MTTA (Sparc Arena Novi)": "MTTA",
+    "Norm's": "Norm's",
+    "New Way Bar (Ferndale)": "New way",
+}
+
+
+class Club:
+    """
+    Model for storing the club name
+    """
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+        # Other values populated bi-directionally
+        self.games = []
+        self.players = []
+
+
+class Games:
     """
     Model for storing date, location, win/loss, opponent, etc.
     Easily queryable, e.g. find max(best_win_opponent_ratings) or avg(opponent_ratings)
     """
 
-    def __init__(
-        self,
-        # row: List[str],
-        date_str: str,
-        players: List[Player],
-        winners_score: int,
-        losers_score: int,
-    ) -> None:
-        if len(players) not in {2, 4}:
-            raise ValueError("Number of players must be either 2 or 4")
+    def __init__(self, row: Dict[str, str]) -> None:
+        self.date = date.fromisoformat(row["date"])
 
-        self.date = date.fromisoformat(date_str)
+        self._outcome = row["outcome"]
+        self.score = tuple(int(x) for x in self._outcome.split("-"))
+        if (self.score[0] < self.score[1]) or len(self.score) != 2:
+            print(f"ERROR: failed to parse CSV row: '{self}'")
+            print(f"Must have high score first, invalid: {self._outcome}")
+            sys.exit()
 
-        self.player1 = player1
-        self.player2 = player2
-
-        self.winners_score = winners_score
-        self.losers_score = losers_score
+        self.location = CLUB_DICT[row["location"]]
 
 
-class SinglesGame(Game):
+class SinglesGames(Games):
     """Singles game specifics"""
 
-    def __init__(
-        self,
-        date_str: str,
-        player1: Player,
-        player2: Player,
-        winners_score: int,
-        losers_score: int,
-    ):
-        super().__init__(
-            date_str=date_str,
-            player1=player1,
-            player2=player2,
-            winners_score=winners_score,
-            losers_score=losers_score,
-        )
+    def __init__(self, row: Dict[str, str]):
+        super().__init__(row=row)
+
+        # TODO: test that these are non-empty values, at least 3 letters long
+        #  and check that there are exactly 2 or 4 players
+        self.username1 = row["winner"]
+        self.username2 = row["loser"]
+
+    def __str__(self) -> str:
+        return f"{self.date} {self.username1} vs. {self.username2} {self._outcome}"
 
 
-class DoublesGame:
+class DoublesGames(Games):
     """Doubles game specifics"""
 
-    def __init__(
-        self,
-        date_str: str,
-        player1: Player,
-        player2: Player,
-        player3: Player,
-        player4: Player,
-        winners_score: int,
-        losers_score: int,
-    ):
-        super().__init__(
-            date_str=date_str,
-            player1=player1,
-            player2=player2,
-            winners_score=winners_score,
-            losers_score=losers_score,
+    def __init__(self, row: Dict[str, str]):
+        super().__init__(row=row)
+
+        self.username1 = row["winner 1"]
+        self.username2 = row["winner 2"]
+        self.username3 = row["loser 1"]
+        self.username4 = row["loser 2"]
+
+    def __str__(self) -> str:
+        return (
+            f"{self.date} {self.username1} & {self.username2} vs."
+            f"{self.username3} & {self.username4} {self._outcome}"
         )
-        self.player3 = player3
-        self.player4 = player4
 
 
 class Player:
@@ -92,6 +102,7 @@ class Player:
 
     TODO:
         - Include points in scoreboard? Track avg(points) of player1 vs. player2?
+        - self.first_game (or self.join_date?)
     """
 
     def __init__(self, username: str) -> None:
@@ -144,15 +155,7 @@ class Player:
 
         def _abbrev_club(_club: str) -> str:
             _pong_det = "Pong Det"
-            return {
-                "Pong Detroit": _pong_det,
-                "Pong Detroit (Bert's)": _pong_det,
-                "Pong Detroit (Magee's)": _pong_det,
-                "Viet Detroit (Grace Parish Warren)": "Viet",
-                "MTTA (Sparc Arena Novi)": "MTTA",
-                "Norm's": "Norm's",
-                "New Way Bar (Ferndale)": "New way",
-            }[_club]
+            return CLUB_DICT[_club]
 
         if singles:
             _club = max(
