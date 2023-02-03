@@ -34,10 +34,10 @@ jobs:
       - name: Lint
         run: make lint
 
-      # - name: Test
-      #   run: make test
+      - name: Test
+        run: make test
 
-      - name: Basic Tests / CLI / Integration
+      - name: Basic CLI Integration Tests
         run: |
           ./singles.py
           ./doubles.py
