@@ -17,7 +17,8 @@ init:
 	pip install -r requirements.txt -r requirements-lint.txt
 
 clean:
-	rm -rf .coverage __pycache__/ .pytest_cache/
+	rm -rf .coverage __pycache__/ .pytest_cache/ .mypy_cache/
+	rm -rf $(shell find . -name .mypy_cache) $(shell find . -name .pytest_cache)
 
 
 
