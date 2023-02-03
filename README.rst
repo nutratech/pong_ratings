@@ -2,6 +2,10 @@
  Pong rankings
 ***************
 
+.. image:: https://github.com/nutratech/pong_ratings/actions/workflows/test.yml/badge.svg
+  :target: https://github.com/nutratech/pong_ratings/actions/workflows/test.yml
+  :alt: Test status unknown
+
 Link to the Google Sheet
 ########################
 
