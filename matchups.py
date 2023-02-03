@@ -48,7 +48,7 @@ def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
 if __name__ == "__main__":
     # Parse player names
     # NOTE: either pass in on command line or set in .env file
-    _players = sys.argv[1:] or shlex.split(os.environ["PONG_PLAYERS"])
+    _players = sys.argv[1:] or shlex.split(os.environ.get("PONG_PLAYERS") or str())
     N_PLAYERS = len(_players)
 
     # TODO: support N_PLAYERS = 1, just match that one person with all others

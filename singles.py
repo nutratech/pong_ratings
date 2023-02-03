@@ -8,7 +8,7 @@ Created on Sun Jan  8 23:34:31 2023
 import math
 import sys
 from datetime import datetime
-from typing import Dict, List, Sequence, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 from tabulate import tabulate
 
@@ -134,7 +134,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     return sorted_players, games, clubs
 
 
-def print_singles_matchups(players: List[Player]) -> Sequence[tuple]:
+def print_singles_matchups(players: List[Player]) -> List[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -158,14 +158,18 @@ def print_singles_matchups(players: List[Player]) -> Sequence[tuple]:
 
             # Compute quality, and add to list
             _delta_rating = round(player1.rating_singles.mu - player2.rating_singles.mu)
-            _rd_avg = round(
-                math.sqrt(
-                    (player1.rating_singles.phi**2 + player2.rating_singles.phi**2)
-                    / 2
-                ),
-                -1,
+            _rd_avg = int(
+                round(
+                    math.sqrt(
+                        (
+                            player1.rating_singles.phi**2
+                            + player2.rating_singles.phi**2
+                        )
+                        / 2
+                    ),
+                    -1,
+                )
             )
-            _rd_avg = int(_rd_avg)
             _win_probability = round(
                 rating_engine.expect_score(
                     rating_engine.scale_down(player1.rating_singles),

@@ -8,7 +8,7 @@ Detailed information about requested match up(s)
 """
 import csv
 import math
-from typing import Dict, Union
+from typing import Dict, Tuple, Union
 
 import trueskill
 from tabulate import tabulate
@@ -34,7 +34,7 @@ from pong.probs import (
 )
 
 
-def build_players() -> tuple:
+def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
     """Builds the players from the updated ratings_*.csv file"""
 
     singles_players: Dict[str, Player] = {}
