@@ -21,7 +21,6 @@ from pong.glicko2 import glicko2
 
 _PONG_DET = "Pong Det"
 CLUB_DICT = {
-    "Pong Detroit": _PONG_DET,
     "Pong Detroit (Bert's)": _PONG_DET,
     "Pong Detroit (Magee's)": _PONG_DET,
     "Viet Detroit (Grace Parish Warren)": "Viet",
