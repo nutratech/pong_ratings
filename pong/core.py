@@ -9,7 +9,7 @@ import csv
 import os
 import sys
 from io import StringIO
-from typing import List
+from typing import Dict, List
 
 import requests
 
@@ -40,10 +40,10 @@ def get_google_sheet(url: str) -> bytes:
     if response.status_code != 200:
         sys.exit(f"Wrong status code, {response.status_code}")
 
-    return response.content
+    return bytes(response.content)
 
 
-def cache_csv_file(_csv_bytes_output, singles=True) -> None:
+def cache_csv_file(_csv_bytes_output: bytes, singles: bool) -> None:
     """
     Persists the CSV file into the git commit history.
     Fall back calculation in case sheets.google.com is unreachable.
@@ -54,7 +54,7 @@ def cache_csv_file(_csv_bytes_output, singles=True) -> None:
         _file.write(_csv_bytes_output)
 
 
-def build_csv_reader(singles=True) -> csv.DictReader:
+def build_csv_reader(singles: bool) -> csv.DictReader:
     """Returns a csv.reader() object"""
 
     try:
@@ -64,7 +64,7 @@ def build_csv_reader(singles=True) -> csv.DictReader:
         cache_csv_file(_csv_bytes_output, singles=singles)
 
         reader = csv.DictReader(_csv_file)
-        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
         return reader
 
     except (
@@ -78,11 +78,11 @@ def build_csv_reader(singles=True) -> csv.DictReader:
 
         # pylint: disable=consider-using-with
         reader = csv.DictReader(open(csv_path, encoding="utf-8"))
-        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
         return reader
 
 
-def get_or_create_player_by_name(players: dict, username: str) -> Player:
+def get_or_create_player_by_name(players: Dict[str, Player], username: str) -> Player:
     """Adds a player"""
     if username in players:
         return players[username]
@@ -131,7 +131,7 @@ def add_club(_player: Player, club: str, mode: str) -> None:
         _appearances[club] = 1
 
 
-def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
+def cache_ratings_csv_file(sorted_players: List[Player], singles: bool) -> None:
     """Saves the ratings in a CSV file, so we can manually calculate match ups"""
 
     # TODO: support p.rating(singles=singles)?
@@ -152,7 +152,7 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
         _file_path = os.path.join(PROJECT_ROOT, "data", "ratings_doubles.csv")
         headers = ["username", "mu", "sigma", "history"]
         _series = [
-            (
+            (  # type: ignore
                 p.username,
                 p.rating_doubles.mu,
                 p.rating_doubles.sigma,

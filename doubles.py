@@ -131,7 +131,7 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
         )
 
         # Push to list of club locations
-        clubs.add(game.location.name)
+        clubs.add(game.location)
         for player in [
             _winner_player1,
             _winner_player2,

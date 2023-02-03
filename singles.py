@@ -8,7 +8,7 @@ Created on Sun Jan  8 23:34:31 2023
 import math
 import sys
 from datetime import datetime
-from typing import List, Set, Tuple
+from typing import Dict, List, Sequence, Set, Tuple
 
 from tabulate import tabulate
 
@@ -83,7 +83,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     reader = build_csv_reader(singles=True)
 
     games = []
-    players = {}  # Player mapping username -> "class" objects use to store ratings
+    players: Dict[str, Player] = {}
     clubs = set()
 
     # Process the CSV
@@ -112,7 +112,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
         f"Rankings ({n_games} games, {len(players)} players, {len(clubs)} clubs)"
     )
     sorted_players = sorted(
-        players.values(), key=lambda x: x.rating_singles.mu, reverse=True
+        players.values(), key=lambda x: float(x.rating_singles.mu), reverse=True
     )
     _table = tabulate(
         [
@@ -134,7 +134,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     return sorted_players, games, clubs
 
 
-def print_singles_matchups(players: List[Player]) -> List[tuple]:
+def print_singles_matchups(players: List[Player]) -> Sequence[tuple]:
     """
     Prints out the fairest possible games, matching up nearly equal opponents for
     interesting play.
@@ -204,7 +204,7 @@ def print_singles_matchups(players: List[Player]) -> List[tuple]:
         f"Pair ups [top {min(_n_top, _n_choose_2_players)}, "
         f"{len(players)}C2={_n_choose_2_players} possible]"
     )
-    matchups.sort(key=lambda x: x[-1], reverse=True)
+    matchups.sort(key=lambda x: float(x[-1]), reverse=True)
 
     # Verify things
     if len(matchups) != _n_choose_2_players:

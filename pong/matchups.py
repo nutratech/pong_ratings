@@ -187,14 +187,14 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     _series = [
         (
             player1.username,
-            player1.str_rating(singles=True),
+            player1.str_rating(mode=SINGLES),
             round(_w_p1.mu - rating1.mu),
             round(_l_p1.mu - rating1.mu),
             round(_w_p1.phi + _l_p1.phi - 2 * rating1.phi, 1),
         ),
         (
             player2.username,
-            player2.str_rating(singles=True),
+            player2.str_rating(mode=SINGLES),
             round(_w_p2.mu - rating2.mu),
             round(_l_p2.mu - rating2.mu),
             round(_w_p2.phi + _l_p2.phi - 2 * rating2.phi, 1),
@@ -294,28 +294,28 @@ def eval_doubles(
     _series = [
         (
             player1.username,
-            player1.str_rating(singles=False),
+            player1.str_rating(mode=DOUBLES),
             round(_w_t1[0].mu - rating1.mu, 1),
             round(_l_t1[0].mu - rating1.mu, 1),
             round(_w_t1[0].sigma + _l_t1[0].sigma - 2 * rating1.sigma, 1),
         ),
         (
             player2.username,
-            player2.str_rating(singles=False),
+            player2.str_rating(mode=DOUBLES),
             round(_w_t1[1].mu - rating2.mu, 1),
             round(_l_t1[1].mu - rating2.mu, 1),
             round(_w_t1[1].sigma + _l_t1[1].sigma - 2 * rating2.sigma, 1),
         ),
         (
             player3.username,
-            player3.str_rating(singles=False),
+            player3.str_rating(mode=DOUBLES),
             round(_w_t2[0].mu - rating3.mu, 1),
             round(_l_t2[0].mu - rating3.mu, 1),
             round(_w_t2[0].sigma + _l_t2[0].sigma - 2 * rating3.sigma, 1),
         ),
         (
             player4.username,
-            player4.str_rating(singles=False),
+            player4.str_rating(mode=DOUBLES),
             round(_w_t2[1].mu - rating4.mu, 1),
             round(_l_t2[1].mu - rating4.mu, 1),
             round(_w_t2[1].sigma + _l_t2[1].sigma - 2 * rating4.sigma, 1),
