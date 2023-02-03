@@ -167,9 +167,12 @@ class Player:
         )
 
     @property
-    def rating_singles(self) -> glicko2.Glicko2:
+    def rating_singles(self) -> glicko2.Rating:
         """Gets the rating"""
-        return self.ratings[SINGLES][-1]  # type: ignore
+        glicko = glicko2.Glicko2()
+        _rating = self.ratings[SINGLES][-1]
+
+        return glicko.create_rating(mu=_rating.mu, phi=_rating.phi, sigma=_rating.sigma)
 
     @property
     def rating_doubles(self) -> trueskill.TrueSkill:

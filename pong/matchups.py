@@ -107,13 +107,7 @@ def detailed_match_ups_singles(
 
     # Alias players and ratings
     player1, player2 = players[username1], players[username2]
-    _rating1, _rating2 = player1.rating_singles, player2.rating_singles
-    rating1 = glicko.create_rating(
-        mu=_rating1.mu, phi=_rating1.phi, sigma=_rating1.sigma
-    )
-    rating2 = glicko.create_rating(
-        mu=_rating2.mu, phi=_rating2.phi, sigma=_rating2.sigma
-    )
+    rating1, rating2 = player1.rating_singles, player2.rating_singles
 
     # Calculate misc stats
     _delta_mu = round(rating1.mu - rating2.mu)
