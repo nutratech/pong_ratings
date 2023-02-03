@@ -16,6 +16,7 @@ from typing import List
 import trueskill  # pylint: disable=import-error
 from tabulate import tabulate
 
+from pong import DOUBLES
 from pong.core import (
     add_club,
     build_csv_reader,
@@ -168,7 +169,7 @@ def build_ratings() -> List[Player]:
                     / len(p.partner_rating_doubles),
                     1,
                 ),
-                p.home_club(singles=False),
+                p.home_club(mode=DOUBLES),
             )
             for p in sorted_players
         ],

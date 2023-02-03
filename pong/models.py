@@ -14,10 +14,8 @@ from typing import Dict, List, Union
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
 
-from pong import DRAW_PROB_DOUBLES
+from pong import DOUBLES, DRAW_PROB_DOUBLES, SINGLES
 from pong.glicko2 import glicko2
-
-# pylint: disable=too-few-public-methods
 
 _PONG_DET = "Pong Det"
 CLUB_DICT = {
@@ -29,6 +27,8 @@ CLUB_DICT = {
     "New Way Bar (Ferndale)": "New way",
 }
 
+# pylint: disable=too-few-public-methods
+
 
 class Club:
     """
@@ -36,11 +36,14 @@ class Club:
     """
 
     def __init__(self, name: str) -> None:
-        self.name = name
+        self.name = CLUB_DICT[name]
 
         # Other values populated bi-directionally
         self.games = []
         self.players = []
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Games:
@@ -59,7 +62,15 @@ class Games:
             print(f"Must have high score first, invalid: {self._outcome}")
             sys.exit()
 
-        self.location = CLUB_DICT[row["location"]]
+        self.location = Club(row["location"])
+
+    def winner_score(self) -> int:
+        """Gets # games won by player 1 (or team 1)"""
+        return self.score[0]
+
+    def loser_score(self) -> int:
+        """Gets # games lost by player 2 (or team 2)"""
+        return self.score[1]
 
 
 class SinglesGames(Games):
@@ -107,31 +118,63 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
-        # # WIP stuff
-        # from pong.models.game import Game
-        #
-        # self.singles_games: List[Game] = []
-
-        # Track singles related stats
-        self.stack_ratings_singles = [glicko2.Glicko2()]
-        # TODO: Glicko not float
-        self.opponent_rating_wins_singles: List[float] = []
-        self.opponent_rating_losses_singles: List[float] = []
-
-        # Track doubles related stats
-        self.stack_ratings_doubles = [
-            trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES),
-        ]
+        # WIP stuff
+        # self.singles_games = []
+        self.games = {
+            "singles": {
+                "wins": [],
+                "losses": [],
+            },
+            "doubles": {
+                "wins": [],
+                "losses": [],
+            },
+        }
+        # NOTE: length of this is one longer than other arrays
+        self.ratings = {
+            "singles": [glicko2.Glicko2()],
+            "doubles": [trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)],
+        }
         self.partner_rating_doubles: List[trueskill.TrueSkill()] = []
-        # TODO: TrueSkill not float
-        self.opponent_rating_wins_doubles: List[float] = []
-        self.opponent_rating_losses_doubles: List[float] = []
+        self.opponent_ratings = {
+            "singles": {
+                "wins": [],
+                "losses": [],
+            },
+            "doubles": {
+                "wins": [],
+                "losses": [],
+            },
+        }
 
         # Used to decide home club
         self.club_appearances: Dict[str, Dict[str, int]] = {
             "singles": {},
             "doubles": {},
         }
+
+        # OLD stuff
+        # Track singles related stats
+        # self.stack_ratings_singles = [glicko2.Glicko2()]
+        # self.opponent_rating_wins_singles: List[float] = []
+        # self.opponent_rating_losses_singles: List[float] = []
+
+        # Track doubles related stats
+        # self.stack_ratings_doubles = [
+        #     trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES),
+        # ]
+        # self.opponent_ratings: Dict[str, Dict[str, List[float]]] = {
+        #     "wins": {
+        #         "singles": [],
+        #         "doubles": [],
+        #     },
+        #     "losses": {
+        #         "singles": [],
+        #         "doubles": [],
+        #     },
+        # }
+        # self.opponent_rating_wins_doubles: List[float] = []
+        # self.opponent_rating_losses_doubles: List[float] = []
 
     def __str__(self) -> str:
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
@@ -142,27 +185,19 @@ class Player:
     @property
     def rating_singles(self) -> glicko2.Glicko2:
         """Gets the rating"""
-        return self.stack_ratings_singles[-1]
+        return self.ratings[SINGLES][-1]
 
     @property
     def rating_doubles(self) -> trueskill.TrueSkill:
         """Gets the rating"""
-        return self.stack_ratings_doubles[-1]
+        return self.ratings[DOUBLES][-1]
 
-    def home_club(self, singles=True) -> str:
+    def home_club(self, mode: str) -> str:
         """Gets the most frequent place of playing"""
-
-        if singles:
-            _club = max(
-                self.club_appearances["singles"],
-                key=self.club_appearances["singles"].get,
-            )
-        else:
-            _club = max(
-                self.club_appearances["doubles"],
-                key=self.club_appearances["doubles"].get,
-            )
-        return CLUB_DICT[_club]
+        return max(
+            self.club_appearances[mode],
+            key=self.club_appearances[mode].get,
+        )
 
     def clubs(self):
         """Gets all the clubs someone has appeared at"""
@@ -182,66 +217,48 @@ class Player:
 
         return f"{_rating} ± {int(_uncertainty)}"
 
-    def str_win_losses(self, singles=True) -> str:
+    def str_win_losses(self, mode: str) -> str:
         """Returns e.g. 5-2"""
 
-        if singles:
-            _wins = len(self.opponent_rating_wins_singles)
-            _losses = len(self.opponent_rating_losses_singles)
-        else:
-            _wins = len(self.opponent_rating_wins_doubles)
-            _losses = len(self.opponent_rating_losses_doubles)
+        n_wins = len(self.games[mode]["wins"])
+        n_losses = len(self.games[mode]["losses"])
 
-        return f"{_wins}-{_losses}"
+        return f"{n_wins}-{n_losses}"
 
-    def avg_opponent(self, singles=True) -> Union[int, float]:
+    def avg_opponent(self, mode: str) -> Union[int, float]:
         """Returns average opponent"""
-        if singles:
-            return round(
-                (
-                    sum(self.opponent_rating_wins_singles)
-                    + sum(self.opponent_rating_losses_singles)
-                )
-                / (
-                    len(self.opponent_rating_wins_singles)
-                    + len(self.opponent_rating_losses_singles)
-                )
-            )
-        return round(
-            (
-                sum(self.opponent_rating_wins_doubles)
-                + sum(self.opponent_rating_losses_doubles)
-            )
-            / (
-                len(self.opponent_rating_wins_doubles)
-                + len(self.opponent_rating_losses_doubles)
-            ),
-            1,
+
+        _avg_opponent = (
+            sum(self.opponent_ratings[mode]["wins"])
+            + sum(self.opponent_ratings[mode]["losses"])
+        ) / (
+            len(self.opponent_ratings[mode]["wins"])
+            + len(self.opponent_ratings[mode]["losses"])
         )
 
-    def best_win(self, singles=True) -> Union[None, int, float]:
+        if mode == SINGLES:
+            return round(_avg_opponent)
+        return round(_avg_opponent, 1)
+
+    def best_win(self, mode: str) -> Union[None, int, float]:
         """Returns best win"""
-        if singles:
-            if self.opponent_rating_wins_singles:
-                return round(max(self.opponent_rating_wins_singles))
-        else:
-            if self.opponent_rating_wins_doubles:
-                return round(max(self.opponent_rating_wins_doubles), 1)
-        return None
+        _best_win = max(self.opponent_ratings[mode]["wins"])
+
+        if mode == SINGLES:
+            return round(_best_win)
+        return _best_win
 
     def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
         """
         Prints an ASCII graph of rating over past 50 games
         """
 
-        if len(self.stack_ratings_singles) > 1:
-            _series = [
-                round(x.mu) for x in self.stack_ratings_singles[-graph_width_limit:]
-            ]
+        if len(self.ratings[SINGLES]) > 1:
+            _series = [round(x.mu) for x in self.ratings[SINGLES][-graph_width_limit:]]
         # TODO: mutually exclusive for now, we process singles/doubles separately
-        elif len(self.stack_ratings_doubles) > 1:
+        elif len(self.ratings[DOUBLES]) > 1:
             _series = [
-                round(x.mu, 1) for x in self.stack_ratings_doubles[-graph_width_limit:]
+                round(x.mu, 1) for x in self.ratings[DOUBLES][-graph_width_limit:]
             ]
         else:
             _series = []

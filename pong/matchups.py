@@ -13,7 +13,13 @@ from typing import Dict, Union
 import trueskill
 from tabulate import tabulate
 
-from pong import CSV_RATINGS_DOUBLES, CSV_RATINGS_SINGLES, DRAW_PROB_DOUBLES
+from pong import (
+    CSV_RATINGS_DOUBLES,
+    CSV_RATINGS_SINGLES,
+    DOUBLES,
+    DRAW_PROB_DOUBLES,
+    SINGLES,
+)
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
@@ -41,7 +47,7 @@ def build_players() -> tuple:
         for row in csv_reader:
             player = Player(username=row["username"])
 
-            player.stack_ratings_singles[0] = glicko2.Glicko2(
+            player.ratings[SINGLES][0] = glicko2.Glicko2(
                 mu=float(row["mu"]),
                 phi=float(row["phi"]),
                 sigma=float(row["sigma"]),
@@ -56,7 +62,7 @@ def build_players() -> tuple:
         for row in csv_reader:
             player = Player(username=row["username"])
 
-            player.stack_ratings_doubles[0] = trueskill.TrueSkill(
+            player.ratings[DOUBLES][0] = trueskill.TrueSkill(
                 mu=float(row["mu"]),
                 sigma=float(row["sigma"]),
             )

@@ -8,11 +8,16 @@ _help:
 
 
 
-# Initialize
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Initialize & clean
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 init:
 	git submodule update --init
 	pip install -r requirements.txt -r requirements-lint.txt
+
+clean:
+	rm -rf .coverage __pycache__/ .pytest_cache/
 
 
 
@@ -39,4 +44,5 @@ lint:	## Lint the code
 	- mypy $(ALL_LINT_LOCS)
 
 test:	## Test the code
-	pytest tests/
+	coverage run -m pytest tests/
+	coverage report

@@ -37,3 +37,7 @@ CSV_GAMES_DOUBLES = os.path.join(PROJECT_ROOT, "data", "games_doubles.csv")
 # Persist ratings after main script for auxiliary calculations
 CSV_RATINGS_SINGLES = os.path.join(PROJECT_ROOT, "data", "ratings_singles.csv")
 CSV_RATINGS_DOUBLES = os.path.join(PROJECT_ROOT, "data", "ratings_doubles.csv")
+
+# Enum
+SINGLES = "singles"
+DOUBLES = "doubles"

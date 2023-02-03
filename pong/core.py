@@ -16,8 +16,10 @@ import requests
 from pong import (
     CSV_GAMES_DOUBLES,
     CSV_GAMES_SINGLES,
+    DOUBLES,
     DOUBLES_CSV_URL,
     PROJECT_ROOT,
+    SINGLES,
     SINGLES_CSV_URL,
 )
 from pong.env import PLAYERS_PRESENT
@@ -145,7 +147,7 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
                 p.rating_singles.mu,
                 p.rating_singles.phi,
                 p.rating_singles.sigma,
-                [round(x.mu) for x in p.stack_ratings_singles],
+                [round(x.mu) for x in p.ratings[SINGLES]],
             )
             for p in sorted_players
         ]
@@ -157,7 +159,7 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles=True) -> None:
                 p.username,
                 p.rating_doubles.mu,
                 p.rating_doubles.sigma,
-                [round(x.mu, 1) for x in p.stack_ratings_doubles],
+                [round(x.mu, 1) for x in p.ratings[DOUBLES]],
             )
             for p in sorted_players
         ]
