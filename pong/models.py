@@ -9,7 +9,7 @@ Club model used for grouping games and players to location names.
 """
 import sys
 from datetime import date
-from typing import Dict, List, Union
+from typing import Dict, List, Set, Union
 
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
@@ -45,7 +45,7 @@ class Club:
     def __str__(self) -> str:
         return self.name
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other) -> bool:  # type: ignore
         return bool(self.name == other.name)
 
     def __hash__(self) -> int:
@@ -141,8 +141,8 @@ class Player:
             "singles": [glicko2.Glicko2()],
             "doubles": [trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)],
         }
-        self.partner_rating_doubles: List[trueskill.TrueSkill()] = []
-        self.opponent_ratings = {
+        self.partner_rating_doubles: List[trueskill.TrueSkill] = []
+        self.opponent_ratings: Dict[str, Dict[str, List[float]]] = {
             "singles": {
                 "wins": [],
                 "losses": [],
@@ -169,7 +169,7 @@ class Player:
     @property
     def rating_singles(self) -> glicko2.Glicko2:
         """Gets the rating"""
-        return self.ratings[SINGLES][-1]
+        return self.ratings[SINGLES][-1]  # type: ignore
 
     @property
     def rating_doubles(self) -> trueskill.TrueSkill:
@@ -180,12 +180,12 @@ class Player:
         """Gets the most frequent place of playing"""
         return max(
             self.club_appearances[mode],
-            key=self.club_appearances[mode].get,
+            key=self.club_appearances[mode].get,  # type: ignore
         )
 
-    def clubs(self):
+    def clubs(self) -> Set[str]:
         """Gets all the clubs someone has appeared at"""
-        _clubs = set()
+        _clubs: Set[str] = set()
         _clubs.update(self.club_appearances["singles"])
         _clubs.update(self.club_appearances["doubles"])
         return _clubs
@@ -233,7 +233,9 @@ class Player:
             return round(_best_win)
         return float(round(_best_win, 1))
 
-    def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
+    def graph_ratings(
+        self, graph_width_limit: int = 50, graph_height: int = 12
+    ) -> None:
         """
         Prints an ASCII graph of rating over past 50 games
         """
