@@ -54,7 +54,7 @@ def cache_csv_file(_csv_bytes_output, singles=True) -> None:
         _file.write(_csv_bytes_output)
 
 
-def build_csv_reader(singles=True) -> csv.reader:
+def build_csv_reader(singles=True) -> csv.DictReader:
     """Returns a csv.reader() object"""
 
     try:
@@ -121,12 +121,9 @@ def filter_players(_sorted_players: List[Player]) -> List[Player]:
     return _sorted_players
 
 
-def add_club(_player: Player, club: str, singles=True) -> None:
+def add_club(_player: Player, club: str, mode: str) -> None:
     """Adds a club tally to the club appearances dictionary"""
-    if singles:
-        _appearances = _player.club_appearances["singles"]
-    else:
-        _appearances = _player.club_appearances["doubles"]
+    _appearances = _player.club_appearances[mode]
 
     if club in _appearances:
         _appearances[club] += 1

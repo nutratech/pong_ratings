@@ -100,18 +100,8 @@ def build_ratings() -> List[Player]:
 
         # Push to list of club appearances
         clubs.add(game.location.name)
-        add_club(_winner_player, game.location.name, singles=True)
-        add_club(_loser_player, game.location.name, singles=True)
-
-        # # Parse fields
-        # _ = date.fromisoformat(row[0])  # Not used for now
-        # _winner = row[1].lower()
-        # _loser = row[2].lower()
-        #
-        # _winner_score = int(row[3].split("-")[0])
-        # _loser_score = int(row[3].split("-")[1])
-        #
-        # _location = row[4]  # Club name or location of game
+        add_club(_winner_player, club=game.location.name, mode=SINGLES)
+        add_club(_loser_player, club=game.location.name, mode=SINGLES)
 
     n_games = sum(sum(y for y in x.score) for x in games)
 
