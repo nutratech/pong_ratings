@@ -153,29 +153,6 @@ class Player:
             "doubles": {},
         }
 
-        # OLD stuff
-        # Track singles related stats
-        # self.stack_ratings_singles = [glicko2.Glicko2()]
-        # self.opponent_rating_wins_singles: List[float] = []
-        # self.opponent_rating_losses_singles: List[float] = []
-
-        # Track doubles related stats
-        # self.stack_ratings_doubles = [
-        #     trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES),
-        # ]
-        # self.opponent_ratings: Dict[str, Dict[str, List[float]]] = {
-        #     "wins": {
-        #         "singles": [],
-        #         "doubles": [],
-        #     },
-        #     "losses": {
-        #         "singles": [],
-        #         "doubles": [],
-        #     },
-        # }
-        # self.opponent_rating_wins_doubles: List[float] = []
-        # self.opponent_rating_losses_doubles: List[float] = []
-
     def __str__(self) -> str:
         # NOTE: return this as a tuple, and tabulate it (rather than format as string)?
         return (
@@ -246,7 +223,7 @@ class Player:
 
         if mode == SINGLES:
             return round(_best_win)
-        return _best_win
+        return round(_best_win, 1)
 
     def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
         """

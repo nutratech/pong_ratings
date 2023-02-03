@@ -113,17 +113,6 @@ def build_ratings() -> List[Player]:
         game = DoublesGames(row)
         games.append(game)
 
-        # # Parse fields
-        # _ = date.fromisoformat(row[0])  # Not used for now
-        # _winner1 = row[1].lower()
-        # _winner2 = row[2].lower()
-        #
-        # _winners_score = int(row[3].split("-")[0])
-        # _losers_score = int(row[3].split("-")[1])
-        #
-        # _loser1 = row[4].lower()
-        # _loser2 = row[5].lower()
-
         # Check if players are already tracked, create if not
         _winner_player1 = get_or_create_player_by_name(players, game.username1)
         _winner_player2 = get_or_create_player_by_name(players, game.username2)
@@ -150,9 +139,13 @@ def build_ratings() -> List[Player]:
         ]:
             add_club(player, club=game.location.name, mode=DOUBLES)
 
+    n_games = sum(sum(y for y in x.score) for x in games)
+
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings?
-    print_title("Rankings")
+    print_title(
+        f"Rankings ({n_games} games, {len(players)} players, {len(clubs)} clubs)"
+    )
     sorted_players = sorted(
         players.values(), key=lambda x: x.rating_doubles.mu, reverse=True
     )
