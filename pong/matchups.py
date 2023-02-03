@@ -115,23 +115,25 @@ def detailed_match_ups_singles(
 
     # Calculate probabilities
     prob_p1_game = glicko.expect_score(
-        glicko.scale_down(rating1),
-        glicko.scale_down(rating2),
-        glicko.reduce_impact(glicko.scale_down(rating2)),
+        glicko.scale_down(rating1),  # type: ignore
+        glicko.scale_down(rating2),  # type: ignore
+        glicko.reduce_impact(glicko.scale_down(rating2)),  # type: ignore
     )
     prob_p2_game = glicko.expect_score(
-        glicko.scale_down(rating2),
-        glicko.scale_down(rating1),
-        glicko.reduce_impact(glicko.scale_down(rating1)),
+        glicko.scale_down(rating2),  # type: ignore
+        glicko.scale_down(rating1),  # type: ignore
+        glicko.reduce_impact(glicko.scale_down(rating1)),  # type: ignore
     )
     prob_game = (prob_p1_game + (1 - prob_p2_game)) / 2
 
     inverse_probs = _inverse_probs(prob_game)
 
-    prob_point = inverse_probs["prob_point"]
-    prob_match = inverse_probs["prob_match"]
-    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
-    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+    prob_point = float(inverse_probs["prob_point"])  # type: ignore
+    prob_match: Dict[int, float] = inverse_probs["prob_match"]  # type: ignore
+    prob_win_at_least_1: Dict[int, float] = inverse_probs[  # type: ignore
+        "prob_win_at_least_1"
+    ]
+    prob_win_6_out_of_6 = float(inverse_probs["prob_win_6_out_of_6"])  # type: ignore
 
     prob_deuce_reach = inverse_probs["prob_deuce_reach"]
     prob_deuce_win = inverse_probs["prob_deuce_win"]
@@ -245,10 +247,12 @@ def detailed_match_ups_doubles(
     # Calculate probabilities
     inverse_probs = _inverse_probs(prob_game)
 
-    prob_point = inverse_probs["prob_point"]
-    prob_match = inverse_probs["prob_match"]
-    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
-    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+    prob_point = float(inverse_probs["prob_point"])  # type: ignore
+    prob_match: Dict[int, float] = inverse_probs["prob_match"]  # type: ignore
+    prob_win_at_least_1: Dict[int, float] = inverse_probs[  # type: ignore
+        "prob_win_at_least_1"
+    ]
+    prob_win_6_out_of_6 = float(inverse_probs["prob_win_6_out_of_6"])  # type: ignore
 
     prob_deuce_reach = inverse_probs["prob_deuce_reach"]
     prob_deuce_win = inverse_probs["prob_deuce_win"]

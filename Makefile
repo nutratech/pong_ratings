@@ -48,4 +48,4 @@ lint:	## Lint the code
 
 test:	## Test the code
 	coverage run -m pytest tests/
-	- coverage report
+	coverage report
