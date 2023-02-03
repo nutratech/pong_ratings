@@ -34,8 +34,7 @@ def do_games(
     player2: Player,
     player3: Player,
     player4: Player,
-    _winners_score: int,
-    _losers_score: int,
+    games: DoublesGames,
 ) -> None:
     """
     Updates ratings.
@@ -78,18 +77,25 @@ def do_games(
             )
 
     # Disallow scores like 2-5
-    if _winners_score < _losers_score:
+    if games.winner_score() < games.loser_score():
         raise ValueError(
-            f"Winner score first in CSV, invalid: {_winners_score}-{_losers_score}"
+            f"Winner score first in CSV, invalid: "
+            f"{games.winner_score()}-{games.loser_score()}"
         )
 
     # Do the rating updates for won games, then alternate
-    for _ in range(_winners_score - _losers_score):
+    for _ in range(games.winner_score() - games.loser_score()):
         _update_rating(player1, player2, player3, player4)
 
-    for _ in range(_losers_score):
+    for _ in range(games.loser_score()):
         _update_rating(player4, player3, player2, player1)
         _update_rating(player1, player2, player3, player4)
+
+    # Push to list of club locations
+    add_club(player1, club=games.location.name, mode=DOUBLES)
+    add_club(player2, club=games.location.name, mode=DOUBLES)
+    add_club(player3, club=games.location.name, mode=DOUBLES)
+    add_club(player4, club=games.location.name, mode=DOUBLES)
 
 
 def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
@@ -104,40 +110,31 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=False)
 
-    games = []
+    sets = []
     players: Dict[str, Player] = {}
     clubs = set()
 
     # Process the CSV
     for row in reader:
         # Add game to list
-        game = DoublesGames(row)
-        games.append(game)
+        games = DoublesGames(row)
+        sets.append(games)
 
         # Check if players are already tracked, create if not
-        _winner_player1 = get_or_create_player_by_name(players, game.username1)
-        _winner_player2 = get_or_create_player_by_name(players, game.username2)
-        _loser_player1 = get_or_create_player_by_name(players, game.username3)
-        _loser_player2 = get_or_create_player_by_name(players, game.username4)
+        _winner_player1 = get_or_create_player_by_name(players, games.username1)
+        _winner_player2 = get_or_create_player_by_name(players, games.username2)
+        _loser_player1 = get_or_create_player_by_name(players, games.username3)
+        _loser_player2 = get_or_create_player_by_name(players, games.username4)
 
         # Run the algorithm and update ratings
         do_games(
-            _winner_player1,
-            _winner_player2,
-            _loser_player1,
-            _loser_player2,
-            game.winner_score(),
-            game.loser_score(),
+            _winner_player1, _winner_player2, _loser_player1, _loser_player2, games
         )
 
         # Push to list of club locations
-        clubs.add(game.location)
-        add_club(_winner_player1, club=game.location.name, mode=DOUBLES)
-        add_club(_winner_player2, club=game.location.name, mode=DOUBLES)
-        add_club(_loser_player1, club=game.location.name, mode=DOUBLES)
-        add_club(_loser_player2, club=game.location.name, mode=DOUBLES)
+        clubs.add(games.location)
 
-    n_games = sum(sum(y for y in x.score) for x in games)
+    n_games = sum(sum(y for y in x.score) for x in sets)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings?
@@ -145,7 +142,9 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
         f"Rankings ({n_games} games, {len(players)} players, {len(clubs)} clubs)"
     )
     sorted_players = sorted(
-        players.values(), key=lambda x: x.rating_doubles.mu, reverse=True
+        players.values(),
+        key=lambda x: x.rating_doubles.mu,  # type: ignore
+        reverse=True,
     )
     _table = tabulate(
         [
@@ -169,7 +168,7 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     print(_table)
 
     # Used to build pairings / ideal matches
-    return sorted_players, games, clubs
+    return sorted_players, sets, clubs
 
 
 def print_doubles_matchups(

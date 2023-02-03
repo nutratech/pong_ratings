@@ -26,9 +26,7 @@ from pong.glicko2 import glicko2
 from pong.models import Club, Player, SinglesGames
 
 
-def do_games(
-    player1: Player, player2: Player, _winner_score: int, _loser_score: int
-) -> None:
+def do_games(player1: Player, player2: Player, games: SinglesGames) -> None:
     """
     Updates ratings for given games & players
     NOTE: player1 wins, player2 loses
@@ -56,18 +54,23 @@ def do_games(
         _player2.opponent_ratings[SINGLES]["losses"].append(_player1.rating_singles.mu)
 
     # Disallow scores like 2-5
-    if _winner_score < _loser_score:
+    if games.winner_score() < games.loser_score():
         raise ValueError(
-            f"Winner score first in CSV, invalid: {_winner_score}-{_loser_score}"
+            f"Winner score first in CSV, invalid: "
+            f"{games.winner_score()}-{games.loser_score()}"
         )
 
     # Do the rating updates for won games, then alternate
-    for _ in range(_winner_score - _loser_score):
+    for _ in range(games.winner_score() - games.loser_score()):
         _update_rating(player1, player2)
 
-    for _ in range(_loser_score):
+    for _ in range(games.loser_score()):
         _update_rating(player2, player1)
         _update_rating(player1, player2)
+
+    # Push to list of club appearances
+    add_club(player1, club=games.location.name, mode=SINGLES)
+    add_club(player2, club=games.location.name, mode=SINGLES)
 
 
 def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
@@ -83,7 +86,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     # Prepare the CSV inputs
     reader = build_csv_reader(singles=True)
 
-    games = []
+    sets = []
     players: Dict[str, Player] = {}
     clubs = set()
 
@@ -91,22 +94,20 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     # Process the CSV
     for row in reader:
         # Add game to list
-        game = SinglesGames(row)
-        games.append(game)
+        games = SinglesGames(row)
+        sets.append(games)
 
         # Check if players are already tracked, create if not
-        _winner_player = get_or_create_player_by_name(players, game.username1)
-        _loser_player = get_or_create_player_by_name(players, game.username2)
+        _winner_player = get_or_create_player_by_name(players, games.username1)
+        _loser_player = get_or_create_player_by_name(players, games.username2)
 
         # Run the algorithm and update ratings
-        do_games(_winner_player, _loser_player, game.winner_score(), game.loser_score())
+        do_games(_winner_player, _loser_player, games)
 
         # Push to list of club appearances
-        clubs.add(game.location)
-        add_club(_winner_player, club=game.location.name, mode=SINGLES)
-        add_club(_loser_player, club=game.location.name, mode=SINGLES)
+        clubs.add(games.location)
 
-    n_games = sum(sum(y for y in x.score) for x in games)
+    n_games = sum(sum(y for y in x.score) for x in sets)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings? Group by home club?
@@ -136,12 +137,12 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     t_delta = time.time() - t_start
     print()
     print(
-        f"Analyzed {len(games)} CSV lines in {round(1000 * t_delta, 1)} ms "
-        f"({round(len(games) / t_delta)}/s)"
+        f"Analyzed {len(sets)} CSV lines in {round(1000 * t_delta, 1)} ms "
+        f"({round(len(sets) / t_delta)}/s)"
     )
 
     # Used to build pairings / ideal matches
-    return sorted_players, games, clubs
+    return sorted_players, sets, clubs
 
 
 def print_singles_matchups(
@@ -184,20 +185,24 @@ def print_singles_matchups(
             )
             _win_probability = round(
                 rating_engine.expect_score(
-                    rating_engine.scale_down(player1.rating_singles),
-                    rating_engine.scale_down(player2.rating_singles),
+                    rating_engine.scale_down(player1.rating_singles),  # type: ignore
+                    rating_engine.scale_down(player2.rating_singles),  # type: ignore
                     rating_engine.reduce_impact(
-                        rating_engine.scale_down(player2.rating_singles),
+                        rating_engine.scale_down(
+                            player2.rating_singles  # type: ignore
+                        ),
                     ),
                 ),
                 2,
             )
             _loss_probability = round(
                 rating_engine.expect_score(
-                    rating_engine.scale_down(player2.rating_singles),
-                    rating_engine.scale_down(player1.rating_singles),
+                    rating_engine.scale_down(player2.rating_singles),  # type: ignore
+                    rating_engine.scale_down(player1.rating_singles),  # type: ignore
                     rating_engine.reduce_impact(
-                        rating_engine.scale_down(player1.rating_singles),
+                        rating_engine.scale_down(
+                            player1.rating_singles  # type: ignore
+                        ),
                     ),
                 ),
                 2,
