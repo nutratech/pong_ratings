@@ -3,8 +3,10 @@
 Created on Sun 08 Jan 2023 11∶26∶34 PM EST
 
 @author: shane
+Game model used for players, location, date, outcome, etc
 Player model used for singles & doubles ratings, username, wins/losses, etc
 """
+from datetime import date
 from typing import Dict, List, Union
 
 import asciichartpy  # pylint: disable=import-error
@@ -12,6 +14,77 @@ import trueskill  # pylint: disable=import-error
 
 from pong import DRAW_PROB_DOUBLES
 from pong.glicko2 import glicko2
+
+
+class Game:
+    """
+    Model for storing date, location, win/loss, opponent, etc.
+    Easily queryable, e.g. find max(best_win_opponent_ratings) or avg(opponent_ratings)
+    """
+
+    def __init__(
+        self,
+        # row: List[str],
+        date_str: str,
+        players: List[Player],
+        winners_score: int,
+        losers_score: int,
+    ) -> None:
+
+        if len(players) not in {2, 4}:
+            raise ValueError("Number of players must be either 2 or 4")
+
+        self.date = date.fromisoformat(date_str)
+
+        self.player1 = player1
+        self.player2 = player2
+
+        self.winners_score = winners_score
+        self.losers_score = losers_score
+
+
+class SinglesGame(Game):
+    """Singles game specifics"""
+
+    def __init__(
+        self,
+        date_str: str,
+        player1: Player,
+        player2: Player,
+        winners_score: int,
+        losers_score: int,
+    ):
+        super().__init__(
+            date_str=date_str,
+            player1=player1,
+            player2=player2,
+            winners_score=winners_score,
+            losers_score=losers_score,
+        )
+
+
+class DoublesGame:
+    """Doubles game specifics"""
+
+    def __init__(
+        self,
+        date_str: str,
+        player1: Player,
+        player2: Player,
+        player3: Player,
+        player4: Player,
+        winners_score: int,
+        losers_score: int,
+    ):
+        super().__init__(
+            date_str=date_str,
+            player1=player1,
+            player2=player2,
+            winners_score=winners_score,
+            losers_score=losers_score,
+        )
+        self.player3 = player3
+        self.player4 = player4
 
 
 class Player:

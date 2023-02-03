@@ -1,0 +1,41 @@
+---
+name: test
+
+"on":
+  push: {}
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Reload Cache / pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.python-version }}-pip-
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Lint
+        run: make lint
+
+      - name: Test
+        run: make test
+
+      - name: Basic Tests / CLI / Integration
+        run: |
+          ./singles.py
+          ./doubles.py
+          ./matchups.py thomas mal shane benji norm
