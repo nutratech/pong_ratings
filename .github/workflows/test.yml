@@ -39,7 +39,7 @@ jobs:
 
       - name: Compare coverage with allowed minimum
         run: |
-          COV_ACTUAL=$(make _test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs)
+          COV_ACTUAL=$(make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs)
           COV_EXPECT=$(grep fail_under setup.cfg | awk -F'=' '{print $2}' | xargs)
           if [[ "$COV_ACTUAL" != "$COV_EXPECT" ]]; then
             echo "FATAL: coverage in setup.cfg must be exactly $COV_ACTUAL"
