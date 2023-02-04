@@ -86,8 +86,8 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
      - Filter RD > 300/350? Command-line flag / ENV VAR to force anyways?
     """
 
-    # Prepare the CSV inputs
-    reader = build_csv_reader(singles=True)
+    # Prepare the CSV inputs (fetch Google Sheet and save to disk)
+    reader = build_csv_reader(mode=SINGLES)
 
     # pylint: disable=duplicate-code
     sets = []
@@ -265,7 +265,7 @@ if __name__ == "__main__":
 
     # TODO: make use of _clubs and _games now. Filter uncertain ratings here?
     _sorted_players = filter_players(_sorted_players)
-    cache_ratings_csv_file(_sorted_players, singles=True)
+    cache_ratings_csv_file(_sorted_players, mode=SINGLES)
 
     print_singles_matchups(_sorted_players)
 

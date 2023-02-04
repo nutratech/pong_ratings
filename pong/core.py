@@ -8,18 +8,16 @@ Shared utilities by both singles and doubles interface
 import csv
 import os
 import sys
+import time
 from io import StringIO
 from typing import Dict, List
 
 import requests
 
 from pong import (
-    CSV_GAMES_DOUBLES,
-    CSV_GAMES_SINGLES,
-    CSV_RATINGS_DOUBLES,
-    CSV_RATINGS_SINGLES,
-    CSV_URL_DOUBLES,
-    CSV_URL_SINGLES,
+    CSV_GAMES_FILE_PATHS,
+    CSV_GAMES_URLS,
+    CSV_RATINGS_FILE_PATHS,
     DOUBLES,
     SINGLES,
 )
@@ -40,29 +38,29 @@ def get_google_sheet(url: str) -> bytes:
     return bytes(response.content)
 
 
-def cache_csv_file(_csv_bytes_output: bytes, singles: bool) -> None:
+def cache_csv_file(_csv_bytes_output: bytes, mode: str) -> None:
     """
     Persists the CSV file into the git commit history.
     Fall back calculation in case sheets.google.com is unreachable.
     (Manually) verify no nefarious edits are made.
     """
-    csv_path = CSV_GAMES_SINGLES if singles else CSV_GAMES_DOUBLES
+    csv_path = CSV_GAMES_FILE_PATHS[mode]
     with open(csv_path, "wb") as _file:
         _file.write(_csv_bytes_output)
 
 
-def build_csv_reader(singles: bool) -> csv.DictReader:
+def build_csv_reader(mode: str) -> csv.DictReader:
     """Returns a csv.reader() object"""
+    url = CSV_GAMES_URLS[mode]
+    t_start = time.time()
 
     try:
-        url = CSV_URL_SINGLES if singles else CSV_URL_DOUBLES
         _csv_bytes_output = get_google_sheet(url)
         _csv_file = StringIO(_csv_bytes_output.decode())
-        cache_csv_file(_csv_bytes_output, singles=singles)
+        cache_csv_file(_csv_bytes_output, mode=mode)
 
         reader = csv.DictReader(_csv_file)
         reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
-        return reader
 
     except (
         requests.exceptions.ConnectionError,
@@ -71,12 +69,15 @@ def build_csv_reader(singles: bool) -> csv.DictReader:
         print(repr(err))
         print()
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
-        csv_path = CSV_GAMES_SINGLES if singles else CSV_GAMES_DOUBLES
+        csv_path = CSV_GAMES_FILE_PATHS[mode]
 
         # pylint: disable=consider-using-with
         reader = csv.DictReader(open(csv_path, encoding="utf-8"))
         reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
-        return reader
+
+    t_delta = time.time() - t_start
+    print(f"Cached {mode} CSV file in {round(t_delta * 1000, 1)} ms")
+    return reader
 
 
 def get_or_create_player_by_name(players: Dict[str, Player], username: str) -> Player:
@@ -132,12 +133,12 @@ def add_club(_player: Player, club: str, mode: str) -> None:
         _appearances[club] = 1
 
 
-def cache_ratings_csv_file(sorted_players: List[Player], singles: bool) -> None:
+def cache_ratings_csv_file(sorted_players: List[Player], mode: str) -> None:
     """Saves the ratings in a CSV file, so we can manually calculate match ups"""
+    _file_path = CSV_RATINGS_FILE_PATHS[mode]
 
-    # TODO: support p.rating(singles=singles)?
-    if singles:
-        _file_path = CSV_RATINGS_SINGLES
+    # TODO: 3rd possibility? Besides singles/doubles?
+    if mode == SINGLES:
         headers = ["username", "mu", "phi", "sigma", "history", "clubs"]
         _series = [
             (
@@ -151,7 +152,6 @@ def cache_ratings_csv_file(sorted_players: List[Player], singles: bool) -> None:
             for p in sorted_players
         ]
     else:
-        _file_path = CSV_RATINGS_DOUBLES
         headers = ["username", "mu", "sigma", "history", "clubs"]
         _series = [
             (  # type: ignore

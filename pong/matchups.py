@@ -13,13 +13,7 @@ from typing import Dict, Set, Tuple, Union
 import trueskill
 from tabulate import tabulate
 
-from pong import (
-    CSV_RATINGS_DOUBLES,
-    CSV_RATINGS_SINGLES,
-    DOUBLES,
-    DRAW_PROB_DOUBLES,
-    SINGLES,
-)
+from pong import CSV_RATINGS_FILE_PATHS, DOUBLES, DRAW_PROB_DOUBLES, SINGLES
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
@@ -50,7 +44,7 @@ def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
     clubs: Dict[str, Set[str]] = {}
 
     # Singles
-    with open(CSV_RATINGS_SINGLES, encoding="utf-8") as _f:
+    with open(CSV_RATINGS_FILE_PATHS[SINGLES], encoding="utf-8") as _f:
         csv_reader = csv.DictReader(_f)
 
         for row in csv_reader:
@@ -71,7 +65,7 @@ def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
             singles_players[player.username] = player
 
     # Doubles
-    with open(CSV_RATINGS_DOUBLES, encoding="utf-8") as _f:
+    with open(CSV_RATINGS_FILE_PATHS[DOUBLES], encoding="utf-8") as _f:
         csv_reader = csv.DictReader(_f)
 
         for row in csv_reader:

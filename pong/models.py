@@ -186,12 +186,12 @@ class Player:
             key=self.club_appearances[mode].get,  # type: ignore
         )
 
-    def clubs(self) -> Set[str]:
+    def clubs(self) -> List[str]:
         """Gets all the clubs someone has appeared at"""
         _clubs: Set[str] = set()
         _clubs.update(self.club_appearances["singles"])
         _clubs.update(self.club_appearances["doubles"])
-        return _clubs
+        return sorted(list(_clubs))
 
     def str_rating(self, mode: str) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
