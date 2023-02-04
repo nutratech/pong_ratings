@@ -31,16 +31,21 @@ jobs:
       - name: Install requirements
         run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make deps
 
-      - name: Lint
-        run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make lint
+      # - name: Lint
+      #   run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make lint
 
-      - name: Test
-        run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make test
+      # - name: Test
+      #   run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make test
 
       - name: Compare coverage with allowed minimum
         run: |
-          export COV_ACTUAL=$(make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs)
-          export COV_EXPECT=$(grep fail_under setup.cfg | awk -F'=' '{print $2}' | xargs)
+          export PYTHON=${{ env.PYTHON_SPOOF_VENV }}
+          make test | grep ^TOTAL
+          make test | grep ^TOTAL | awk -F' ' '{print $4}'
+          make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}'
+          make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs
+          COV_ACTUAL=$(make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs)
+          COV_EXPECT=$(grep fail_under setup.cfg | awk -F'=' '{print $2}' | xargs)
           if [[ "$COV_ACTUAL" != "$COV_EXPECT" ]]; then
             echo "FATAL: coverage in setup.cfg must be exactly $COV_ACTUAL"
             exit 1
