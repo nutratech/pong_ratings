@@ -8,7 +8,7 @@ Detailed information about requested match up(s)
 """
 import csv
 import math
-from typing import Dict, Set, Tuple, Union
+from typing import Dict, Set, Tuple
 
 import trueskill
 from tabulate import tabulate
@@ -87,7 +87,9 @@ def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
     return singles_players, doubles_players
 
 
-def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]]:
+def _inverse_probs(
+    prob_game: float,
+) -> Tuple[Dict[str, float], Dict[str, Dict[int, float]]]:
     """Returns common match / point / game metrics to both singles & doubles"""
 
     prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
@@ -100,14 +102,18 @@ def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]
     prob_deuce_win = round(p_deuce_win(prob_point), 2)
     prob_win_6_out_of_6 = round(prob_game**6, 3)
 
-    return {
-        "prob_point": prob_point,
-        "prob_match": prob_match,
-        "prob_win_at_least_1": prob_win_at_least_1,
-        "prob_deuce_reach": prob_deuce_reach,
-        "prob_deuce_win": prob_deuce_win,
-        "prob_win_6_out_of_6": prob_win_6_out_of_6,
-    }
+    return (
+        {
+            "prob_point": prob_point,
+            "prob_deuce_reach": prob_deuce_reach,
+            "prob_deuce_win": prob_deuce_win,
+            "prob_win_6_out_of_6": prob_win_6_out_of_6,
+        },
+        {
+            "prob_match": prob_match,
+            "prob_win_at_least_1": prob_win_at_least_1,
+        },
+    )
 
 
 def detailed_match_ups_singles(
@@ -141,17 +147,15 @@ def detailed_match_ups_singles(
     )
     prob_game = (prob_p1_game + (1 - prob_p2_game)) / 2
 
-    inverse_probs = _inverse_probs(prob_game)
+    inverse_probs_pts, inverse_probs_match = _inverse_probs(prob_game)
 
-    prob_point = float(inverse_probs["prob_point"])  # type: ignore
-    prob_match: Dict[int, float] = inverse_probs["prob_match"]  # type: ignore
-    prob_win_at_least_1: Dict[int, float] = inverse_probs[  # type: ignore
-        "prob_win_at_least_1"
-    ]
-    prob_win_6_out_of_6 = float(inverse_probs["prob_win_6_out_of_6"])  # type: ignore
+    prob_point = float(inverse_probs_pts["prob_point"])
+    prob_match: Dict[int, float] = inverse_probs_match["prob_match"]
+    prob_win_at_least_1: Dict[int, float] = inverse_probs_match["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = float(inverse_probs_pts["prob_win_6_out_of_6"])
 
-    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
-    prob_deuce_win = inverse_probs["prob_deuce_win"]
+    prob_deuce_reach = inverse_probs_pts["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs_pts["prob_deuce_win"]
 
     # Calculate other statistics
     fair_handicap = [
@@ -260,17 +264,15 @@ def detailed_match_ups_doubles(
     )
 
     # Calculate probabilities
-    inverse_probs = _inverse_probs(prob_game)
+    inverse_probs_pts, inverse_probs_match = _inverse_probs(prob_game)
 
-    prob_point = float(inverse_probs["prob_point"])  # type: ignore
-    prob_match: Dict[int, float] = inverse_probs["prob_match"]  # type: ignore
-    prob_win_at_least_1: Dict[int, float] = inverse_probs[  # type: ignore
-        "prob_win_at_least_1"
-    ]
-    prob_win_6_out_of_6 = float(inverse_probs["prob_win_6_out_of_6"])  # type: ignore
+    prob_point = float(inverse_probs_pts["prob_point"])
+    prob_match: Dict[int, float] = inverse_probs_match["prob_match"]
+    prob_win_at_least_1: Dict[int, float] = inverse_probs_match["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = float(inverse_probs_pts["prob_win_6_out_of_6"])
 
-    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
-    prob_deuce_win = inverse_probs["prob_deuce_win"]
+    prob_deuce_reach = inverse_probs_pts["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs_pts["prob_deuce_win"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details

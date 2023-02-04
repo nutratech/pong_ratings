@@ -54,8 +54,11 @@ class Club:
 
 class Games:
     """
-    Model for storing date, location, win/loss, opponent, etc.
-    Easily queryable, e.g. find max(best_win_opponent_ratings) or avg(opponent_ratings)
+    Model for storing date, location, wins/losses, opponent, etc.
+    TODO:
+        - Easily queryable,
+            e.g. find max(best_win_opponent_ratings) or avg(opponent_ratings)
+        - Decide on life cycle flow of overall app: interface, modularity, & persistence
     """
 
     def __init__(self, row: Dict[str, str]) -> None:
