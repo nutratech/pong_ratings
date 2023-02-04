@@ -78,6 +78,15 @@ class Games:
         """Gets # games lost by player 2 (or team 2)"""
         return self.score[1]
 
+    def validate_username(self, username: str) -> None:
+        """Verify a username is at least 3 characters long"""
+        min_length = 3
+        if len(username) < min_length:
+            raise ValueError(
+                f"Username must be at least {min_length} characters, got: {username}\n"
+                f"Game: {self}",
+            )
+
 
 class SinglesGames(Games):
     """Singles game specifics"""
@@ -89,6 +98,8 @@ class SinglesGames(Games):
         #  and check that there are exactly 2 or 4 players
         self.username1 = row["winner"]
         self.username2 = row["loser"]
+        self.validate_username(self.username1)
+        self.validate_username(self.username2)
 
     def __str__(self) -> str:
         return f"{self.date} {self.username1} vs. {self.username2} {self._outcome}"
@@ -104,6 +115,10 @@ class DoublesGames(Games):
         self.username2 = row["winner 2"]
         self.username3 = row["loser 1"]
         self.username4 = row["loser 2"]
+        self.validate_username(self.username1)
+        self.validate_username(self.username2)
+        self.validate_username(self.username3)
+        self.validate_username(self.username4)
 
     def __str__(self) -> str:
         return (
