@@ -11,14 +11,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      PYTHON_SPOOF_VENV: /home/runner/work/pong_ratings/pong_ratings/.venv/bin/python
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      # - name: Count lines of source code
-      #   run: cloc HEAD
 
       - name: Reload Cache / pip
         uses: actions/cache@v3
@@ -29,15 +29,25 @@ jobs:
             ${{ runner.os }}-${{ matrix.python-version }}-pip-
 
       - name: Install requirements
-        run: pip install -r requirements.txt -r requirements-lint.txt
+        run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make deps
 
       - name: Lint
-        run: make lint
+        run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make lint
 
-      # - name: Test
-      #   run: make test
+      - name: Test
+        run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make test
 
-      - name: Basic Tests / CLI / Integration
+      - name: Compare coverage with allowed minimum
+        run: |
+          export PYTHON=${{ env.PYTHON_SPOOF_VENV }}
+          COV_ACTUAL=$(make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs)
+          COV_EXPECT=$(grep fail_under setup.cfg | awk -F'=' '{print $2}' | xargs)
+          if [[ "$COV_ACTUAL" != "$COV_EXPECT" ]]; then
+            echo "FATAL: coverage in setup.cfg must be exactly '$COV_ACTUAL'"
+            exit 1
+          fi
+
+      - name: Basic CLI Integration Tests
         run: |
           ./singles.py
           ./doubles.py

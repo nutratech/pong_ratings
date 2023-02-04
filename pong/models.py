@@ -9,7 +9,7 @@ Club model used for grouping games and players to location names.
 """
 import sys
 from datetime import date
-from typing import Dict, List, Union
+from typing import Dict, List, Set, Union
 
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
@@ -39,14 +39,14 @@ class Club:
         self.name = CLUB_DICT[name]
 
         # Other values populated bi-directionally
-        self.games = []
-        self.players = []
+        self.games = []  # type: ignore
+        self.players = []  # type: ignore
 
     def __str__(self) -> str:
         return self.name
 
-    def __eq__(self, other) -> bool:
-        return self.name == other.name
+    def __eq__(self, other) -> bool:  # type: ignore
+        return bool(self.name == other.name)
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -54,8 +54,11 @@ class Club:
 
 class Games:
     """
-    Model for storing date, location, win/loss, opponent, etc.
-    Easily queryable, e.g. find max(best_win_opponent_ratings) or avg(opponent_ratings)
+    Model for storing date, location, wins/losses, opponent, etc.
+    TODO:
+        - Easily queryable,
+            e.g. find max(best_win_opponent_ratings) or avg(opponent_ratings)
+        - Decide on life cycle flow of overall app: interface, modularity, & persistence
     """
 
     def __init__(self, row: Dict[str, str]) -> None:
@@ -78,6 +81,15 @@ class Games:
         """Gets # games lost by player 2 (or team 2)"""
         return self.score[1]
 
+    def validate_username(self, username: str) -> None:
+        """Verify a username is at least 3 characters long"""
+        min_length = 3
+        if len(username) < min_length:
+            raise ValueError(
+                f"Username must be at least {min_length} characters, got: {username}\n"
+                f"Game: {self}",
+            )
+
 
 class SinglesGames(Games):
     """Singles game specifics"""
@@ -89,6 +101,8 @@ class SinglesGames(Games):
         #  and check that there are exactly 2 or 4 players
         self.username1 = row["winner"]
         self.username2 = row["loser"]
+        self.validate_username(self.username1)
+        self.validate_username(self.username2)
 
     def __str__(self) -> str:
         return f"{self.date} {self.username1} vs. {self.username2} {self._outcome}"
@@ -104,6 +118,10 @@ class DoublesGames(Games):
         self.username2 = row["winner 2"]
         self.username3 = row["loser 1"]
         self.username4 = row["loser 2"]
+        self.validate_username(self.username1)
+        self.validate_username(self.username2)
+        self.validate_username(self.username3)
+        self.validate_username(self.username4)
 
     def __str__(self) -> str:
         return (
@@ -124,25 +142,25 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
-        # WIP stuff
-        # self.singles_games = []
-        self.games = {
-            "singles": {
-                "wins": [],
-                "losses": [],
-            },
-            "doubles": {
-                "wins": [],
-                "losses": [],
-            },
-        }
+        # # WIP stuff
+        # # self.singles_games = []
+        # self.games = {
+        #     "singles": {
+        #         "wins": [],
+        #         "losses": [],
+        #     },
+        #     "doubles": {
+        #         "wins": [],
+        #         "losses": [],
+        #     },
+        # }
         # NOTE: length of this is one longer than other arrays
         self.ratings = {
             "singles": [glicko2.Glicko2()],
             "doubles": [trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)],
         }
-        self.partner_rating_doubles: List[trueskill.TrueSkill()] = []
-        self.opponent_ratings = {
+        self.partner_rating_doubles: List[trueskill.TrueSkill] = []
+        self.opponent_ratings: Dict[str, Dict[str, List[float]]] = {
             "singles": {
                 "wins": [],
                 "losses": [],
@@ -167,9 +185,12 @@ class Player:
         )
 
     @property
-    def rating_singles(self) -> glicko2.Glicko2:
+    def rating_singles(self) -> glicko2.Rating:
         """Gets the rating"""
-        return self.ratings[SINGLES][-1]
+        glicko = glicko2.Glicko2()
+        _rating = self.ratings[SINGLES][-1]
+
+        return glicko.create_rating(mu=_rating.mu, phi=_rating.phi, sigma=_rating.sigma)
 
     @property
     def rating_doubles(self) -> trueskill.TrueSkill:
@@ -180,15 +201,15 @@ class Player:
         """Gets the most frequent place of playing"""
         return max(
             self.club_appearances[mode],
-            key=self.club_appearances[mode].get,
+            key=self.club_appearances[mode].get,  # type: ignore
         )
 
-    def clubs(self):
+    def clubs(self) -> List[str]:
         """Gets all the clubs someone has appeared at"""
-        _clubs = set()
+        _clubs: Set[str] = set()
         _clubs.update(self.club_appearances["singles"])
         _clubs.update(self.club_appearances["doubles"])
-        return _clubs
+        return sorted(list(_clubs))
 
     def str_rating(self, mode: str) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
@@ -205,8 +226,8 @@ class Player:
     def str_win_losses(self, mode: str) -> str:
         """Returns e.g. 5-2"""
 
-        n_wins = len(self.games[mode]["wins"])
-        n_losses = len(self.games[mode]["losses"])
+        n_wins = len(self.opponent_ratings[mode]["wins"])
+        n_losses = len(self.opponent_ratings[mode]["losses"])
 
         return f"{n_wins}-{n_losses}"
 
@@ -227,13 +248,18 @@ class Player:
 
     def best_win(self, mode: str) -> Union[None, int, float]:
         """Returns best win"""
-        _best_win = max(self.opponent_ratings[mode]["wins"])
+        try:
+            _best_win = max(self.opponent_ratings[mode]["wins"])
+        except ValueError:
+            return None
 
         if mode == SINGLES:
             return round(_best_win)
-        return round(_best_win, 1)
+        return float(round(_best_win, 1))
 
-    def graph_ratings(self, graph_width_limit=50, graph_height=12) -> None:
+    def graph_ratings(
+        self, graph_width_limit: int = 50, graph_height: int = 12
+    ) -> None:
         """
         Prints an ASCII graph of rating over past 50 games
         """

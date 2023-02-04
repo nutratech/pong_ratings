@@ -8,18 +8,12 @@ Detailed information about requested match up(s)
 """
 import csv
 import math
-from typing import Dict, Union
+from typing import Dict, Set, Tuple
 
 import trueskill
 from tabulate import tabulate
 
-from pong import (
-    CSV_RATINGS_DOUBLES,
-    CSV_RATINGS_SINGLES,
-    DOUBLES,
-    DRAW_PROB_DOUBLES,
-    SINGLES,
-)
+from pong import CSV_RATINGS_FILE_PATHS, DOUBLES, DRAW_PROB_DOUBLES, SINGLES
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
 from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
@@ -34,45 +28,68 @@ from pong.probs import (
 )
 
 
-def build_players() -> tuple:
+def add_player_to_club(player: Player, club: str, clubs: Dict[str, Set[str]]) -> None:
+    """Create a club (if it doesn't exist) and add a player to its list"""
+    if club in clubs:
+        clubs[club].add(player.username)
+    else:
+        clubs[club] = set(player.username)
+
+
+def build_players() -> Tuple[Dict[str, Player], Dict[str, Player]]:
     """Builds the players from the updated ratings_*.csv file"""
 
     singles_players: Dict[str, Player] = {}
     doubles_players: Dict[str, Player] = {}
+    clubs: Dict[str, Set[str]] = {}
 
     # Singles
-    with open(CSV_RATINGS_SINGLES, encoding="utf-8") as _f:
+    with open(CSV_RATINGS_FILE_PATHS[SINGLES], encoding="utf-8") as _f:
         csv_reader = csv.DictReader(_f)
 
         for row in csv_reader:
             player = Player(username=row["username"])
 
+            # Set rating
             player.ratings[SINGLES][0] = glicko2.Glicko2(
                 mu=float(row["mu"]),
                 phi=float(row["phi"]),
                 sigma=float(row["sigma"]),
             )
 
+            # Populate player's clubs
+            for club in row["clubs"].split("|"):
+                add_player_to_club(player, club, clubs)
+
+            # Add to list
             singles_players[player.username] = player
 
     # Doubles
-    with open(CSV_RATINGS_DOUBLES, encoding="utf-8") as _f:
+    with open(CSV_RATINGS_FILE_PATHS[DOUBLES], encoding="utf-8") as _f:
         csv_reader = csv.DictReader(_f)
 
         for row in csv_reader:
             player = Player(username=row["username"])
 
+            # Set rating
             player.ratings[DOUBLES][0] = trueskill.TrueSkill(
                 mu=float(row["mu"]),
                 sigma=float(row["sigma"]),
             )
 
+            # Populate player's clubs
+            for club in row["clubs"].split("|"):
+                add_player_to_club(player, club, clubs)
+
+            # Add to list
             doubles_players[player.username] = player
 
     return singles_players, doubles_players
 
 
-def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]]:
+def _inverse_probs(
+    prob_game: float,
+) -> Tuple[Dict[str, float], Dict[str, Dict[int, float]]]:
     """Returns common match / point / game metrics to both singles & doubles"""
 
     prob_point = GAME_PERCENT_TO_POINT_PROB[round(prob_game * 10000)]
@@ -85,17 +102,23 @@ def _inverse_probs(prob_game: float) -> Dict[str, Union[float, Dict[int, float]]
     prob_deuce_win = round(p_deuce_win(prob_point), 2)
     prob_win_6_out_of_6 = round(prob_game**6, 3)
 
-    return {
-        "prob_point": prob_point,
-        "prob_match": prob_match,
-        "prob_win_at_least_1": prob_win_at_least_1,
-        "prob_deuce_reach": prob_deuce_reach,
-        "prob_deuce_win": prob_deuce_win,
-        "prob_win_6_out_of_6": prob_win_6_out_of_6,
-    }
+    return (
+        {
+            "prob_point": prob_point,
+            "prob_deuce_reach": prob_deuce_reach,
+            "prob_deuce_win": prob_deuce_win,
+            "prob_win_6_out_of_6": prob_win_6_out_of_6,
+        },
+        {
+            "prob_match": prob_match,
+            "prob_win_at_least_1": prob_win_at_least_1,
+        },
+    )
 
 
-def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> None:
+def detailed_match_ups_singles(
+    username1: str, username2: str, players: Dict[str, Player]
+) -> None:
     """
     Print out stats for player1 vs. player2
     """
@@ -124,15 +147,15 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     )
     prob_game = (prob_p1_game + (1 - prob_p2_game)) / 2
 
-    inverse_probs = _inverse_probs(prob_game)
+    inverse_probs_pts, inverse_probs_match = _inverse_probs(prob_game)
 
-    prob_point = inverse_probs["prob_point"]
-    prob_match = inverse_probs["prob_match"]
-    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
-    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+    prob_point = float(inverse_probs_pts["prob_point"])
+    prob_match: Dict[int, float] = inverse_probs_match["prob_match"]
+    prob_win_at_least_1: Dict[int, float] = inverse_probs_match["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = float(inverse_probs_pts["prob_win_6_out_of_6"])
 
-    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
-    prob_deuce_win = inverse_probs["prob_deuce_win"]
+    prob_deuce_reach = inverse_probs_pts["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs_pts["prob_deuce_win"]
 
     # Calculate other statistics
     fair_handicap = [
@@ -150,14 +173,14 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
     print_title(f"{username1} & {username2} (Δμ={_delta_mu}, RD={_rd})")
 
     # Game & Deuce probabilities
-    _series = [
+    _series_gdp = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
         ("Win 6/6", prob_win_6_out_of_6),
     ]
-    print(tabulate(_series, headers=["x", "P(x)"]))
+    print(tabulate(_series_gdp, headers=["x", "P(x)"]))
     print()
 
     # Other stats
@@ -169,7 +192,7 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
 
     # Match probability, and related stats
     print_subtitle("Match odds and rating changes")
-    _series = [
+    _series_mp = [
         ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
         (
             "Win 1+ games",
@@ -178,13 +201,13 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         ),
         ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
     ]
-    print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
+    print(tabulate(_series_mp, headers=["P(...)", "3-game", "5-game"]))
     print()
 
     # New ratings (preview the changes)
     _w_p1, _w_p2 = glicko.rate_1vs1(rating1, rating2)
     _l_p2, _l_p1 = glicko.rate_1vs1(rating2, rating1)
-    _series = [
+    _series_pr = [
         (
             player1.username,
             player1.str_rating(mode=SINGLES),
@@ -201,14 +224,14 @@ def eval_singles(username1: str, username2: str, players: Dict[str, Player]) -> 
         ),
     ]
     _table = tabulate(
-        _series,
+        _series_pr,
         headers=["Player", "μ", f"{username1} wins", f"{username1} loses", "avg(ΔΦ)"],
     )
     print(_table)
 
 
 # pylint: disable=too-many-arguments
-def eval_doubles(
+def detailed_match_ups_doubles(
     username1: str,
     username2: str,
     username3: str,
@@ -241,15 +264,15 @@ def eval_doubles(
     )
 
     # Calculate probabilities
-    inverse_probs = _inverse_probs(prob_game)
+    inverse_probs_pts, inverse_probs_match = _inverse_probs(prob_game)
 
-    prob_point = inverse_probs["prob_point"]
-    prob_match = inverse_probs["prob_match"]
-    prob_win_at_least_1 = inverse_probs["prob_win_at_least_1"]
-    prob_win_6_out_of_6 = inverse_probs["prob_win_6_out_of_6"]
+    prob_point = float(inverse_probs_pts["prob_point"])
+    prob_match: Dict[int, float] = inverse_probs_match["prob_match"]
+    prob_win_at_least_1: Dict[int, float] = inverse_probs_match["prob_win_at_least_1"]
+    prob_win_6_out_of_6 = float(inverse_probs_pts["prob_win_6_out_of_6"])
 
-    prob_deuce_reach = inverse_probs["prob_deuce_reach"]
-    prob_deuce_win = inverse_probs["prob_deuce_win"]
+    prob_deuce_reach = inverse_probs_pts["prob_deuce_reach"]
+    prob_deuce_win = inverse_probs_pts["prob_deuce_win"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print off the details
@@ -264,19 +287,19 @@ def eval_doubles(
     print()
 
     # Game & Deuce probabilities
-    _series = [
+    _series_gdp = [
         ("Game", round(prob_game, 2)),
         ("Point", round(prob_point, 3)),
         ("Deuce", prob_deuce_reach),
         ("Win deuce", prob_deuce_win),
         ("Win 6/6", prob_win_6_out_of_6),
     ]
-    print(tabulate(_series, headers=["x", "P(x)"]))
+    print(tabulate(_series_gdp, headers=["x", "P(x)"]))
     print()
 
     # Match probability, and related stats
     print_subtitle("Match odds and rating changes")
-    _series = [
+    _series_mp = [
         ("Win match", round(prob_match[2], 2), round(prob_match[3], 3)),
         (
             "Win 1+ games",
@@ -285,13 +308,14 @@ def eval_doubles(
         ),
         ("Win all games", round(prob_game**2, 2), round(prob_game**3, 2)),
     ]
-    print(tabulate(_series, headers=["P(...)", "3-game", "5-game"]))
+    print(tabulate(_series_mp, headers=["P(...)", "3-game", "5-game"]))
     print()
 
     # New ratings (preview the changes)
     _w_t1, _w_t2 = tse.rate([(rating1, rating2), (rating3, rating4)])
     _l_t2, _l_t1 = tse.rate([(rating3, rating4), (rating1, rating2)])
-    _series = [
+    # noinspection DuplicatedCode
+    _series_pr = [
         (
             player1.username,
             player1.str_rating(mode=DOUBLES),
@@ -321,5 +345,8 @@ def eval_doubles(
             round(_w_t2[1].sigma + _l_t2[1].sigma - 2 * rating4.sigma, 1),
         ),
     ]
-    _table = tabulate(_series, headers=["Player", "μ", "T1 wins", "T2 wins", "avg(Δσ)"])
+    _table = tabulate(
+        _series_pr,
+        headers=["Player", "μ", "T1 wins", "T2 wins", "avg(Δσ)"],
+    )
     print(_table)

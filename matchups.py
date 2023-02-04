@@ -8,29 +8,39 @@ Created on Wed Jan 25 13:38:55 2023
 import os
 import shlex
 import sys
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from doubles import print_doubles_matchups
 from pong.env import MODE_SINGLES
-from pong.matchups import build_players, eval_doubles, eval_singles
+from pong.matchups import (
+    build_players,
+    detailed_match_ups_doubles,
+    detailed_match_ups_singles,
+)
 from pong.models import Player
 from singles import print_singles_matchups
 
 
-def print_singles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
+def print_singles_details(
+    matchups: List[Tuple[str, str, int, int, float, float]],
+    players: Dict[str, Player],
+) -> None:
     """Prints the details for each requested match-ups"""
     for pairing in matchups:
-        eval_singles(
+        detailed_match_ups_singles(
             pairing[0],
             pairing[1],
             players,
         )
 
 
-def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> None:
+def print_doubles_details(
+    matchups: List[Tuple[str, str, str, str, float, int, float, float]],
+    players: Dict[str, Player],
+) -> None:
     """Prints the details for each possible team pairing"""
     for pairing in matchups:
-        eval_doubles(
+        detailed_match_ups_doubles(
             pairing[0],
             pairing[1],
             pairing[2],
@@ -44,12 +54,16 @@ def print_doubles_details(matchups: List[tuple], players: Dict[str, Player]) -> 
 if __name__ == "__main__":
     # Parse player names
     # NOTE: either pass in on command line or set in .env file
-    _players = sys.argv[1:] or shlex.split(os.environ["PONG_PLAYERS"])
+    _players = sys.argv[1:] or shlex.split(os.environ.get("PONG_PLAYERS") or str())
     N_PLAYERS = len(_players)
 
-    # TODO: support N_PLAYERS = 1, just match that one person with all others
-    if N_PLAYERS < 2:
-        sys.exit(f"Needs at least two players, got {N_PLAYERS}")
+    # TODO: set _n_top to be arbitrarily large?
+    if N_PLAYERS == 0:
+        pass
+        # TODO: Only pair up by clubs by default? For detailed statistics?
+    elif N_PLAYERS == 1:
+        pass
+        # TODO: support N_PLAYERS = 1, just match that one person with all others
 
     # Load players/ratings from CSV
     singles_players, doubles_players = build_players()
@@ -60,7 +74,9 @@ if __name__ == "__main__":
     if MODE_SINGLES:
         singles_matchups = print_singles_matchups(
             players=sorted(
+                # TODO: where should this be filtered or decided?
                 [singles_players[name] for name in _players],
+                # singles_players.values(),
                 key=lambda p: p.rating_singles.mu,
                 reverse=True,
             )
@@ -70,7 +86,8 @@ if __name__ == "__main__":
         doubles_matchups = print_doubles_matchups(
             players=sorted(
                 [doubles_players[name] for name in _players],
-                key=lambda p: p.rating_doubles.mu,
+                # doubles_players.values(),
+                key=lambda p: p.rating_doubles.mu,  # type: ignore
                 reverse=True,
             ),
             delta_mu_threshold=15.0,

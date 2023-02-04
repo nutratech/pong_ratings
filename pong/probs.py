@@ -15,7 +15,7 @@ from tabulate import tabulate
 # pylint: disable=invalid-name
 
 
-def p_game_straight(p: float, n=11) -> float:
+def p_game_straight(p: float, n: int = 11) -> float:
     """
     Probability of winning a game (without going to deuce, e.g. 11-9 or 11-0)
     :param p: Probability of winning an individual point
@@ -25,7 +25,7 @@ def p_game_straight(p: float, n=11) -> float:
     return sum(math.comb(n - 1 + k, k) * p**n * (1 - p) ** k for k in range(0, n - 1))
 
 
-def p_game_straight_handicap(p: float, n=11, i=0) -> float:
+def p_game_straight_handicap(p: float, n: int = 11, i: int = 0) -> float:
     """
     Probability of winning a game (without going to deuce, e.g. 11-9 or 11-0)
     :param p: Probability of winning an individual point
@@ -39,7 +39,7 @@ def p_game_straight_handicap(p: float, n=11, i=0) -> float:
     )
 
 
-def p_deuce(p: float, n=11) -> float:
+def p_deuce(p: float, n: int = 11) -> float:
     """
     Get probability of reaching 10-10 score, based on probability to win a point.
     :param p: Probability of winning an individual point
@@ -48,7 +48,7 @@ def p_deuce(p: float, n=11) -> float:
     return p ** (n - 1) * (1 - p) ** (n - 1) * math.comb(2 * (n - 1), n - 1)
 
 
-def p_deuce_handicap(p: float, n=11, i=0) -> float:
+def p_deuce_handicap(p: float, n: int = 11, i: int = 0) -> float:
     """
     Get probability of reaching 10-10 score, based on probability to win a point.
     :param p: Probability of winning an individual point
@@ -66,7 +66,7 @@ def p_deuce_win(p: float) -> float:
     return p**2 / (1 - 2 * p * (1 - p))
 
 
-def p_game(p: float, n=11) -> float:
+def p_game(p: float, n: int = 11) -> float:
     """
     Probability of winning a game, based on probability to win a point.
     :param p: Probability of winning an individual point
@@ -161,14 +161,14 @@ def p_at_least_k_wins_out_of_n_games(p: float, n: int, k: int) -> float:
     return sum(math.comb(n, i) * p**i * (1 - p) ** (n - i) for i in range(k, n + 1))
 
 
-def n_fair_handicap_points(p: float, n=11) -> List[Tuple[int, float]]:
+def n_fair_handicap_points(p: float, n: int = 11) -> List[Tuple[int, float]]:
     """
     Start e.g. up 7-0 or 6-0 against a stronger opponent for fair odds ~0.5 of winning
     :param p: Probability of winning an individual point
     :param n: Points to win game (e.g. 11 or 21)
     """
 
-    def _prob_game_handicap(_p: float):
+    def _prob_game_handicap(_p: float) -> List[Tuple[int, float]]:
         prob_game_handicap = [
             (
                 j,
