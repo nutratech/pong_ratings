@@ -29,13 +29,12 @@ from pong.models import Player
 
 def get_google_sheet(url: str) -> bytes:
     """
-    Returns a byte array (string)
-    TODO:
-      - Allow running instantly on old (cached) CSV files.
+    Returns a byte array (string) of the Google Sheet in CSV format
     """
 
     response = requests.get(url, timeout=2)
     if response.status_code != 200:
+        print(response.content.decode())
         sys.exit(f"Wrong status code, {response.status_code}")
 
     return bytes(response.content)
@@ -108,7 +107,11 @@ def print_subtitle(subtitle: str) -> None:
 
 
 def filter_players(_sorted_players: List[Player]) -> List[Player]:
-    """Shared method for singles and doubles (main method)"""
+    """
+    Shared method for singles and doubles (main method)
+    TODO:
+        - Add way to filter based on clubs, rating deviation, etc
+    """
 
     # Filter if requested
     if PLAYERS_PRESENT:

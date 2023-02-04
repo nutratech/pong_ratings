@@ -9,11 +9,22 @@ _help:
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Initialize & clean
+# Initialize, requirements, venv & clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 init:	## Install requirements and sub-modules
 	git submodule update --init
+	/usr/bin/python3 -m venv .venv
+	- direnv allow
+
+PYTHON ?= $(shell which python)
+PWD ?= $(shell pwd)
+.PHONY: _venv
+_venv:
+	# ensuring venv
+	[ "$(PYTHON)" = "$(PWD)/.venv/bin/python" ] || [ "$(PYTHON)" = "$(PWD)/.venv/Scripts/python" ]
+
+deps: _venv
 	pip install -r requirements.txt -r requirements-lint.txt
 
 ALL_CLEAN_LOCS=pong/ tests/
@@ -30,11 +41,11 @@ clean:	## Clean up pycache/ and other left overs
 
 ALL_LINT_LOCS=*.py pong/ tests/
 
-format:	## Format the code
+format: _venv	## Format the code
 	isort $(ALL_LINT_LOCS)
 	black $(ALL_LINT_LOCS)
 
-lint:	## Lint the code
+lint: _venv	## Lint the code
 	# check formatting: Python
 	isort --diff --check $(ALL_LINT_LOCS)
 	black --check $(ALL_LINT_LOCS)
@@ -45,6 +56,6 @@ lint:	## Lint the code
 	pylint $(ALL_LINT_LOCS)
 	mypy $(ALL_LINT_LOCS)
 
-test:	## Test the code
+test: _venv	## Test the code
 	coverage run -m pytest tests/
 	coverage report
