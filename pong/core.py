@@ -71,8 +71,8 @@ def build_csv_reader(mode: str) -> csv.DictReader:
         print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
         csv_path = CSV_GAMES_FILE_PATHS[mode]
 
-        # pylint: disable=consider-using-with
-        reader = csv.DictReader(open(csv_path, encoding="utf-8"))
+        with open(csv_path, encoding="utf-8") as _f:
+            reader = csv.DictReader(_f)
         reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
 
     t_delta = time.time() - t_start
@@ -140,7 +140,7 @@ def cache_ratings_csv_file(sorted_players: List[Player], mode: str) -> None:
     # TODO: 3rd possibility? Besides singles/doubles?
     if mode == SINGLES:
         headers = ["username", "mu", "phi", "sigma", "history", "clubs"]
-        _series = [
+        rows = [
             (
                 p.username,
                 p.rating_singles.mu,
@@ -153,7 +153,7 @@ def cache_ratings_csv_file(sorted_players: List[Player], mode: str) -> None:
         ]
     else:
         headers = ["username", "mu", "sigma", "history", "clubs"]
-        _series = [
+        rows = [
             (  # type: ignore
                 p.username,
                 p.rating_doubles.mu,
@@ -169,4 +169,4 @@ def cache_ratings_csv_file(sorted_players: List[Player], mode: str) -> None:
         csv_writer = csv.writer(_f)
 
         csv_writer.writerow(headers)
-        csv_writer.writerows(_series)
+        csv_writer.writerows(rows)
