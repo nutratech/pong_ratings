@@ -12,29 +12,26 @@ Link to the Google Sheet
 https://docs.google.com/spreadsheets/d/1evcgUzJ5hO55RYshc3dH-EmzZfor58t0qPB-zp8iw4A/edit#gid=605912978
 
 
-Setup
-#####
+Setup (Linux)
+#############
 
 Install ``venv``.
 
 .. code-block:: bash
 
-  python3 -m venv .venv
-  source .venv/bin/activate
-  # or with direnv: direnv allow
+  sudo apt install python3-venv
 
-Install ``pip`` dependencies and ``glicko2`` submodule.
+Set up ``venv``. Install ``pip`` dependencies and ``glicko2`` submodule.
 
 .. code-block:: bash
 
-  pip install -r requirements.txt
-  git submodule update --init
+  make init deps
 
 
 Running
 #######
 
-Output the rankings and fairest matchings by running the main script.
+Output the rankings and fairest match ups by running the main script.
 
 Requires internet connection, as it currently fetches the Google Sheet every
 time.
@@ -45,12 +42,6 @@ time.
 
   ./doubles.py
 
-  # Singles
-  ./matchups.py benji norm
-
-  # Doubles
-  PONG_DOUBLES=1 ./matchups.py shane mal norm amos benji
-
 
 Match ups for given players
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,10 +50,14 @@ You can run the top-level script, e.g.
 
 .. code-block:: bash
 
-  ./matchups.py brandon shane benji amos
+  # Singles
+  ./matchups.py benji norm
+
+  # Doubles
+  PONG_DOUBLES=1 ./matchups.py brandon thomas mal shane norm amos benji
 
 **NOTE:** You can also run the script without player name arguments. Just set
-the ``PLAYERS`` variable as in the above section ("Filtering Players").
+the ``PLAYERS`` variable in the ``.env`` file, (see: "Filtering Players").
 
 You can switch between modes by setting ``DOUBLES=1`` in the ``.env`` file.
 
