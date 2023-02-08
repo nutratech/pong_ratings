@@ -100,11 +100,7 @@ def do_games(
 
 def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
     """
-    Main method which calculates ratings
-
-    TODO:
-     - Support TrueSkill and multiplayer (doubles games) ratings
-     - Support an API level interface?
+    Main method which calculates doubles ratings
     """
 
     # Prepare the CSV inputs (fetch Google Sheet and save to disk)
@@ -126,12 +122,12 @@ def build_ratings() -> Tuple[List[Player], List[DoublesGames], Set[Club]]:
         # Check if players are already tracked, create if not
         _winner_player1 = get_or_create_player_by_name(players, games.username1)
         _winner_player2 = get_or_create_player_by_name(players, games.username2)
-        _loser_player1 = get_or_create_player_by_name(players, games.username3)
-        _loser_player2 = get_or_create_player_by_name(players, games.username4)
+        _loser_player3 = get_or_create_player_by_name(players, games.username3)
+        _loser_player4 = get_or_create_player_by_name(players, games.username4)
 
         # Run the algorithm and update ratings
         do_games(
-            _winner_player1, _winner_player2, _loser_player1, _loser_player2, games
+            _winner_player1, _winner_player2, _loser_player3, _loser_player4, games
         )
 
         # Push to list of club locations
