@@ -5,7 +5,6 @@ Created on Wed Feb  8 12:24:55 2023
 @author: shane
 """
 import argparse
-import math
 import os
 import shutil
 
@@ -31,19 +30,13 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 BUFFER_WD = shutil.get_terminal_size()[0]
 BUFFER_HT = shutil.get_terminal_size()[1]
 
-# Location on disk to cache CSV file
-CSV_GAMES_FILE_PATH = os.path.join(PROJECT_ROOT, "data", "games.csv")
-
 # lichess.org uses 110 and 75 (65 for variants)
 DEVIATION_PROVISIONAL = 110
 DEVIATION_ESTABLISHED = 75
 
-# Mathematical constants
-DRAW_PROB_DOUBLES = math.comb(20, 10) * (1 / 2) ** 20
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Enums
+# Structs
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Game types
@@ -52,9 +45,8 @@ SINGLES = "singles"
 DOUBLES = "doubles"
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # URLs
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def _url(gid: int) -> str:
     """Hard-coded URL values pointing to our sheet"""
 
@@ -66,22 +58,24 @@ def _url(gid: int) -> str:
     )
 
 
-# URLs to google sheets for singles & doubles CSVs
+# URLs to Google Sheets for singles & doubles CSVs
 CSV_GAMES_URLS = {
     SINGLES: _url(PONG_SHEET_GID_SINGLES),
     DOUBLES: _url(PONG_SHEET_GID_DOUBLES),
 }
 
-# Fall back (cached CSV files, if sheets.google.com is unreachable)
+# File paths
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Location on disk to cache CSV files
 CSV_GAMES_FILE_PATHS = {
-    SINGLES: os.path.join(PROJECT_ROOT, "data", "games_singles.csv"),
-    DOUBLES: os.path.join(PROJECT_ROOT, "data", "games_doubles.csv"),
+    SINGLES: os.path.join(PROJECT_ROOT, "data", f"games_{SINGLES}.csv"),
+    DOUBLES: os.path.join(PROJECT_ROOT, "data", f"games_{DOUBLES}.csv"),
 }
 
 # Persist ratings after main script for auxiliary calculations
 CSV_RATINGS_FILE_PATHS = {
-    SINGLES: os.path.join(PROJECT_ROOT, "data", "ratings_singles.csv"),
-    DOUBLES: os.path.join(PROJECT_ROOT, "data", "ratings_doubles.csv"),
+    SINGLES: os.path.join(PROJECT_ROOT, "data", f"ratings_{SINGLES}.csv"),
+    DOUBLES: os.path.join(PROJECT_ROOT, "data", f"ratings_{DOUBLES}.csv"),
 }
 
 

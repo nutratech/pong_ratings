@@ -14,7 +14,7 @@ from typing import Dict, List, Set, Union
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
 
-from pong import DOUBLES, DRAW_PROB_DOUBLES, SINGLES
+from pong import DOUBLES, SINGLES
 from pong.glicko2 import glicko2
 
 _PONG_DET = "Pong Det"
@@ -158,7 +158,8 @@ class Player:
         # NOTE: length of this is one longer than other arrays
         self.ratings = {
             "singles": [glicko2.Glicko2()],
-            "doubles": [trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)],
+            # FIXME: draw_probability=DRAW_PROB_DOUBLES
+            "doubles": [trueskill.TrueSkill()],
         }
         self.partner_rating_doubles: List[trueskill.TrueSkill] = []
         self.opponent_ratings: Dict[str, Dict[str, List[float]]] = {

@@ -8,11 +8,10 @@ import csv
 
 import requests
 
-from pong import CLI_CONFIG, CSV_GAMES_FILE_PATH
-from pong.env import CSV_GAMES_URL
+from pong import CLI_CONFIG, CSV_GAMES_FILE_PATHS, CSV_GAMES_URLS
 
 
-def get_google_sheet(url: str = CSV_GAMES_URL) -> bytes:
+def get_google_sheet(url: str = CSV_GAMES_URLS) -> bytes:
     """
     Returns a byte array (string) of the Google Sheet in CSV format
     """
@@ -26,7 +25,7 @@ def get_google_sheet(url: str = CSV_GAMES_URL) -> bytes:
 
 def cache_csv_games_file(
     _csv_bytes_output: bytes,
-    _file_path: str = CSV_GAMES_FILE_PATH,
+    _file_path: str = CSV_GAMES_FILE_PATHS,
 ) -> None:
     """
     Persists the CSV file into the git commit history.
@@ -38,7 +37,7 @@ def cache_csv_games_file(
         _file.write(_csv_bytes_output)
 
 
-def build_csv_reader(csv_file_path: str = CSV_GAMES_FILE_PATH) -> csv.DictReader:
+def build_csv_reader(csv_file_path: str = CSV_GAMES_FILE_PATHS) -> csv.DictReader:
     """Returns a csv.reader() object"""
     if CLI_CONFIG.debug:
         print(f"Using csv_file_path='{csv_file_path}'")

@@ -7,7 +7,7 @@ Created on Wed Feb  8 15:22:46 2023
 import os
 from typing import Dict
 
-from chessdet.models import Player
+from pong.models import Player
 
 
 def get_or_create_player_by_name(players: Dict[str, Player], username: str) -> Player:

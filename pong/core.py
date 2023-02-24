@@ -9,7 +9,7 @@ from typing import Dict, List, Set, Tuple
 
 from tabulate import tabulate
 
-from pong import BLACK, CSV_GAMES_FILE_PATH, WHITE
+from pong import CSV_GAMES_FILE_PATHS
 from pong.glicko2 import glicko2
 from pong.models import Club, Game, Player
 from pong.sheetutils import build_csv_reader
@@ -45,21 +45,24 @@ def update_players_ratings(players: Dict[str, Player], game: Game) -> None:
     glicko = glicko2.Glicko2()
 
     # Extract (or create) player_white & player_black from Players Dict
-    player_white = get_or_create_player_by_name(players, game.username_white)
-    player_black = get_or_create_player_by_name(players, game.username_black)
+    player_winner = get_or_create_player_by_name(players, game.username_white)
+    player_loser = get_or_create_player_by_name(players, game.username_black)
+
+    # FIXME: loop for games in match, or rate in series
+    do_game(player_winner, player_loser)
 
     # Run the helper methods
-    if game.score == WHITE:
-        do_game(player_white, player_black)
-    elif game.score == BLACK:
-        do_game(player_black, player_white)
-    else:
-        # NOTE: already validated with ENUM_SCORES and self.validation_error()
-        do_game(player_white, player_black, drawn=True)
+    # if game.score == WHITE:
+    #     do_game(player_white, player_black)
+    # elif game.score == BLACK:
+    #     do_game(player_black, player_white)
+    # else:
+    #     # NOTE: already validated with ENUM_SCORES and self.validation_error()
+    #     do_game(player_white, player_black, drawn=True)
 
 
 def process_csv(
-    csv_path: str = CSV_GAMES_FILE_PATH,
+    csv_path: str = CSV_GAMES_FILE_PATHS,
 ) -> Tuple[List[Game], Dict[str, Player], Set[Club]]:
     """Load the CSV file into entity objects"""
 
