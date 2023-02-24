@@ -25,6 +25,7 @@ CLUB_DICT = {
     "MTTA (Sparc Arena Novi)": "MTTA",
     "Norm's": "Norm's",
     "New Way Bar (Ferndale)": "New way",
+    "Chinese Community Center (Madison Heights)": "ACA",
 }
 
 # pylint: disable=too-few-public-methods

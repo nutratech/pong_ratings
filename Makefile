@@ -12,10 +12,11 @@ _help:
 # Initialize, requirements, venv & clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# TODO: OS-independent venv, e.g. .venv/Scripts/activate
+
 init:	## Install requirements and sub-modules
-	git submodule update --init
 	/usr/bin/python3 -m venv .venv
-	- direnv allow
+	direnv allow || source .venv/bin/activate
 
 PYTHON ?= $(shell which python)
 PWD ?= $(shell pwd)
@@ -24,7 +25,8 @@ _venv:
 	# ensuring venv
 	[ "$(PYTHON)" = "$(PWD)/.venv/bin/python" ] || [ "$(PYTHON)" = "$(PWD)/.venv/Scripts/python" ]
 
-deps: _venv
+deps: _venv	## Install requirements
+	git submodule update --init
 	pip install -r requirements.txt -r requirements-lint.txt
 
 ALL_CLEAN_LOCS=pong/ tests/

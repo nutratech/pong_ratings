@@ -84,6 +84,7 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     TODO:
      - Support an API level interface?
      - Filter RD > 300/350? Command-line flag / ENV VAR to force anyways?
+     - Verify dates are in order, throw error if not
     """
 
     # Prepare the CSV inputs (fetch Google Sheet and save to disk)
@@ -103,11 +104,11 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
         sets.append(games)
 
         # Check if players are already tracked, create if not
-        _winner_player = get_or_create_player_by_name(players, games.username1)
-        _loser_player = get_or_create_player_by_name(players, games.username2)
+        _winner_player1 = get_or_create_player_by_name(players, games.username1)
+        _loser_player2 = get_or_create_player_by_name(players, games.username2)
 
         # Run the algorithm and update ratings
-        do_games(_winner_player, _loser_player, games)
+        do_games(_winner_player1, _loser_player2, games)
 
         # pylint: disable=duplicate-code
         # Push to list of club appearances
