@@ -36,7 +36,7 @@ deps: _venv	## Install requirements & sub-module
 # Lint, test, format, clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ALL_LINT_LOCS=cr *.py chessdet/ tests/
+ALL_LINT_LOCS=pr pong/ tests/
 
 format: _venv	## Format the code
 	isort $(ALL_LINT_LOCS)
@@ -85,8 +85,8 @@ build: _venv	## Bundle a source distribution
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 rank:	## Rank (copy for google sheet)
-	./cr fetch
-	./cr rank --no-abbrev-titles -s -mg | xclip -sel clip
+	./pr fetch
+	./pr rank --no-abbrev-titles -s -mg | xclip -sel clip
 
 
 
