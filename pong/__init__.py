@@ -8,8 +8,6 @@ import argparse
 import os
 import shutil
 
-from pong.env import PONG_SHEET_GID_DOUBLES, PONG_SHEET_GID_SINGLES, PONG_SHEET_KEY
-
 # Package info
 __title__ = "pr"
 __version__ = "0.0.1.dev12"
@@ -43,26 +41,6 @@ DEVIATION_ESTABLISHED = 75
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 SINGLES = "singles"
 DOUBLES = "doubles"
-
-
-# URLs
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def _url(gid: int) -> str:
-    """Hard-coded URL values pointing to our sheet"""
-
-    return (
-        "https://docs.google.com/spreadsheet/ccc"
-        f"?key={PONG_SHEET_KEY}"
-        f"&gid={gid}"
-        "&output=csv"
-    )
-
-
-# URLs to Google Sheets for singles & doubles CSVs
-CSV_GAMES_URLS = {
-    SINGLES: _url(PONG_SHEET_GID_SINGLES),
-    DOUBLES: _url(PONG_SHEET_GID_DOUBLES),
-}
 
 # File paths
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
