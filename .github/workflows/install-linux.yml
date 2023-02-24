@@ -44,5 +44,5 @@ jobs:
 
       - name: Basic CLI Integration Tests
         run: |
-          cr -d fetch
-          cr -d rank -smg
+          pr -d fetch
+          pr -d rank -smg
