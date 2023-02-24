@@ -1,172 +1,208 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri 13 Jan 2023 01∶14∶59 PM EST
+Created on Fri Feb 10 13:37:46 2023
 
 @author: shane
-Shared utilities by both singles and doubles interface
 """
-import csv
-import os
-import sys
-import time
-from io import StringIO
-from typing import Dict, List
+import math
+from typing import Dict, List, Set, Tuple
 
-import requests
+from tabulate import tabulate
 
-from pong import (
-    CSV_GAMES_FILE_PATHS,
-    CSV_GAMES_URLS,
-    CSV_RATINGS_FILE_PATHS,
-    DOUBLES,
-    SINGLES,
-)
-from pong.env import PLAYERS_PRESENT
-from pong.models import Player
+from pong import BLACK, CSV_GAMES_FILE_PATH, WHITE
+from pong.glicko2 import glicko2
+from pong.models import Club, Game, Player
+from pong.sheetutils import build_csv_reader
+from pong.utils import get_or_create_player_by_name, print_title
 
 
-def get_google_sheet(url: str) -> bytes:
-    """
-    Returns a byte array (string) of the Google Sheet in CSV format
-    """
+def update_players_ratings(players: Dict[str, Player], game: Game) -> None:
+    """Update two players' ratings, based on a game outcome together"""
 
-    response = requests.get(url, timeout=2)
-    if response.status_code != 200:
-        print(response.content.decode())
-        sys.exit(f"Wrong status code, {response.status_code}")
+    def do_game(player1: Player, player2: Player, drawn: bool = False) -> None:
+        """NOTE: player1 is winner by default, unless drawn (then it doesn't matter)"""
 
-    return bytes(response.content)
+        # Add opponent ratings
+        if drawn:
+            player1.opponent_ratings["draws"].append(player2.rating)
+            player2.opponent_ratings["draws"].append(player1.rating)
+        else:
+            player1.opponent_ratings["wins"].append(player2.rating)
+            player2.opponent_ratings["losses"].append(player1.rating)
 
+        # Add clubs
+        player1.add_club(game.location.name)
+        player2.add_club(game.location.name)
 
-def cache_csv_file(_csv_bytes_output: bytes, mode: str) -> None:
-    """
-    Persists the CSV file into the git commit history.
-    Fall back calculation in case sheets.google.com is unreachable.
-    (Manually) verify no nefarious edits are made.
-    """
-    csv_path = CSV_GAMES_FILE_PATHS[mode]
-    with open(csv_path, "wb") as _file:
-        _file.write(_csv_bytes_output)
+        # Update ratings
+        _new_rating_player1, _new_rating_player2 = glicko.rate_1vs1(
+            player1.rating, player2.rating, drawn=drawn
+        )
+        player1.ratings.append(_new_rating_player1)
+        player2.ratings.append(_new_rating_player2)
 
+    # Create the rating engine
+    glicko = glicko2.Glicko2()
 
-def build_csv_reader(mode: str) -> csv.DictReader:
-    """Returns a csv.reader() object"""
-    url = CSV_GAMES_URLS[mode]
-    t_start = time.time()
+    # Extract (or create) player_white & player_black from Players Dict
+    player_white = get_or_create_player_by_name(players, game.username_white)
+    player_black = get_or_create_player_by_name(players, game.username_black)
 
-    try:
-        _csv_bytes_output = get_google_sheet(url)
-        _csv_file = StringIO(_csv_bytes_output.decode())
-        cache_csv_file(_csv_bytes_output, mode=mode)
-
-        reader = csv.DictReader(_csv_file)
-        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
-
-    except (
-        requests.exceptions.ConnectionError,
-        requests.exceptions.ReadTimeout,
-    ) as err:
-        print(repr(err))
-        print()
-        print("WARN: failed to fetch Google sheet, falling back to cached CSV files...")
-        csv_path = CSV_GAMES_FILE_PATHS[mode]
-
-        with open(csv_path, encoding="utf-8") as _f:
-            reader = csv.DictReader(_f)
-        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames or []]
-
-    t_delta = time.time() - t_start
-    print(f"Cached {mode} CSV file in {round(t_delta * 1000, 1)} ms")
-    return reader
+    # Run the helper methods
+    if game.score == WHITE:
+        do_game(player_white, player_black)
+    elif game.score == BLACK:
+        do_game(player_black, player_white)
+    else:
+        # NOTE: already validated with ENUM_SCORES and self.validation_error()
+        do_game(player_white, player_black, drawn=True)
 
 
-def get_or_create_player_by_name(players: Dict[str, Player], username: str) -> Player:
-    """Adds a player"""
-    if username in players:
-        return players[username]
+def process_csv(
+    csv_path: str = CSV_GAMES_FILE_PATH,
+) -> Tuple[List[Game], Dict[str, Player], Set[Club]]:
+    """Load the CSV file into entity objects"""
 
-    _player = Player(username)
-    players[username] = _player
-    return _player
+    # Prep the lists
+    games: List[Game] = []
+    players: Dict[str, Player] = {}
+    clubs: Set[Club] = set()
+
+    # Read CSV
+    reader = build_csv_reader(csv_path)
+    for row in reader:
+        game = Game(row)
+        games.append(game)
+        clubs.add(game.location)
+
+        # Update players stats and ratings
+        update_players_ratings(players, game)
+
+    # Sort players by ratings
+    sorted_players = sorted(
+        players.values(), key=lambda x: float(x.rating.mu), reverse=True
+    )
+    players = {p.username: p for p in sorted_players}
+
+    return games, players, clubs
 
 
-def print_title(title: str) -> None:
-    """Prints a neat and visible header to separate tables"""
-    print(os.linesep)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(title)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print()
+def func_rank(
+    games: List[Game],
+    players: Dict[str, Player],
+    clubs: List[Club],
+    extended_titles: bool = False,
+) -> None:
+    """Rank function used by rank sub-parser"""
+
+    table_series_players = [
+        (
+            p.username,
+            p.str_rating(),
+            p.str_wins_draws_losses(),
+            p.rating_max(),
+            p.avg_opponent(),
+            p.best_result(mode="wins"),
+            p.best_result(mode="draws"),
+            p.home_club(),
+        )
+        for p in players.values()
+    ]
+
+    # Condensed titles for command line, extended ones for sheet (formatting issue)
+    if extended_titles:
+        headers = [
+            "Username",
+            "Glicko 2",
+            "Record",
+            "Top",
+            "Avg opp",
+            "Best W",
+            "Best D",
+            "Club",
+        ]
+    else:
+        headers = [
+            "\nUsername",
+            "\nGlicko 2",
+            "\nRecord",
+            "\nTop",
+            "Avg\nopp",
+            "Best\nWin",
+            "Best\nDraw",
+            "\nClub",
+        ]
+
+    # Print the rankings table
+    _table = tabulate(table_series_players, headers)
+    print_title(
+        f"Rankings ({len(games)} games, {len(players)} players, {len(clubs)} clubs)"
+    )
+    print(_table)
 
 
-def print_subtitle(subtitle: str) -> None:
-    """Print a subtitle"""
-    print()
-    print(subtitle)
-    print("~" * len(subtitle))
-    print()
+def func_match_ups(
+    players: Dict[str, Player],
+) -> Tuple[int, List[Tuple[str, str, int, int, float]]]:
+    """Print match ups (used by rank sub-parser)"""
 
+    def match_up(player1: Player, player2: Player) -> Tuple[str, str, int, int, float]:
+        """Yields an individual match up for the table data"""
+        glicko = glicko2.Glicko2()
 
-def filter_players(_sorted_players: List[Player]) -> List[Player]:
-    """
-    Shared method for singles and doubles (main method)
-    TODO:
-        - Add way to filter based on clubs, rating deviation, etc
-    """
-
-    # Filter if requested
-    if PLAYERS_PRESENT:
-        _sorted_players = list(
-            filter(lambda x: x.username in PLAYERS_PRESENT, _sorted_players)
+        delta_rating = round(player1.rating.mu - player2.rating.mu)
+        rd_avg = int(
+            round(
+                math.sqrt((player1.rating.phi**2 + player2.rating.phi**2) / 2),
+                -1,
+            )
+        )
+        expected_score = round(
+            glicko.expect_score(
+                glicko.scale_down(player1.rating),
+                glicko.scale_down(player2.rating),
+                glicko.reduce_impact(
+                    glicko.scale_down(player2.rating),
+                ),
+            ),
+            2,
+        )
+        return (
+            player1.username,
+            player2.username,
+            delta_rating,
+            rd_avg,
+            expected_score,
         )
 
-    return _sorted_players
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Main match up method
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    players_list = list(players.values())
 
+    match_ups = []
+    n_players = len(players)
 
-def add_club(_player: Player, club: str, mode: str) -> None:
-    """Adds a club tally to the club appearances dictionary"""
-    _appearances = _player.club_appearances[mode]
+    # pylint: disable=invalid-name
+    for i1 in range(n_players):
+        p1 = players_list[i1]
+        for i2 in range(i1 + 1, n_players):
+            p2 = players_list[i2]
+            match_ups.append(match_up(p1, p2))
 
-    if club in _appearances:
-        _appearances[club] += 1
-    else:
-        _appearances[club] = 1
+    # Sort
+    match_ups.sort(key=lambda x: x[-1], reverse=False)
 
+    # Print off top matches
+    _n_pairs = int(
+        math.gamma(n_players + 1) / (math.gamma(2 + 1) * math.gamma(n_players - 2 + 1))
+    )
+    _n_top = min(100, _n_pairs)
+    print_title(f"Match ups (top {_n_top}, {n_players}C2={_n_pairs} possible)")
+    _table = tabulate(
+        match_ups,
+        headers=["Player 1", "Player 2", "ΔR", "RD", "E"],
+    )
+    print(_table)
 
-def cache_ratings_csv_file(sorted_players: List[Player], mode: str) -> None:
-    """Saves the ratings in a CSV file, so we can manually calculate match ups"""
-    _file_path = CSV_RATINGS_FILE_PATHS[mode]
-
-    # TODO: 3rd possibility? Besides singles/doubles?
-    if mode == SINGLES:
-        headers = ["username", "mu", "phi", "sigma", "history", "clubs"]
-        rows = [
-            (
-                p.username,
-                p.rating_singles.mu,
-                p.rating_singles.phi,
-                p.rating_singles.sigma,
-                " ".join(str(round(x.mu)) for x in p.ratings[SINGLES]),
-                "|".join(p.clubs()),
-            )
-            for p in sorted_players
-        ]
-    else:
-        headers = ["username", "mu", "sigma", "history", "clubs"]
-        rows = [
-            (  # type: ignore
-                p.username,
-                p.rating_doubles.mu,
-                p.rating_doubles.sigma,
-                " ".join(str(round(x.mu, 1)) for x in p.ratings[DOUBLES]),
-                "|".join(p.clubs()),
-            )
-            for p in sorted_players
-        ]
-
-    # Write the rows
-    with open(_file_path, "w", encoding="utf-8") as _f:
-        csv_writer = csv.writer(_f)
-
-        csv_writer.writerow(headers)
-        csv_writer.writerows(rows)
+    return 0, match_ups
