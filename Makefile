@@ -36,7 +36,7 @@ deps: _venv	## Install requirements & sub-module
 # Lint, test, format, clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ALL_LINT_LOCS=pr pong/ tests/
+ALL_LINT_LOCS=pr *.py pong/ tests/
 
 format: _venv	## Format the code
 	isort $(ALL_LINT_LOCS)
