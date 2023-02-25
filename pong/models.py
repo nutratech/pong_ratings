@@ -143,18 +143,14 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
-        # # WIP stuff
-        # # self.singles_games = []
-        self.matches: Dict[str, Dict[str, List[Match]]] = {
-            SINGLES: {
-                "wins": [],
-                "losses": [],
-            },
-            DOUBLES: {
-                "wins": [],
-                "losses": [],
-            },
+        # WIP stuff
+        # self.singles_games = []
+        self.matches: Dict[str, List[Match]] = {
+            SINGLES: [],
+            DOUBLES: [],
         }
+
+        # Old stuff
         # NOTE: length of this is one longer than other arrays
         self.ratings = {
             "singles": [glicko2.Glicko2()],
