@@ -96,5 +96,5 @@ rank:	## Rank (copy for google sheet)
 
 N_ANNOTATED_FILES_ACTUAL ?= $(shell grep @author $(shell git ls-files \*.py) | wc -l)
 N_ANNOTATED_FILES_EXPECT ?= $(shell git ls-files \*.py | grep -v glicko2 | wc -l)
-verify/py-annotated:	## Verify all pythong files have the annotation at top
+verify/py-annotated:	## Verify all python files have the annotation at top
 	[[ "$(N_ANNOTATED_FILES_ACTUAL)" == "$(N_ANNOTATED_FILES_EXPECT)" ]]
