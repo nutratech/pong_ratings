@@ -17,49 +17,39 @@ from pong.sheetutils import build_csv_reader
 from pong.utils import get_or_create_player_by_name, print_title
 
 
-def update_players_ratings(players: Dict[str, Player], game: Game) -> None:
+def update_players_ratings(
+    player_white: Player, player_black: Player, game: Game
+) -> None:
     """Update two players' ratings, based on a game outcome together"""
 
-    def do_game(player1: Player, player2: Player, drawn: bool = False) -> None:
+    def update_player_ratings(player1: Player, player2: Player, drawn: bool) -> None:
         """NOTE: player1 is winner by default, unless drawn (then it doesn't matter)"""
-
-        # Add opponent ratings
-        if drawn:
-            player1.opponent_ratings["draws"].append(player2.rating)
-            player2.opponent_ratings["draws"].append(player1.rating)
-        else:
-            player1.opponent_ratings["wins"].append(player2.rating)
-            player2.opponent_ratings["losses"].append(player1.rating)
-
-        # Add clubs
-        player1.add_club(game.location.name)
-        player2.add_club(game.location.name)
-
-        # Update ratings
+        # TODO
+        #   - Store on games list, not root player object?
+        #   - Should I aggregate all games or use a dict by variant & time control?
         _new_rating_player1, _new_rating_player2 = glicko.rate_1vs1(
-            player1.rating, player2.rating, drawn=drawn
+            player1.rating(game.variant, game.category),
+            player2.rating(game.variant, game.category),
+            drawn=drawn,
         )
-        player1.ratings.append(_new_rating_player1)
-        player2.ratings.append(_new_rating_player2)
+        player1.ratings[game.variant][game.category].append(_new_rating_player1)
+        player2.ratings[game.variant][game.category].append(_new_rating_player2)
 
     # Create the rating engine
     glicko = glicko2.Glicko2()
 
-    # Extract (or create) player_white & player_black from Players Dict
-    player_winner = get_or_create_player_by_name(players, game.username_white)
-    player_loser = get_or_create_player_by_name(players, game.username_black)
-
-    # FIXME: loop for games in match, or rate in series
-    do_game(player_winner, player_loser)
-
     # Run the helper methods
-    # if game.score == WHITE:
-    #     do_game(player_white, player_black)
-    # elif game.score == BLACK:
-    #     do_game(player_black, player_white)
-    # else:
-    #     # NOTE: already validated with ENUM_SCORES and self.validation_error()
-    #     do_game(player_white, player_black, drawn=True)
+    if game.score == WHITE:
+        update_player_ratings(player_white, player_black, drawn=False)
+    elif game.score == BLACK:
+        update_player_ratings(player_black, player_white, drawn=False)
+    else:
+        # NOTE: already validated with ENUM_SCORES and self.validation_error()
+        update_player_ratings(player_white, player_black, drawn=True)
+
+    # Add to game.ratings stack
+    game.ratings_white.append(player_white.rating)
+    game.ratings_black.append(player_black.rating)
 
 
 def process_csv(
