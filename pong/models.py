@@ -8,7 +8,7 @@ Player model used for singles & doubles ratings, username, wins/losses, etc.
 Club model used for grouping games and players to location names.
 """
 import sys
-from datetime import date
+from datetime import datetime
 from typing import Dict, List, Set, Union
 
 import asciichartpy  # pylint: disable=import-error
@@ -53,7 +53,7 @@ class Club:
         return hash(self.name)
 
 
-class Games:
+class Match:
     """
     Model for storing date, location, wins/losses, opponent, etc.
     TODO:
@@ -63,7 +63,7 @@ class Games:
     """
 
     def __init__(self, row: Dict[str, str]) -> None:
-        self.date = date.fromisoformat(row["date"])
+        self.date = datetime.strptime(row["Date"], "%Y-%m-%d")
 
         self._outcome = row["outcome"]
         self.score = tuple(int(x) for x in self._outcome.split("-"))
@@ -92,7 +92,7 @@ class Games:
             )
 
 
-class SinglesGames(Games):
+class SinglesMatch(Match):
     """Singles game specifics"""
 
     def __init__(self, row: Dict[str, str]):
@@ -109,7 +109,7 @@ class SinglesGames(Games):
         return f"{self.date} {self.username1} vs. {self.username2} {self._outcome}"
 
 
-class DoublesGames(Games):
+class DoublesMatch(Match):
     """Doubles game specifics"""
 
     def __init__(self, row: Dict[str, str]):
@@ -145,16 +145,16 @@ class Player:
 
         # # WIP stuff
         # # self.singles_games = []
-        # self.games = {
-        #     "singles": {
-        #         "wins": [],
-        #         "losses": [],
-        #     },
-        #     "doubles": {
-        #         "wins": [],
-        #         "losses": [],
-        #     },
-        # }
+        self.matches: Dict[str, Dict[str, List[Match]]] = {
+            SINGLES: {
+                "wins": [],
+                "losses": [],
+            },
+            DOUBLES: {
+                "wins": [],
+                "losses": [],
+            },
+        }
         # NOTE: length of this is one longer than other arrays
         self.ratings = {
             "singles": [glicko2.Glicko2()],
