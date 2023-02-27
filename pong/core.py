@@ -86,6 +86,7 @@ def func_rank(
     players: Dict[str, Player],
     clubs: List[Club],
     extended_titles: bool = False,
+    club_name: str = "Global",
 ) -> None:
     """Rank function used by rank sub-parser"""
 
@@ -112,7 +113,6 @@ def func_rank(
             "Top",
             "Avg opp",
             "Best W",
-            "Best D",
             "Club",
         ]
     else:
@@ -123,15 +123,14 @@ def func_rank(
             "\nTop",
             "Avg\nopp",
             "Best\nWin",
-            "Best\nDraw",
             "\nClub",
         ]
 
     # Print the rankings table
     _table = tabulate(table_series_players, headers)
-    print_title(
-        f"Rankings ({len(games)} games, {len(players)} players, {len(clubs)} clubs)"
-    )
+    # TODO: Does this n_games, n_players, n_clubs belong elsewhere higher up?
+    print(f"Based on {len(games)} games, {len(players)} players, {len(clubs)} clubs")
+    print_title(f"{club_name} Standings")
     print(_table)
 
 
