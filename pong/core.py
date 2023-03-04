@@ -10,7 +10,6 @@ from typing import Dict, List, Set, Tuple
 
 from tabulate import tabulate
 
-from pong import CSV_GAMES_FILE_PATHS
 from pong.glicko2 import glicko2
 from pong.models import Club, Match, Player
 from pong.sheetutils import build_csv_reader
@@ -52,9 +51,7 @@ def update_players_ratings(
     game.ratings_black.append(player_black.rating)
 
 
-def process_csv(
-    csv_path: str = CSV_GAMES_FILE_PATHS,
-) -> Tuple[List[Match], Dict[str, Player], Set[Club]]:
+def process_csv(csv_path: str) -> Tuple[List[Match], Dict[str, Player], Set[Club]]:
     """Load the CSV file into entity objects"""
 
     # Prep the lists
