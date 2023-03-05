@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Sun 08 Jan 2023 11∶26∶34 PM EST
@@ -8,13 +9,13 @@ Player model used for singles & doubles ratings, username, wins/losses, etc.
 Club model used for grouping games and players to location names.
 """
 import sys
-from datetime import date
+from datetime import datetime
 from typing import Dict, List, Set, Union
 
 import asciichartpy  # pylint: disable=import-error
 import trueskill  # pylint: disable=import-error
 
-from pong import DOUBLES, DRAW_PROB_DOUBLES, SINGLES
+from pong import DOUBLES, SINGLES
 from pong.glicko2 import glicko2
 
 _PONG_DET = "Pong Det"
@@ -53,7 +54,7 @@ class Club:
         return hash(self.name)
 
 
-class Games:
+class Match:
     """
     Model for storing date, location, wins/losses, opponent, etc.
     TODO:
@@ -63,7 +64,7 @@ class Games:
     """
 
     def __init__(self, row: Dict[str, str]) -> None:
-        self.date = date.fromisoformat(row["date"])
+        self.date = datetime.strptime(row["Date"], "%Y-%m-%d")
 
         self._outcome = row["outcome"]
         self.score = tuple(int(x) for x in self._outcome.split("-"))
@@ -92,8 +93,8 @@ class Games:
             )
 
 
-class SinglesGames(Games):
-    """Singles game specifics"""
+class SinglesMatch(Match):
+    """Singles match specifics"""
 
     def __init__(self, row: Dict[str, str]):
         super().__init__(row=row)
@@ -109,8 +110,8 @@ class SinglesGames(Games):
         return f"{self.date} {self.username1} vs. {self.username2} {self._outcome}"
 
 
-class DoublesGames(Games):
-    """Doubles game specifics"""
+class DoublesMatch(Match):
+    """Doubles match specifics"""
 
     def __init__(self, row: Dict[str, str]):
         super().__init__(row=row)
@@ -143,22 +144,19 @@ class Player:
     def __init__(self, username: str) -> None:
         self.username = username
 
-        # # WIP stuff
-        # # self.singles_games = []
-        # self.games = {
-        #     "singles": {
-        #         "wins": [],
-        #         "losses": [],
-        #     },
-        #     "doubles": {
-        #         "wins": [],
-        #         "losses": [],
-        #     },
-        # }
+        # WIP stuff
+        # self.singles_games = []
+        self.matches: Dict[str, List[Match]] = {
+            SINGLES: [],
+            DOUBLES: [],
+        }
+
+        # Old stuff
         # NOTE: length of this is one longer than other arrays
         self.ratings = {
             "singles": [glicko2.Glicko2()],
-            "doubles": [trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)],
+            # FIXME: draw_probability=DRAW_PROB_DOUBLES
+            "doubles": [trueskill.TrueSkill()],
         }
         self.partner_rating_doubles: List[trueskill.TrueSkill] = []
         self.opponent_ratings: Dict[str, Dict[str, List[float]]] = {
@@ -211,6 +209,14 @@ class Player:
         _clubs.update(self.club_appearances["singles"])
         _clubs.update(self.club_appearances["doubles"])
         return sorted(list(_clubs))
+
+    def add_club(self, club: str, mode: str) -> None:
+        """Adds a club tally to the club appearances dictionary"""
+
+        if club in self.club_appearances[mode]:
+            self.club_appearances[mode][club] += 1
+        else:
+            self.club_appearances[mode][club] = 1
 
     def str_rating(self, mode: str) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
