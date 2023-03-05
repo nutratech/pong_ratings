@@ -17,7 +17,7 @@ from pong.utils import get_or_create_player_by_name, print_title
 
 
 def update_players_ratings(
-    player_white: Player, player_black: Player, game: Game
+    player_white: Player, player_black: Player, match: Match
 ) -> None:
     """Update two players' ratings, based on a game outcome together"""
 
@@ -27,47 +27,47 @@ def update_players_ratings(
         #   - Store on games list, not root player object?
         #   - Should I aggregate all games or use a dict by variant & time control?
         _new_rating_player1, _new_rating_player2 = glicko.rate_1vs1(
-            player1.rating(game.variant, game.category),
-            player2.rating(game.variant, game.category),
+            player1.rating(match.variant, match.category),
+            player2.rating(match.variant, match.category),
             drawn=drawn,
         )
-        player1.ratings[game.variant][game.category].append(_new_rating_player1)
-        player2.ratings[game.variant][game.category].append(_new_rating_player2)
+        player1.ratings[match.variant][match.category].append(_new_rating_player1)
+        player2.ratings[match.variant][match.category].append(_new_rating_player2)
 
     # Create the rating engine
     glicko = glicko2.Glicko2()
 
     # Run the helper methods
-    if game.score == WHITE:
+    if match.score == WHITE:
         update_player_ratings(player_white, player_black, drawn=False)
-    elif game.score == BLACK:
+    elif match.score == BLACK:
         update_player_ratings(player_black, player_white, drawn=False)
     else:
         # NOTE: already validated with ENUM_SCORES and self.validation_error()
         update_player_ratings(player_white, player_black, drawn=True)
 
     # Add to game.ratings stack
-    game.ratings_white.append(player_white.rating)
-    game.ratings_black.append(player_black.rating)
+    match.ratings_white.append(player_white.rating)
+    match.ratings_black.append(player_black.rating)
 
 
 def process_csv(csv_path: str) -> Tuple[List[Match], Dict[str, Player], Set[Club]]:
     """Load the CSV file into entity objects"""
 
     # Prep the lists
-    games: List[Game] = []
+    matches: List[Match] = []
     players: Dict[str, Player] = {}
     clubs: Set[Club] = set()
 
     # Read CSV
     reader = build_csv_reader(csv_path)
     for row in reader:
-        game = Game(row)
-        games.append(game)
-        clubs.add(game.location)
+        match = Match(row)
+        matches.append(match)
+        clubs.add(match.location)
 
         # Update players stats and ratings
-        update_players_ratings(players, game)
+        update_players_ratings(players, match)
 
     # Sort players by ratings
     sorted_players = sorted(
@@ -75,7 +75,7 @@ def process_csv(csv_path: str) -> Tuple[List[Match], Dict[str, Player], Set[Club
     )
     players = {p.username: p for p in sorted_players}
 
-    return games, players, clubs
+    return matches, players, clubs
 
 
 def func_rank(
