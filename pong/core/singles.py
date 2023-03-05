@@ -13,20 +13,14 @@ from typing import Dict, List, Set, Tuple
 
 from tabulate import tabulate
 
-from pong import SINGLES
-from pong.core import (
-    add_club,
-    build_csv_reader,
-    cache_ratings_csv_file,
-    filter_players,
-    get_or_create_player_by_name,
-    print_title,
-)
+from pong import CSV_GAMES_FILE_PATHS, SINGLES
 from pong.glicko2 import glicko2
-from pong.models import Club, Player, SinglesGames
+from pong.models import Club, Player, SinglesMatch
+from pong.sheetutils import build_csv_reader
+from pong.utils import get_or_create_player_by_name, print_title
 
 
-def do_games(player1: Player, player2: Player, games: SinglesGames) -> None:
+def do_games(player1: Player, player2: Player, match: SinglesMatch) -> None:
     """
     Updates ratings for given games & players
     NOTE: player1 wins, player2 loses
@@ -57,26 +51,26 @@ def do_games(player1: Player, player2: Player, games: SinglesGames) -> None:
 
     # pylint: disable=duplicate-code
     # Disallow scores like 2-5
-    if games.winner_score() < games.loser_score():
+    if match.winner_score() < match.loser_score():
         raise ValueError(
             f"Winner score first in CSV, invalid: "
-            f"{games.winner_score()}-{games.loser_score()}"
+            f"{match.winner_score()}-{match.loser_score()}"
         )
 
     # Do the rating updates for won games, then alternate
-    for _ in range(games.winner_score() - games.loser_score()):
+    for _ in range(match.winner_score() - match.loser_score()):
         _update_rating(player1, player2)
 
-    for _ in range(games.loser_score()):
+    for _ in range(match.loser_score()):
         _update_rating(player2, player1)
         _update_rating(player1, player2)
 
     # Push to list of club appearances
-    add_club(player1, club=games.location.name, mode=SINGLES)
-    add_club(player2, club=games.location.name, mode=SINGLES)
+    player1.add_club(match.location.name, SINGLES)
+    player2.add_club(match.location.name, SINGLES)
 
 
-def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
+def build_ratings() -> Tuple[List[Player], List[SinglesMatch], Set[Club]]:
     """
     Main method which aggregates games, players, clubs.
     And calculates ratings.
@@ -88,10 +82,10 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     """
 
     # Prepare the CSV inputs (fetch Google Sheet and save to disk)
-    reader = build_csv_reader(mode=SINGLES)
+    reader = build_csv_reader(csv_file_path=CSV_GAMES_FILE_PATHS[SINGLES])
 
     # pylint: disable=duplicate-code
-    sets = []
+    matches = []
     players: Dict[str, Player] = {}
     clubs = set()
 
@@ -100,21 +94,21 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     # Process the CSV
     for row in reader:
         # Add game to list
-        games = SinglesGames(row)
-        sets.append(games)
+        match = SinglesMatch(row)
+        matches.append(match)
 
         # Check if players are already tracked, create if not
-        _winner_player1 = get_or_create_player_by_name(players, games.username1)
-        _loser_player2 = get_or_create_player_by_name(players, games.username2)
+        _winner_player1 = get_or_create_player_by_name(players, match.username1)
+        _loser_player2 = get_or_create_player_by_name(players, match.username2)
 
         # Run the algorithm and update ratings
-        do_games(_winner_player1, _loser_player2, games)
+        do_games(_winner_player1, _loser_player2, match)
 
         # pylint: disable=duplicate-code
         # Push to list of club appearances
-        clubs.add(games.location)
+        clubs.add(match.location)
 
-    n_games = sum(sum(y for y in x.score) for x in sets)
+    n_games = sum(sum(y for y in x.score) for x in matches)
 
     # Print off rankings
     # TODO: filter inactive or highly uncertain ratings? Group by home club?
@@ -145,12 +139,12 @@ def build_ratings() -> Tuple[List[Player], List[SinglesGames], Set[Club]]:
     t_delta = time.time() - t_start
     print()
     print(
-        f"Analyzed {len(sets)} CSV lines in {round(1000 * t_delta, 1)} ms "
-        f"({round(len(sets) / t_delta)}/s)"
+        f"Analyzed {len(matches)} CSV lines in {round(1000 * t_delta, 1)} ms "
+        f"({round(len(matches) / t_delta)}/s)"
     )
 
     # Used to build pairings / ideal matches
-    return sorted_players, sets, clubs
+    return sorted_players, matches, clubs
 
 
 def print_singles_matchups(
@@ -265,8 +259,8 @@ if __name__ == "__main__":
     _sorted_players, _games, _clubs = build_ratings()
 
     # TODO: make use of _clubs and _games now. Filter uncertain ratings here?
-    _sorted_players = filter_players(_sorted_players)
-    cache_ratings_csv_file(_sorted_players, mode=SINGLES)
+    # _sorted_players = filter_players(_sorted_players)
+    # cache_ratings_csv_file(_sorted_players, mode=SINGLES)
 
     print_singles_matchups(_sorted_players)
 

@@ -94,7 +94,7 @@ class Match:
 
 
 class SinglesMatch(Match):
-    """Singles game specifics"""
+    """Singles match specifics"""
 
     def __init__(self, row: Dict[str, str]):
         super().__init__(row=row)
@@ -111,7 +111,7 @@ class SinglesMatch(Match):
 
 
 class DoublesMatch(Match):
-    """Doubles game specifics"""
+    """Doubles match specifics"""
 
     def __init__(self, row: Dict[str, str]):
         super().__init__(row=row)
@@ -209,6 +209,14 @@ class Player:
         _clubs.update(self.club_appearances["singles"])
         _clubs.update(self.club_appearances["doubles"])
         return sorted(list(_clubs))
+
+    def add_club(self, club: str, mode: str) -> None:
+        """Adds a club tally to the club appearances dictionary"""
+
+        if club in self.club_appearances[mode]:
+            self.club_appearances[mode][club] += 1
+        else:
+            self.club_appearances[mode][club] = 1
 
     def str_rating(self, mode: str) -> str:
         """Returns a friendly string for a rating, e.g. 1500 ± 300"""
