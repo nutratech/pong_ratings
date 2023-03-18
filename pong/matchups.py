@@ -13,9 +13,8 @@ from typing import Dict, Set, Tuple
 import trueskill
 from tabulate import tabulate
 
-from pong import CSV_RATINGS_FILE_PATHS, DOUBLES, DRAW_PROB_DOUBLES, SINGLES
+from pong import CSV_RATINGS_FILE_PATHS, DOUBLES, SINGLES
 from pong.consts import GAME_PERCENT_TO_POINT_PROB
-from pong.core import print_subtitle, print_title
 from pong.glicko2 import glicko2
 from pong.models import Player
 from pong.probs import (
@@ -26,6 +25,7 @@ from pong.probs import (
     p_deuce_win,
     p_match,
 )
+from pong.utils import print_subtitle, print_title
 
 
 def add_player_to_club(player: Player, club: str, clubs: Dict[str, Set[str]]) -> None:
@@ -244,8 +244,9 @@ def detailed_match_ups_doubles(
     Print out stats for (player1, player2) vs. (player3, player4)
     """
 
+    # FIXME: draw_probability=DRAW_PROB_DOUBLES
     # Only use doubles ratings for this
-    tse = trueskill.TrueSkill(draw_probability=DRAW_PROB_DOUBLES)
+    tse = trueskill.TrueSkill()
 
     # Alias players and ratings
     player1, player2 = players[username1], players[username2]

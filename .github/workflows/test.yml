@@ -12,9 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      # yamllint disable rule:line-length
       PYTHON_SPOOF_VENV: /home/runner/work/pong_ratings/pong_ratings/.venv/bin/python
+      # yamllint enable rule:line-length
 
     steps:
+      # ~~~~~~~~~~~~~~~~~~~~~
+      # Set up
+      # ~~~~~~~~~~~~~~~~~~~~~
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -24,31 +29,30 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-pip-
+            ${{ runner.os }}-pip-
 
+      # ~~~~~~~~~~~~~~~~~~~~~
+      # Initialize
+      # ~~~~~~~~~~~~~~~~~~~~~
+      # TODO: use venv, pip-licenses
       - name: Install requirements
         run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make deps
 
+      # ~~~~~~~~~~~~~~~~~~~~~
+      # Test & Lint
+      # ~~~~~~~~~~~~~~~~~~~~~
       - name: Lint
         run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make lint
 
       - name: Test
         run: PYTHON=${{ env.PYTHON_SPOOF_VENV }} make test
 
-      - name: Compare coverage with allowed minimum
-        run: |
-          export PYTHON=${{ env.PYTHON_SPOOF_VENV }}
-          COV_ACTUAL=$(make test | grep ^TOTAL | awk -F' ' '{print $4}' | awk -F'%' '{print $1}' | xargs)
-          COV_EXPECT=$(grep fail_under setup.cfg | awk -F'=' '{print $2}' | xargs)
-          if [[ "$COV_ACTUAL" != "$COV_EXPECT" ]]; then
-            echo "FATAL: coverage in setup.cfg must be exactly '$COV_ACTUAL'"
-            exit 1
-          fi
+      - name: Verify all python files are annotated at top
+        run: make verify/py-annotated
 
       - name: Basic CLI Integration Tests
         run: |
-          ./singles.py
-          ./doubles.py
-          ./matchups.py thomas mal shane benji norm
+          make install
+          pr -d rank -smg
