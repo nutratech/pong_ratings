@@ -20,10 +20,10 @@ from pong.glicko2 import glicko2
 _PONG_DET = "Pong Det"
 CLUB_DICT = {
     "Pong Detroit (Bert's)": _PONG_DET,
-    "Pong Detroit (Magee's)": _PONG_DET,
     "Viet Detroit (Grace Parish Warren)": "Viet",
     "MTTA (Sparc Arena Novi)": "MTTA",
     "Norm's": "Norm's",
+    "Benji's": "Benji's",
     "New Way Bar (Ferndale)": "New way",
     "Chinese Community Center (Madison Heights)": "ACA",
 }
